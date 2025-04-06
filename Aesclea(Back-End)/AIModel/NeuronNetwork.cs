@@ -11,7 +11,7 @@ namespace Aesclea_Back_End_.AIModel
         public List<NeuronLayer> Layers { get; private set; }
         private int TotalNumberOfLayers;
 
-        public NeuronNetwork(int[] neuronsPerLayer)
+        public NeuronNetwork(int[] neuronsPerLayer, double dropoutRate = 0.0)
         {
             if (neuronsPerLayer.Length < 2)
                 throw new ArgumentException("Network must have at least input and output layers");
@@ -19,32 +19,36 @@ namespace Aesclea_Back_End_.AIModel
             TotalNumberOfLayers = neuronsPerLayer.Length - 1; // Subtract 1 because we'll handle input separately
             Layers = new List<NeuronLayer>(TotalNumberOfLayers);
 
-            // Hidden layers (using ReLU)
+            // Hidden layers (using LeakyReLU)
             for (int i = 1; i < neuronsPerLayer.Length - 1; i++)
             {
-                Layers.Add(new NeuronLayer(neuronsPerLayer[i], neuronsPerLayer[i - 1], Neuron.ActivationType.ReLU));
+                Layers.Add(new NeuronLayer(neuronsPerLayer[i], neuronsPerLayer[i - 1],
+                    Neuron.ActivationType.LeakyReLU,
+                    // Apply dropout to hidden layers only, with decreasing rate for deeper layers
+                    dropoutRate * (1.0 - (double)i / neuronsPerLayer.Length)));
             }
 
             // Output layer (using Sigmoid for bounded output between 0 and 1)
             Layers.Add(new NeuronLayer(neuronsPerLayer[neuronsPerLayer.Length - 1],
                       neuronsPerLayer[neuronsPerLayer.Length - 2],
-                      Neuron.ActivationType.Sigmoid));
+                      Neuron.ActivationType.Sigmoid,
+                      0.0)); // No dropout in output layer
         }
 
-        public List<double> FeedForward(List<double> inputs)
+        public List<double> FeedForward(List<double> inputs, bool isTraining = false)
         {
             List<double> currentInputs = new List<double>(inputs);
 
             // Process each layer
             foreach (var layer in Layers)
             {
-                currentInputs = layer.FeedForward(currentInputs);
+                currentInputs = layer.FeedForward(currentInputs, isTraining);
             }
 
             return currentInputs;
         }
 
-        public void Backpropagate(List<double> inputs, List<double> expectedOutput, double learningRate)
+        public void Backpropagate(List<double> inputs, List<double> expectedOutput, double learningRate, double l2Lambda = 0.0001)
         {
             // Store activations (outputs) from each layer
             List<List<double>> activations = new List<List<double>>();
@@ -55,7 +59,7 @@ namespace Aesclea_Back_End_.AIModel
 
             for (int i = 0; i < Layers.Count; i++)
             {
-                currentActivation = Layers[i].FeedForward(currentActivation);
+                currentActivation = Layers[i].FeedForward(currentActivation, true);
                 activations.Add(new List<double>(currentActivation));
             }
 
@@ -77,7 +81,7 @@ namespace Aesclea_Back_End_.AIModel
                 var prevLayer = Layers[l - 1];
 
                 // Update weights for current layer
-                currentLayer.UpdateWeights(activations[l], learningRate);
+                currentLayer.UpdateWeights(activations[l], learningRate, l2Lambda);
 
                 // Calculate errors for previous layer (adjust error propagation weights)
                 for (int i = 0; i < prevLayer.Neurons.Count; i++)
@@ -96,10 +100,15 @@ namespace Aesclea_Back_End_.AIModel
             }
 
             // Update weights for first layer
-            Layers[0].UpdateWeights(inputs, learningRate);
+            Layers[0].UpdateWeights(inputs, learningRate, l2Lambda);
         }
 
         public void Train(List<List<double>> inputs, List<List<double>> expectedOutputs, int epochs, double learningRate)
+        {
+            TrainWithBatches(inputs, expectedOutputs, epochs, learningRate);
+        }
+
+        public void TrainWithBatches(List<List<double>> inputs, List<List<double>> expectedOutputs, int epochs, double learningRate, int batchSize = 16)
         {
             if (inputs.Count != expectedOutputs.Count)
                 throw new ArgumentException("Number of input samples must match number of expected output samples");
@@ -118,63 +127,102 @@ namespace Aesclea_Back_End_.AIModel
             DateTime startTime = DateTime.Now;
 
             Console.WriteLine($"Starting training with {inputs.Count} samples for {epochs} epochs ({totalIterations} total iterations)");
+            Console.WriteLine($"Using batch size: {batchSize}");
+
+            // For early stopping
+            double bestError = double.MaxValue;
+            int patienceCounter = 0;
+            int patienceLimit = 10; // Stop after 10 epochs without improvement
+            List<double> trainingErrors = new List<double>();
 
             for (int epoch = 0; epoch < epochs; epoch++)
             {
-                // Decrease learning rate over time (learning rate decay)
-                double currentLearningRate = initialLearningRate / (1 + 0.0001 * epoch);
+                // Learning rate scheduler - cosine annealing
+                double currentLearningRate = initialLearningRate *
+                    (0.5 * (1 + Math.Cos(Math.PI * epoch / epochs)));
+
                 double totalError = 0;
 
                 // Shuffle training data for better generalization
                 List<int> indices = Enumerable.Range(0, inputs.Count).ToList();
                 Shuffle(indices);
 
-                foreach (int i in indices)
+                // Process in batches
+                for (int batchStart = 0; batchStart < indices.Count; batchStart += batchSize)
                 {
-                    var input = inputs[i];
-                    var expectedOutput = expectedOutputs[i];
+                    int currentBatchSize = Math.Min(batchSize, indices.Count - batchStart);
 
-                    // Forward pass
-                    var output = FeedForward(input);
-
-                    // Calculate mean squared error
-                    for (int j = 0; j < expectedOutput.Count; j++)
+                    // Process each sample in the batch
+                    double batchError = 0;
+                    for (int i = 0; i < currentBatchSize; i++)
                     {
-                        if (j < output.Count)
+                        int idx = indices[batchStart + i];
+                        var input = inputs[idx];
+                        var expectedOutput = expectedOutputs[idx];
+
+                        // Forward pass
+                        var output = FeedForward(input, true);
+
+                        // Calculate mean squared error
+                        double sampleError = 0;
+                        for (int j = 0; j < expectedOutput.Count; j++)
                         {
-                            totalError += Math.Pow(expectedOutput[j] - output[j], 2);
+                            if (j < output.Count)
+                            {
+                                sampleError += Math.Pow(expectedOutput[j] - output[j], 2);
+                            }
                         }
+                        batchError += sampleError;
+
+                        // Backpropagation
+                        Backpropagate(input, expectedOutput, currentLearningRate);
+
+                        // Update progress
+                        currentIteration++;
                     }
 
-                    // Backpropagation
-                    Backpropagate(input, expectedOutput, currentLearningRate);
+                    // Average error for this batch
+                    batchError /= currentBatchSize;
+                    totalError += batchError * currentBatchSize;
 
-                    // Update progress
-                    currentIteration++;
-
-                    // Simplify progress reporting to ensure updates occur
+                    // Update progress display
                     int currentPercentage = (int)((double)currentIteration / totalIterations * 100);
 
-                    // Update progress display more frequently (every 1% or when it changes)
                     if (currentPercentage != lastPercentageReported)
                     {
                         TimeSpan elapsed = DateTime.Now - startTime;
                         TimeSpan estimated = TimeSpan.FromTicks((long)(elapsed.Ticks / (currentIteration / (double)totalIterations)));
                         TimeSpan remaining = estimated - elapsed;
 
-                        // Ensure console output is flushed immediately
-                        Console.Write($"\rTraining progress: {currentPercentage}% | Error: {totalError / (i + 1):F6} | Time remaining: {FormatTimeSpan(remaining)}        ");
+                        Console.Write($"\rTraining progress: {currentPercentage}% | Error: {batchError:F6} | Time remaining: {FormatTimeSpan(remaining)}        ");
                         Console.Out.Flush();
                         lastPercentageReported = currentPercentage;
                     }
                 }
 
                 totalError /= inputs.Count;
+                trainingErrors.Add(totalError);
 
                 // Print detailed progress after each epoch
                 Console.WriteLine($"\nEpoch {epoch + 1}/{epochs}: Error = {totalError:F6}, Learning Rate = {currentLearningRate:F6}");
 
-                // Early stopping if error is very low
+                // Early stopping check
+                if (totalError < bestError)
+                {
+                    bestError = totalError;
+                    patienceCounter = 0;
+                }
+                else
+                {
+                    patienceCounter++;
+                    if (patienceCounter >= patienceLimit)
+                    {
+                        Console.WriteLine($"\nEarly stopping triggered after {epoch + 1} epochs with no improvement for {patienceLimit} epochs");
+                        break;
+                    }
+                }
+
+                // Very low error check
                 if (totalError < 0.001)
                 {
                     Console.WriteLine($"\nTraining converged at epoch {epoch + 1} with error {totalError:F6}");
@@ -183,6 +231,17 @@ namespace Aesclea_Back_End_.AIModel
             }
 
             Console.WriteLine("\nTraining complete!");
+
+            // Show error evolution if requested
+            Console.WriteLine("Would you like to see the error evolution? (Y/N)");
+            if (Console.ReadLine().Trim().ToUpper() == "Y")
+            {
+                Console.WriteLine("Error evolution across epochs:");
+                for (int i = 0; i < trainingErrors.Count; i++)
+                {
+                    Console.WriteLine($"Epoch {i + 1}: {trainingErrors[i]:F6}");
+                }
+            }
         }
 
         // Helper method to format time remaining
@@ -297,7 +356,7 @@ namespace Aesclea_Back_End_.AIModel
 
             for (int i = 0; i < testInputs.Count; i++)
             {
-                var output = FeedForward(testInputs[i]);
+                var output = FeedForward(testInputs[i], false); // No dropout during evaluation
                 bool predictedClass = output[0] >= threshold;
                 bool actualClass = expectedOutputs[i][0] >= threshold;
 
@@ -308,6 +367,57 @@ namespace Aesclea_Back_End_.AIModel
             }
 
             return (double)correctCount / testInputs.Count;
+        }
+
+        // Calculate more detailed metrics
+        public Dictionary<string, double> CalculateMetrics(List<List<double>> testInputs, List<List<double>> expectedOutputs, double threshold = 0.5)
+        {
+            if (testInputs.Count != expectedOutputs.Count)
+                throw new ArgumentException("Test inputs and expected outputs must have the same count.");
+
+            int truePositives = 0;
+            int trueNegatives = 0;
+            int falsePositives = 0;
+            int falseNegatives = 0;
+            double totalError = 0;
+
+            for (int i = 0; i < testInputs.Count; i++)
+            {
+                var output = FeedForward(testInputs[i], false); // No dropout during evaluation
+                bool predictedClass = output[0] >= threshold;
+                bool actualClass = expectedOutputs[i][0] >= threshold;
+
+                // Update confusion matrix
+                if (actualClass && predictedClass) truePositives++;
+                if (!actualClass && !predictedClass) trueNegatives++;
+                if (!actualClass && predictedClass) falsePositives++;
+                if (actualClass && !predictedClass) falseNegatives++;
+
+                // Calculate mean squared error
+                totalError += Math.Pow(expectedOutputs[i][0] - output[0], 2);
+            }
+
+            // Calculate metrics
+            double accuracy = (double)(truePositives + trueNegatives) / testInputs.Count;
+            double precision = truePositives == 0 ? 0 : (double)truePositives / (truePositives + falsePositives);
+            double recall = truePositives == 0 ? 0 : (double)truePositives / (truePositives + falseNegatives);
+            double f1Score = precision + recall == 0 ? 0 : 2 * precision * recall / (precision + recall);
+            double specificity = trueNegatives == 0 ? 0 : (double)trueNegatives / (trueNegatives + falsePositives);
+            double mse = totalError / testInputs.Count;
+
+            return new Dictionary<string, double>
+            {
+                { "Accuracy", accuracy },
+                { "Precision", precision },
+                { "Recall", recall },
+                { "F1Score", f1Score },
+                { "Specificity", specificity },
+                { "MSE", mse },
+                { "TruePositives", truePositives },
+                { "TrueNegatives", trueNegatives },
+                { "FalsePositives", falsePositives },
+                { "FalseNegatives", falseNegatives }
+            };
         }
 
         // Helper method to shuffle training data

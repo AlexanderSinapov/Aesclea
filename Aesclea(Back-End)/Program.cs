@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using Aesclea_Back_End_.AIModel;
+using System.Globalization;
 
 namespace Aesclea_Back_End_
 {
@@ -12,7 +13,7 @@ namespace Aesclea_Back_End_
         public static void Main(string[] args)
         {
             // Network with layers sized for 512x512 grayscale images
-            var network = new NeuronNetwork(new int[] { 262144, 768, 100, 1 });
+            var network = new NeuronNetwork(new int[] { 16384, 256, 64, 16, 1 });
 
             while (true)
             {
@@ -74,7 +75,7 @@ namespace Aesclea_Back_End_
                 using (var image = new Bitmap(imagePath))
                 {
                     // Use the ImageHelper class to preprocess the image
-                    var processedImage = ImageHelper.PreprocessImage(image);
+                    var processedImage = ImageHelper.ProcessImage(image, 128); // Updated method call
 
                     // Feed the image data into the network
                     var output = network.FeedForward(processedImage);
@@ -123,7 +124,7 @@ namespace Aesclea_Back_End_
                 int epochs = int.Parse(Console.ReadLine());
 
                 Console.WriteLine("Enter the learning rate (e.g., 0.01):");
-                double learningRate = double.Parse(Console.ReadLine());
+                double learningRate = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
                 // Use ImageHelper to load and process images
                 var tumorImages = ImageHelper.LoadImages(tumorFolderPath);
