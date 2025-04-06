@@ -61,6 +61,7 @@ namespace Aesclea_Back_End_.AIModel
             {
                 currentActivation = Layers[i].FeedForward(currentActivation, true);
                 activations.Add(new List<double>(currentActivation));
+                //Console.WriteLine($"Layer {i + 1} activation: {string.Join(", ", currentActivation)}");
             }
 
             // Calculate output layer errors
@@ -123,7 +124,7 @@ namespace Aesclea_Back_End_.AIModel
             // Set up progress tracking
             int totalIterations = epochs * inputs.Count;
             int currentIteration = 0;
-            int lastPercentageReported = -1;
+            double lastPercentageReported = -1.0;
             DateTime startTime = DateTime.Now;
 
             Console.WriteLine($"Starting training with {inputs.Count} samples for {epochs} epochs ({totalIterations} total iterations)");
@@ -134,6 +135,8 @@ namespace Aesclea_Back_End_.AIModel
             int patienceCounter = 0;
             int patienceLimit = 10; // Stop after 10 epochs without improvement
             List<double> trainingErrors = new List<double>();
+
+            Console.Out.Flush();
 
             for (int epoch = 0; epoch < epochs; epoch++)
             {
@@ -186,7 +189,7 @@ namespace Aesclea_Back_End_.AIModel
                     totalError += batchError * currentBatchSize;
 
                     // Update progress display
-                    int currentPercentage = (int)((double)currentIteration / totalIterations * 100);
+                    double currentPercentage = ((double)currentIteration / totalIterations) * 100;
 
                     if (currentPercentage != lastPercentageReported)
                     {
@@ -194,7 +197,7 @@ namespace Aesclea_Back_End_.AIModel
                         TimeSpan estimated = TimeSpan.FromTicks((long)(elapsed.Ticks / (currentIteration / (double)totalIterations)));
                         TimeSpan remaining = estimated - elapsed;
 
-                        Console.Write($"\rTraining progress: {currentPercentage}% | Error: {batchError:F6} | Time remaining: {FormatTimeSpan(remaining)}        ");
+                        Console.Write($"\rTraining progress: {currentPercentage.ToString("N2")}% | Error: {batchError:F6} | Time remaining: {FormatTimeSpan(remaining)} | Epoch: {epoch}/{epochs} | Iterations: {currentIteration}/{totalIterations}        ");
                         Console.Out.Flush();
                         lastPercentageReported = currentPercentage;
                     }
