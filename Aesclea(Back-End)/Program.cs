@@ -5,13 +5,20 @@ using System.IO;
 using System.Linq;
 using Aesclea_Back_End_.AIModel;
 using System.Globalization;
+using Aesclea_Back_End_.AIModel.Helpers;
+using Aesclea_Back_End_.DDOs;
 
 namespace Aesclea_Back_End_
 {
     public class Program
     {
+        private static FileHelper fileHelper = new FileHelper();
+
         public static void Main(string[] args)
         {
+            // Initialize the file helper
+            fileHelper.OpenFolder();
+
             // Network with layers sized for 512x512 grayscale images
             var network = new NeuronNetwork(new int[] { 16384, 256, 64, 16, 1 });
 
@@ -25,7 +32,8 @@ namespace Aesclea_Back_End_
                 Console.WriteLine("3. Mass Test");
                 Console.WriteLine("4. Load Weights");
                 Console.WriteLine("5. Save Weights");
-                Console.WriteLine("6. Exit");
+                Console.WriteLine("6. Convert Old Weights to New");
+                Console.WriteLine("7. Exit");
                 Console.Write("Enter your choice: ");
 
                 var choice = Console.ReadLine();
@@ -48,6 +56,9 @@ namespace Aesclea_Back_End_
                         SaveWeights(network);
                         break;
                     case "6":
+                        ConvertWeights();
+                        break;
+                    case "7":
                         return; // Exit the program
                     default:
                         Console.WriteLine("Invalid choice, please try again.");
@@ -240,33 +251,102 @@ namespace Aesclea_Back_End_
 
         private static void LoadWeights(NeuronNetwork network)
         {
-            Console.Write("Enter the path to the weights file: ");
-            string filePath = Console.ReadLine();
+            Console.WriteLine("Available weight files:");
 
-            try
+            // Get all .wbn files in the NeuronData folder
+            var files = fileHelper.GetAvailableWeightFiles();
+
+            if (files.Count == 0)
             {
-                network.LoadWeights(filePath);
-                Console.WriteLine("Weights loaded successfully.");
+                Console.WriteLine("No weight files found in NeuronData directory.");
+                return;
             }
-            catch (Exception ex)
+
+            // List all available files
+            for (int i = 0; i < files.Count; i++)
             {
-                Console.WriteLine($"Error loading weights: {ex.Message}");
+                Console.WriteLine($"{i + 1}. {files[i]}");
+            }
+
+            Console.Write("Select a file by number (or enter 0 to cancel): ");
+            if (int.TryParse(Console.ReadLine(), out int selection) && selection > 0 && selection <= files.Count)
+            {
+                string selectedFile = files[selection - 1];
+
+                try
+                {
+                    // Load the neural data
+                    NeuralData data = fileHelper.GetNeuralData(selectedFile);
+
+                    if (data != null)
+                    {
+                        // Set the weights in the network
+                        network.SetNeuralNetworkData(data);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error loading weights: {ex.Message}");
+                }
+            }
+            else if (selection != 0)
+            {
+                Console.WriteLine("Invalid selection.");
             }
         }
 
         private static void SaveWeights(NeuronNetwork network)
         {
-            Console.Write("Enter the path to save the weights: ");
-            string filePath = Console.ReadLine();
+            Console.Write("Enter a name for the weights file (leave empty for timestamp): ");
+            string fileName = Console.ReadLine();
 
             try
             {
-                network.SaveWeights(filePath);
-                Console.WriteLine("Weights saved successfully.");
+                // Get current weights and biases
+                NeuralData data = network.GetNeuralNetworkData();
+
+                // Save to file
+                bool success = fileHelper.SaveNeuralData(data, fileName);
+
+                if (success)
+                {
+                    string displayName = string.IsNullOrEmpty(fileName) ?
+                        DateTime.Now.ToString("yyyyMMddHHmmss") : fileName;
+
+                    Console.WriteLine($"Weights saved successfully to {displayName}_NeuralData.wbn.");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error saving weights: {ex.Message}");
+            }
+        }
+
+        private static void ConvertWeights()
+        {
+            Console.WriteLine("Convert old weights to new .wbn format");
+            Console.Write("Enter the path to the old weights JSON file: ");
+            string inputFile = Console.ReadLine();
+
+            if (!File.Exists(inputFile))
+            {
+                Console.WriteLine($"Error: File not found at {inputFile}");
+                return;
+            }
+
+            Console.Write("Enter a name for the new weights file: ");
+            string outputName = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(outputName))
+            {
+                outputName = DateTime.Now.ToString("yyyyMMddHHmmss");
+            }
+
+            bool success = fileHelper.ConvertOldDataToNew(inputFile, outputName);
+
+            if (success)
+            {
+                Console.WriteLine($"Conversion complete. File saved to NeuronData/{outputName}_NeuralData.wbn");
             }
         }
     }

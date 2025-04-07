@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
+using Aesclea_Back_End_.DDOs;
 
 namespace Aesclea_Back_End_.AIModel
 {
@@ -264,6 +265,8 @@ namespace Aesclea_Back_End_.AIModel
             }
         }
 
+        [Obsolete("SaveWeights is deprecated, please use GetNeuralNetworkData instead.")]
+
         public void SaveWeights(string filePath)
         {
             try
@@ -302,6 +305,68 @@ namespace Aesclea_Back_End_.AIModel
             }
         }
 
+        public void SetNeuralNetworkData(NeuralData data)
+        {
+            List<List<List<double>>> allWeights = data.Weights;
+            List<List<double>> allBiases = data.Biases;
+
+            if (allWeights.Count != Layers.Count || allBiases.Count != Layers.Count)
+            {
+                throw new Exception("Weight file structure doesn't match current network architecture");
+            }
+
+            try
+            {
+                for (int layerIndex = 0; layerIndex < Layers.Count; layerIndex++)
+                {
+                    var layer = Layers[layerIndex];
+                    if (allWeights[layerIndex].Count != layer.Neurons.Count)
+                    {
+                        throw new Exception($"Layer {layerIndex}: Weight count mismatch");
+                    }
+
+                    for (int neuronIndex = 0; neuronIndex < layer.Neurons.Count; neuronIndex++)
+                    {
+                        if (allWeights[layerIndex][neuronIndex].Count != layer.Neurons[neuronIndex].Weights.Count)
+                        {
+                            throw new Exception($"Neuron {neuronIndex} in layer {layerIndex}: Weight dimension mismatch");
+                        }
+
+                        layer.Neurons[neuronIndex].Weights = allWeights[layerIndex][neuronIndex];
+                        layer.Neurons[neuronIndex].Bias = allBiases[layerIndex][neuronIndex];
+                    }
+                }
+                Console.WriteLine("Weights successfully loaded.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error setting weights: {ex.Message}");
+                throw;
+            }
+
+
+        }
+
+        public NeuralData GetNeuralNetworkData()
+        {
+            var allWeights = new List<List<List<double>>>();
+            var allBiases = new List<List<double>>();
+            foreach (var layer in Layers)
+            {
+                var layerWeights = new List<List<double>>();
+                var layerBiases = new List<double>();
+                foreach (var neuron in layer.Neurons)
+                {
+                    layerWeights.Add(neuron.Weights);
+                    layerBiases.Add(neuron.Bias);
+                }
+                allWeights.Add(layerWeights);
+                allBiases.Add(layerBiases);
+            }
+            return new NeuralData(allWeights, allBiases);
+        }
+
+        [Obsolete("LoadWeights is deprecated, please use SetNeuralNetworkData instead.")]
         public void LoadWeights(string filePath)
         {
             if (!File.Exists(filePath))
