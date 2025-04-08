@@ -21,6 +21,8 @@ namespace Aesclea_Back_End_
 
             // Network with layers sized for 512x512 grayscale images
             var network = new NeuronNetwork(new int[] { 16384, 256, 64, 16, 1 });
+            // Initialize recurrent network with similar architecture
+            var recurrentNetwork = new RecurrentNeuralNetwork(new int[] { 256, 64, 16 }, new int[] { 256, 64, 16 }, 500);
 
             while (true)
             {
@@ -33,7 +35,8 @@ namespace Aesclea_Back_End_
                 Console.WriteLine("4. Load Weights");
                 Console.WriteLine("5. Save Weights");
                 Console.WriteLine("6. Convert Old Weights to New");
-                Console.WriteLine("7. Exit");
+                Console.WriteLine("7. Recurrent Network Options");
+                Console.WriteLine("8. Exit");
                 Console.Write("Enter your choice: ");
 
                 var choice = Console.ReadLine();
@@ -59,6 +62,9 @@ namespace Aesclea_Back_End_
                         ConvertWeights();
                         break;
                     case "7":
+                        RecurrentNeuralNetworkOptions(recurrentNetwork);
+                        break;
+                    case "8":
                         return; // Exit the program
                     default:
                         Console.WriteLine("Invalid choice, please try again.");
@@ -67,6 +73,309 @@ namespace Aesclea_Back_End_
 
                 Console.WriteLine("\nPress Enter to return to the menu...");
                 Console.ReadLine();
+            }
+        }
+
+        private static void RecurrentNeuralNetworkOptions(RecurrentNeuralNetwork recurrentNetwork)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Recurrent Neural Network Options:");
+                Console.WriteLine("1. Prompt (Test image for tumor with recurrent network)");
+                Console.WriteLine("2. Train Recurrent Network");
+                Console.WriteLine("3. Mass Test Recurrent Network");
+                Console.WriteLine("4. Load Recurrent Network Weights");
+                Console.WriteLine("5. Save Recurrent Network Weights");
+                Console.WriteLine("6. Return to Main Menu");
+                Console.Write("Enter your choice: ");
+
+                var choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        PromptRecurrent(recurrentNetwork);
+                        break;
+                    case "2":
+                        TrainRecurrent(recurrentNetwork);
+                        break;
+                    case "3":
+                        MassTestRecurrent(recurrentNetwork);
+                        break;
+                    case "4":
+                        LoadRecurrentWeights(recurrentNetwork);
+                        break;
+                    case "5":
+                        SaveRecurrentWeights(recurrentNetwork);
+                        break;
+                    case "6":
+                        return; // Return to main menu
+                    default:
+                        Console.WriteLine("Invalid choice, please try again.");
+                        break;
+                }
+
+                Console.WriteLine("\nPress Enter to return to the recurrent network options...");
+                Console.ReadLine();
+            }
+        }
+
+        private static void PromptRecurrent(RecurrentNeuralNetwork recurrentNetwork)
+        {
+            Console.WriteLine("Enter the path to the image file to analyze:");
+            string imagePath = Console.ReadLine();
+
+            if (!File.Exists(imagePath))
+            {
+                Console.WriteLine($"File not found: {imagePath}");
+                return;
+            }
+
+            try
+            {
+                using (var image = new Bitmap(imagePath))
+                {
+                    // Use the ImageHelper class to preprocess the image
+                    var processedImage = ImageHelper.ProcessImage(image, 128); // Using same method as regular network
+
+                    // Feed the image data into the recurrent network
+                    var output = recurrentNetwork.FeedForward(processedImage);
+
+                    // Interpret the result
+                    double tumorProbability = output[0] * 100;
+                    Console.WriteLine($"Analysis complete.");
+                    Console.WriteLine($"Tumor probability (using recurrent network): {tumorProbability:F2}%");
+
+                    // Give a clear interpretation
+                    if (tumorProbability > 75)
+                    {
+                        Console.WriteLine("Assessment: High probability of tumor detected.");
+                    }
+                    else if (tumorProbability > 40)
+                    {
+                        Console.WriteLine("Assessment: Moderate probability of tumor detected.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Assessment: Low probability of tumor detected.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error analyzing image with recurrent network: {ex.Message}");
+            }
+        }
+
+        private static void TrainRecurrent(RecurrentNeuralNetwork recurrentNetwork)
+        {
+            Console.WriteLine("Starting training recurrent network with MRI/X-RAY images...");
+
+            try
+            {
+                // Get positive examples (with tumor)
+                Console.WriteLine("Enter the path to the folder containing tumor images:");
+                string tumorFolderPath = Console.ReadLine();
+
+                // Get negative examples (without tumor)
+                Console.WriteLine("Enter the path to the folder containing non-tumor images:");
+                string nonTumorFolderPath = Console.ReadLine();
+
+                Console.WriteLine("Enter the number of epochs:");
+                int epochs = int.Parse(Console.ReadLine());
+
+                Console.WriteLine("Enter the learning rate (e.g., 0.01):");
+                double learningRate = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+
+                // Use ImageHelper to load and process images
+                var tumorImages = ImageHelper.LoadImages(tumorFolderPath);
+                Console.WriteLine($"Loaded {tumorImages.Count} tumor images.");
+
+                var nonTumorImages = ImageHelper.LoadImages(nonTumorFolderPath);
+                Console.WriteLine($"Loaded {nonTumorImages.Count} non-tumor images.");
+
+                // Combine into training data
+                var inputs = new List<List<double>>();
+                var outputs = new List<List<double>>();
+
+                // Add tumor images with label 1
+                foreach (var imageData in tumorImages)
+                {
+                    inputs.Add(imageData);
+                    outputs.Add(new List<double> { 1.0 });
+                }
+
+                // Add non-tumor images with label 0
+                foreach (var imageData in nonTumorImages)
+                {
+                    inputs.Add(imageData);
+                    outputs.Add(new List<double> { 0.0 });
+                }
+
+                // Train the recurrent network
+                Console.WriteLine($"Starting recurrent network training with {inputs.Count} images for {epochs} epochs...");
+                recurrentNetwork.Train(inputs, outputs, epochs, learningRate);
+
+                Console.WriteLine("Recurrent network training complete!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during recurrent network training: {ex.Message}");
+            }
+        }
+
+        private static void MassTestRecurrent(RecurrentNeuralNetwork recurrentNetwork)
+        {
+            Console.WriteLine("Starting mass test for recurrent network...");
+
+            try
+            {
+                // Get test data path
+                Console.WriteLine("Enter path to folder with tumor test images:");
+                string tumorTestPath = Console.ReadLine();
+
+                Console.WriteLine("Enter path to folder with non-tumor test images:");
+                string nonTumorTestPath = Console.ReadLine();
+
+                // Load test images using ImageHelper
+                var tumorTestImages = ImageHelper.LoadImages(tumorTestPath);
+                var nonTumorTestImages = ImageHelper.LoadImages(nonTumorTestPath);
+
+                var testInputs = new List<List<double>>();
+                var expectedOutputs = new List<List<double>>();
+
+                // Add tumor images with label 1
+                foreach (var image in tumorTestImages)
+                {
+                    testInputs.Add(image);
+                    expectedOutputs.Add(new List<double> { 1.0 });
+                }
+
+                // Add non-tumor images with label 0
+                foreach (var image in nonTumorTestImages)
+                {
+                    testInputs.Add(image);
+                    expectedOutputs.Add(new List<double> { 0.0 });
+                }
+
+                Console.WriteLine($"Testing recurrent network with {testInputs.Count} images...");
+
+                // Reset state for all samples before testing
+                recurrentNetwork.ResetState();
+
+                // Calculate accuracy using the RecurrentNeuralNetwork method
+                double accuracy = recurrentNetwork.CalculateAccuracy(testInputs, expectedOutputs);
+
+                Console.WriteLine($"Recurrent network mass test results: Accuracy = {accuracy * 100:F2}%");
+
+                // Detailed evaluation
+                int totalTumorImages = tumorTestImages.Count;
+                int totalNonTumorImages = nonTumorTestImages.Count;
+
+                // Test tumor detection rate (sensitivity)
+                int correctTumorDetections = 0;
+                recurrentNetwork.ResetState(); // Reset state before tumor detection testing
+                foreach (var image in tumorTestImages)
+                {
+                    var output = recurrentNetwork.FeedForward(image);
+                    if (output[0] >= 0.5) // Predicted as tumor
+                        correctTumorDetections++;
+                }
+
+                // Test non-tumor detection rate (specificity)
+                int correctNonTumorDetections = 0;
+                recurrentNetwork.ResetState(); // Reset state before non-tumor detection testing
+                foreach (var image in nonTumorTestImages)
+                {
+                    var output = recurrentNetwork.FeedForward(image);
+                    if (output[0] < 0.5) // Predicted as non-tumor
+                        correctNonTumorDetections++;
+                }
+
+                double sensitivity = (double)correctTumorDetections / totalTumorImages * 100;
+                double specificity = (double)correctNonTumorDetections / totalNonTumorImages * 100;
+
+                Console.WriteLine($"Tumor detection rate (sensitivity): {sensitivity:F2}%");
+                Console.WriteLine($"Non-tumor detection rate (specificity): {specificity:F2}%");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during recurrent network mass testing: {ex.Message}");
+            }
+        }
+
+        private static void LoadRecurrentWeights(RecurrentNeuralNetwork recurrentNetwork)
+        {
+            Console.WriteLine("Available recurrent network weight files:");
+
+            // Get all .rnn files in the RecurrentNeuralData folder
+            var files = fileHelper.GetAvailableRecurrentWeightFiles();
+
+            if (files.Count == 0)
+            {
+                Console.WriteLine("No recurrent network weight files found in RecurrentNeuralData directory.");
+                return;
+            }
+
+            // List all available files
+            for (int i = 0; i < files.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {files[i]}");
+            }
+
+            Console.Write("Select a file by number (or enter 0 to cancel): ");
+            if (int.TryParse(Console.ReadLine(), out int selection) && selection > 0 && selection <= files.Count)
+            {
+                string selectedFile = files[selection - 1];
+
+                try
+                {
+                    // Load the recurrent neural data
+                    RecurrentNeuralData data = fileHelper.GetRecurrentNeuralData(selectedFile);
+
+                    if (data != null)
+                    {
+                        // Set the weights in the recurrent network
+                        recurrentNetwork.SetRecurrentNeuralNetworkData(data);
+                        Console.WriteLine("Recurrent network weights loaded successfully.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error loading recurrent network weights: {ex.Message}");
+                }
+            }
+            else if (selection != 0)
+            {
+                Console.WriteLine("Invalid selection.");
+            }
+        }
+
+        private static void SaveRecurrentWeights(RecurrentNeuralNetwork recurrentNetwork)
+        {
+            Console.Write("Enter a name for the recurrent network weights file (leave empty for timestamp): ");
+            string fileName = Console.ReadLine();
+
+            try
+            {
+                // Get current weights and biases for the recurrent network
+                RecurrentNeuralData data = recurrentNetwork.GetRecurrentNeuralNetworkData();
+
+                // Save to file
+                bool success = fileHelper.SaveRecurrentNeuralData(data, fileName);
+
+                if (success)
+                {
+                    string displayName = string.IsNullOrEmpty(fileName) ?
+                        DateTime.Now.ToString("yyyyMMddHHmmss") : fileName;
+
+                    Console.WriteLine($"Recurrent network weights saved successfully to {displayName}_RecurrentNeuralData.rnn.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving recurrent network weights: {ex.Message}");
             }
         }
 

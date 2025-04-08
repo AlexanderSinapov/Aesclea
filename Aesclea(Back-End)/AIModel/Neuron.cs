@@ -73,7 +73,7 @@ namespace Aesclea_Back_End_.AIModel
             {
                 Output = LeakyReLU(Input);
             }
-            else // ReLU
+            else if (_activationType == ActivationType.ReLU) // ReLU
             {
                 Output = ReLU(Input);
             }
