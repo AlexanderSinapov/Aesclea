@@ -187,7 +187,7 @@ namespace Aesclea_Back_End_.AIModel
                 switch (augmentationType)
                 {
                     case 0: // Rotation
-                        using (Bitmap rotated = RotateImage(copy, random.Next(-15, 15)))
+                        using (Bitmap rotated = RotateImage(copy, random.Next(-180, 180)))
                         {
                             return ProcessImage(rotated, size);
                         }
