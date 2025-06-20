@@ -111,15 +111,29 @@ namespace Aesclea_Back_End_.Server
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<TumorAnalysisService>();
             builder.Services.AddScoped<ImageProcessingService>();
-            builder.Services.AddScoped<FileService>();
-
-            // Configure your existing TumorClassifier with required dependencies
+            builder.Services.AddScoped<FileService>();            // Configure your existing TumorClassifier with required dependencies
             builder.Services.AddScoped<TumorClassifier>(provider =>
             {
                 // You'll need to initialize with your existing NeuronNetwork
                 // This depends on how you currently create your base network
                 var baseNetwork = new NeuronNetwork(new int[] { 16384, 1024, 512, 256, 1 });
-                return new TumorClassifier(baseNetwork);
+                var classifier = new TumorClassifier(baseNetwork);
+                
+                // Auto-load existing weights if available
+                try
+                {
+                    var fileHelper = new FileHelper();
+                    fileHelper.OpenFolder();
+                    classifier.LoadWeights(fileHelper, "tgl");
+                    Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classifier weights");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️  API: Could not load existing weights: {ex.Message}");
+                    Console.WriteLine("   You may need to train the classifier first via console application.");
+                }
+                
+                return classifier;
             });
 
             // Configure CORS - IMPORTANT: This must be configured properly

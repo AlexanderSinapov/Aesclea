@@ -26,9 +26,7 @@ namespace Aesclea_Back_End_.Services
             _fileService = fileService;
             _logger = logger;
             _analysisHistory = new List<TumorAnalysisResponse>();
-        }
-
-        public async Task<TumorAnalysisResponse> AnalyzeImageAsync(IFormFile imageFile)
+        }        public async Task<TumorAnalysisResponse> AnalyzeImageAsync(IFormFile imageFile, bool saveAnnotated = true)
         {
             try
             {
@@ -40,14 +38,13 @@ namespace Aesclea_Back_End_.Services
                 
                 // Perform tumor analysis
                 var analysisResult = _tumorClassifier.AnalyzeImage(imageData);
-                  // Create annotated image if tumor is detected
+                
+                // Create annotated image if tumor is detected and user wants to save it
                 string? annotatedImagePath = null;
-                if (analysisResult.HasTumor)
+                if (analysisResult.HasTumor && saveAnnotated)
                 {
                     annotatedImagePath = await CreateAnnotatedImageAsync(originalImagePath, analysisResult);
-                }
-
-                // Create response
+                }                // Create response
                 var response = new TumorAnalysisResponse
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -56,6 +53,7 @@ namespace Aesclea_Back_End_.Services
                     OriginalImagePath = originalImagePath,
                     AnnotatedImagePath = annotatedImagePath,
                     AnnotatedFileName = annotatedImagePath != null ? Path.GetFileName(annotatedImagePath) : null,
+                    CanCreateAnnotatedImage = analysisResult.HasTumor, // Can create if tumor is detected
                     
                     // Analysis results
                     HasTumor = analysisResult.HasTumor,
@@ -82,48 +80,59 @@ namespace Aesclea_Back_End_.Services
                 _logger.LogError(ex, "Error in tumor analysis service");
                 throw;
             }
-        }        private async Task<string> CreateAnnotatedImageAsync(string originalImagePath, TumorAnalysisResult analysisResult)
+        }        private async Task<string> CreateAnnotatedImageAsync(string originalImagePath, TumorAnalysisResult analysisResult, string outlineColor = "Red")
         {
             try
             {
-#if WINDOWS
-                using var originalImage = Image.FromFile(originalImagePath);
-                using var annotatedImage = new Bitmap(originalImage.Width, originalImage.Height);
-                using var graphics = Graphics.FromImage(annotatedImage);
-                
-                // Set high quality rendering
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                
-                // Draw the original image
-                graphics.DrawImage(originalImage, 0, 0);
-
-                if (analysisResult.HasTumor)
+                if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
                 {
-                    // Calculate approximate tumor region (this is simplified - in real implementation, 
-                    // you'd need actual bounding box coordinates from your AI model)
-                    var tumorRegion = CalculateEstimatedTumorRegion(originalImage.Width, originalImage.Height, analysisResult);
+                    using var originalImage = Image.FromFile(originalImagePath);
+                    using var annotatedImage = new Bitmap(originalImage.Width, originalImage.Height);
+                    using var graphics = Graphics.FromImage(annotatedImage);
                     
-                    // Draw red rectangle around estimated tumor area
-                    using var pen = new Pen(Color.Red, 4);
-                    graphics.DrawRectangle(pen, tumorRegion);
+                    // Set high quality rendering
+                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                     
-                    // Draw confidence and type information
-                    DrawAnalysisInfo(graphics, tumorRegion, analysisResult);
-                }
+                    // Draw the original image
+                    graphics.DrawImage(originalImage, 0, 0);
 
-                // Save annotated image
-                var annotatedPath = _fileService.GetAnnotatedImagePath(originalImagePath);
-                annotatedImage.Save(annotatedPath, ImageFormat.Png);
-                
-                return annotatedPath;
-#else                // For non-Windows platforms, just copy the original file and return it
-                var annotatedPath = _fileService.GetAnnotatedImagePath(originalImagePath);
-                using var sourceStream = File.OpenRead(originalImagePath);
-                using var destStream = File.Create(annotatedPath);
-                await sourceStream.CopyToAsync(destStream);
-                return annotatedPath;
-#endif
+                    if (analysisResult.HasTumor)
+                    {
+                        // Calculate approximate tumor region (this is simplified - in real implementation, 
+                        // you'd need actual bounding box coordinates from your AI model)
+                        var tumorRegion = CalculateEstimatedTumorRegion(originalImage.Width, originalImage.Height, analysisResult);
+                        
+                        // Choose outline color based on tumor grade and malignancy
+                        Color penColor = GetTumorOutlineColor(analysisResult, outlineColor);
+                        
+                        // Draw bold outline around estimated tumor area
+                        using var pen = new Pen(penColor, 6);
+                        graphics.DrawRectangle(pen, tumorRegion);
+                        
+                        // Add semi-transparent fill to highlight the region
+                        using var brush = new SolidBrush(Color.FromArgb(60, penColor));
+                        graphics.FillRectangle(brush, tumorRegion);
+                        
+                        // Draw confidence and type information
+                        DrawAnalysisInfo(graphics, tumorRegion, analysisResult);
+                    }
+
+                    // Save annotated image
+                    var annotatedPath = _fileService.GetAnnotatedImagePath(originalImagePath);
+                    annotatedImage.Save(annotatedPath, ImageFormat.Png);
+                    
+                    return annotatedPath;
+                }
+                else
+                {
+                    // For non-Windows platforms, just copy the original file and return it
+                    var annotatedPath = _fileService.GetAnnotatedImagePath(originalImagePath);
+                    using var sourceStream = File.OpenRead(originalImagePath);
+                    using var destStream = File.Create(annotatedPath);
+                    await sourceStream.CopyToAsync(destStream);
+                    return annotatedPath;
+                }
             }
             catch (Exception ex)
             {
@@ -168,42 +177,55 @@ namespace Aesclea_Back_End_.Services
             };
         }        private void DrawAnalysisInfo(Graphics graphics, Rectangle tumorRegion, TumorAnalysisResult result)
         {
-#if WINDOWS
-            var font = new Font("Arial", 12, FontStyle.Bold);
-            var brush = new SolidBrush(Color.Red);
-            var backgroundBrush = new SolidBrush(Color.FromArgb(200, Color.White));
-            
-            var lines = new[]
+            if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
             {
-                $"Tumor: {result.TumorProbability:P1}",
-                $"Type: {result.TumorType}",
-                $"Grade: {result.TumorGrade}",
-                $"Stage: {result.EstimatedStage}"
-            };
-            
-            int lineHeight = 20;
-            int padding = 5;
-            int boxWidth = 200;
-            int boxHeight = lines.Length * lineHeight + padding * 2;
-            
-            // Position the info box
-            int infoX = tumorRegion.X;
-            int infoY = tumorRegion.Y - boxHeight - 10;
-            
-            // Adjust if it goes off screen
-            if (infoY < 0) infoY = tumorRegion.Bottom + 10;
-            if (infoX + boxWidth > graphics.ClipBounds.Width) infoX = (int)graphics.ClipBounds.Width - boxWidth;
-            
-            // Draw background
-            graphics.FillRectangle(backgroundBrush, infoX, infoY, boxWidth, boxHeight);
-            graphics.DrawRectangle(new Pen(Color.Red, 2), infoX, infoY, boxWidth, boxHeight);
-            
-            // Draw text
-            for (int i = 0; i < lines.Length; i++)
-            {
-                graphics.DrawString(lines[i], font, brush, infoX + padding, infoY + padding + i * lineHeight);
+                var font = new Font("Arial", 14, FontStyle.Bold);
+                var textBrush = new SolidBrush(Color.White);
+                var backgroundBrush = new SolidBrush(Color.FromArgb(180, Color.Black));
+                var borderPen = new Pen(Color.White, 2);
+                
+                var lines = new[]
+                {
+                    $"TUMOR DETECTED: {result.TumorProbability:P1}",
+                    $"Type: {result.TumorType}",
+                    $"Grade: {result.TumorGrade} ({result.GradeDescription})",
+                    $"Location: {result.TumorLocation}",
+                    $"Stage: {result.EstimatedStage} - {result.StageDescription}"
+                };
+                
+                int lineHeight = 22;
+                int padding = 10;
+                int boxWidth = 320;
+                int boxHeight = lines.Length * lineHeight + padding * 2;
+                
+                // Position the info box - try above the tumor region first
+                int infoX = Math.Max(5, tumorRegion.X);
+                int infoY = tumorRegion.Y - boxHeight - 15;
+                
+                // Adjust if it goes off screen
+                if (infoY < 5) 
+                    infoY = tumorRegion.Bottom + 15;
+                if (infoX + boxWidth > graphics.ClipBounds.Width - 5) 
+                    infoX = Math.Max(5, (int)graphics.ClipBounds.Width - boxWidth - 5);
+                if (infoY + boxHeight > graphics.ClipBounds.Height - 5)
+                    infoY = Math.Max(5, (int)graphics.ClipBounds.Height - boxHeight - 5);
+                
+                // Draw background with border
+                graphics.FillRectangle(backgroundBrush, infoX, infoY, boxWidth, boxHeight);
+                graphics.DrawRectangle(borderPen, infoX, infoY, boxWidth, boxHeight);
+                
+                // Draw text with better positioning
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    graphics.DrawString(lines[i], font, textBrush, infoX + padding, infoY + padding + i * lineHeight);
+                }
+                
+                // Dispose of resources
+                font.Dispose();
+                textBrush.Dispose();
+                backgroundBrush.Dispose();
+                borderPen.Dispose();
             }
-#endif
         }
 
         public async Task<FileDownloadResult?> GetAnnotatedImageAsync(string fileName)
@@ -284,6 +306,56 @@ namespace Aesclea_Back_End_.Services
             return trainingData;
         }
 
+        public async Task<string?> CreateAnnotatedImageOnDemandAsync(string analysisId, string outlineColor = "Auto")
+        {
+            try
+            {
+                // Find the analysis result from history
+                var analysis = _analysisHistory.FirstOrDefault(a => a.Id == analysisId);
+                if (analysis == null)
+                {
+                    _logger.LogWarning($"Analysis with ID {analysisId} not found");
+                    return null;
+                }
+
+                if (!analysis.HasTumor)
+                {
+                    _logger.LogWarning($"Analysis {analysisId} does not contain a tumor to annotate");
+                    return null;
+                }
+
+                // Recreate the analysis result from the response data
+                var analysisResult = new TumorAnalysisResult
+                {
+                    HasTumor = analysis.HasTumor,
+                    TumorProbability = analysis.TumorProbability,
+                    TumorType = analysis.TumorType,
+                    TypeConfidence = analysis.TypeConfidence,
+                    TumorGrade = analysis.TumorGrade,
+                    GradeDescription = analysis.GradeDescription,
+                    GradeConfidence = analysis.GradeConfidence,
+                    TumorLocation = analysis.TumorLocation,
+                    LocationConfidence = analysis.LocationConfidence,
+                    EstimatedStage = analysis.EstimatedStage,
+                    StageDescription = analysis.StageDescription
+                };
+
+                // Create new annotated image with specified color
+                var annotatedPath = await CreateAnnotatedImageAsync(analysis.OriginalImagePath, analysisResult, outlineColor);
+                
+                // Update the analysis record with new annotated image path
+                analysis.AnnotatedImagePath = annotatedPath;
+                analysis.AnnotatedFileName = Path.GetFileName(annotatedPath);
+
+                return annotatedPath;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating on-demand annotated image for analysis {analysisId}");
+                return null;
+            }
+        }
+
         private string GetContentType(string fileName)
         {
             var extension = Path.GetExtension(fileName).ToLower();
@@ -296,6 +368,33 @@ namespace Aesclea_Back_End_.Services
                 _ => "application/octet-stream"
             };
         }
+
+        private Color GetTumorOutlineColor(TumorAnalysisResult result, string preferredColor = "Red")
+        {
+            // Allow custom color preference
+            if (!string.IsNullOrEmpty(preferredColor) && preferredColor != "Auto")
+            {
+                return Color.FromName(preferredColor);
+            }
+            
+            // Automatic color selection based on tumor characteristics
+            if (result.TumorGrade >= 4)
+            {
+                return Color.DarkRed; // High-grade malignant tumors - dark red
+            }
+            else if (result.TumorGrade >= 3)
+            {
+                return Color.Red; // High-grade tumors - bright red
+            }
+            else if (result.TumorGrade >= 2)
+            {
+                return Color.Orange; // Intermediate-grade tumors - orange
+            }
+            else
+            {
+                return Color.Yellow; // Low-grade tumors - yellow
+            }
+        }
     }    public class TumorAnalysisResponse
     {
         public string Id { get; set; } = string.Empty;
@@ -304,6 +403,7 @@ namespace Aesclea_Back_End_.Services
         public string OriginalImagePath { get; set; } = string.Empty;
         public string? AnnotatedImagePath { get; set; }
         public string? AnnotatedFileName { get; set; }
+        public bool CanCreateAnnotatedImage { get; set; } // Indicates if an annotated image can be created/saved
         
         // Analysis results
         public bool HasTumor { get; set; }

@@ -19,10 +19,8 @@ namespace Aesclea_Back_End_.Controllers
         {
             _tumorAnalysisService = tumorAnalysisService;
             _logger = logger;
-        }
-
-        [HttpPost("analyze")]
-        public async Task<ActionResult<TumorAnalysisResponse>> AnalyzeImage(IFormFile imageFile)
+        }        [HttpPost("analyze")]
+        public async Task<ActionResult<TumorAnalysisResponse>> AnalyzeImage(IFormFile imageFile, [FromQuery] bool saveAnnotated = true)
         {
             try
             {
@@ -36,7 +34,7 @@ namespace Aesclea_Back_End_.Controllers
                     return BadRequest("Invalid file format. Supported formats: JPG, PNG, BMP, TIFF");
 
                 // Process the image
-                var result = await _tumorAnalysisService.AnalyzeImageAsync(imageFile);
+                var result = await _tumorAnalysisService.AnalyzeImageAsync(imageFile, saveAnnotated);
                 
                 return Ok(result);
             }
@@ -97,6 +95,56 @@ namespace Aesclea_Back_End_.Controllers
                 _logger.LogError(ex, "Error retrieving analysis history");
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        [HttpPost("annotate/{analysisId}")]
+        public async Task<IActionResult> CreateAnnotatedImage(string analysisId, [FromQuery] string outlineColor = "Auto")
+        {
+            try
+            {
+                var allowedColors = new[] { "Auto", "Red", "Orange", "Yellow", "Green", "Blue", "Purple", "DarkRed", "Pink" };
+                if (!allowedColors.Contains(outlineColor))
+                    return BadRequest($"Invalid outline color. Allowed colors: {string.Join(", ", allowedColors)}");
+
+                var annotatedImagePath = await _tumorAnalysisService.CreateAnnotatedImageOnDemandAsync(analysisId, outlineColor);
+                
+                if (annotatedImagePath == null)
+                    return NotFound("Analysis not found or does not contain a detectable tumor");
+
+                var fileName = Path.GetFileName(annotatedImagePath);
+                return Ok(new 
+                { 
+                    Message = "Annotated image created successfully",
+                    AnnotatedImagePath = annotatedImagePath,
+                    FileName = fileName,
+                    DownloadUrl = $"/api/tumoranalysis/download/{fileName}",
+                    OutlineColor = outlineColor
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating annotated image");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("outline-colors")]
+        public IActionResult GetAvailableOutlineColors()
+        {
+            var colors = new[]
+            {
+                new { Value = "Auto", Description = "Automatic color based on tumor grade (Yellow=Grade 1, Orange=Grade 2, Red=Grade 3, DarkRed=Grade 4)" },
+                new { Value = "Red", Description = "Classic red outline" },
+                new { Value = "Orange", Description = "Orange outline" },
+                new { Value = "Yellow", Description = "Yellow outline" },
+                new { Value = "Green", Description = "Green outline" },
+                new { Value = "Blue", Description = "Blue outline" },
+                new { Value = "Purple", Description = "Purple outline" },
+                new { Value = "DarkRed", Description = "Dark red outline" },
+                new { Value = "Pink", Description = "Pink outline" }
+            };
+
+            return Ok(colors);
         }
     }
 }

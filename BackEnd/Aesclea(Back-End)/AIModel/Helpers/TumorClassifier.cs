@@ -13,6 +13,11 @@ namespace Aesclea_Back_End_.AIModel
         private NeuronNetwork locationNetwork; // Network for tumor location classification
         private TumorHelper tumorHelper; // Helper with tumor metadata
 
+        // Configuration properties
+        public double DetectionThreshold { get; set; } = 0.5;
+        public double ClassificationThreshold { get; set; } = 0.3;
+        public bool EnableDetailedAnalysis { get; set; } = true;
+
         public TumorClassifier(NeuronNetwork baseNetwork)
         {
             this.baseNetwork = baseNetwork;
@@ -43,11 +48,12 @@ namespace Aesclea_Back_End_.AIModel
             var result = new TumorAnalysisResult
             {
                 TumorProbability = tumorProbability,
-                HasTumor = tumorProbability >= 0.5
+                HasTumor = tumorProbability >= DetectionThreshold,
+                AnalysisTimestamp = DateTime.UtcNow
             };
 
             // Only classify the tumor if probability is reasonably high
-            if (result.HasTumor)
+            if (result.HasTumor && EnableDetailedAnalysis)
             {
                 // Get tumor type
                 var typeOutput = typeNetwork.FeedForward(imageData);
@@ -69,12 +75,62 @@ namespace Aesclea_Back_End_.AIModel
                 result.LocationConfidence = locationOutput[locationIndex];
 
                 // Determine stage from grade and other factors (simplified approach)
-                // In a real system, this would use more complex analysis
                 result.EstimatedStage = DetermineEstimatedStage(result.TumorGrade.ToString(), tumorProbability);
                 result.StageDescription = tumorHelper.GeneralizedStage[result.EstimatedStage];
+
+                // Calculate risk assessment
+                result.RiskAssessment = CalculateRiskAssessment(result);
+                
+                // Generate confidence metrics
+                result.OverallConfidence = CalculateOverallConfidence(result);
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Analyze multiple images in batch
+        /// </summary>
+        /// <param name="imageDataList">List of preprocessed image data</param>
+        /// <param name="progressCallback">Optional callback for progress updates</param>
+        /// <returns>List of analysis results</returns>
+        public List<TumorAnalysisResult> AnalyzeBatch(List<List<double>> imageDataList, Action<int, int>? progressCallback = null)
+        {
+            var results = new List<TumorAnalysisResult>();
+            
+            for (int i = 0; i < imageDataList.Count; i++)
+            {
+                var result = AnalyzeImage(imageDataList[i]);
+                result.BatchIndex = i;
+                results.Add(result);
+                
+                progressCallback?.Invoke(i + 1, imageDataList.Count);
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Get statistical summary of batch analysis
+        /// </summary>
+        public BatchAnalysisSummary GetBatchSummary(List<TumorAnalysisResult> results)
+        {
+            var summary = new BatchAnalysisSummary
+            {
+                TotalImages = results.Count,
+                TumorsDetected = results.Count(r => r.HasTumor),
+                AverageConfidence = results.Where(r => r.HasTumor).Average(r => r.TumorProbability),
+                MostCommonType = results.Where(r => r.HasTumor && !string.IsNullOrEmpty(r.TumorType))
+                                      .GroupBy(r => r.TumorType)
+                                      .OrderByDescending(g => g.Count())
+                                      .FirstOrDefault()?.Key ?? "None",
+                GradeDistribution = results.Where(r => r.HasTumor)
+                                          .GroupBy(r => r.TumorGrade)
+                                          .ToDictionary(g => g.Key, g => g.Count()),
+                HighRiskCases = results.Count(r => r.RiskAssessment == "High Risk")
+            };
+
+            return summary;
         }
 
         /// <summary>
@@ -217,6 +273,37 @@ namespace Aesclea_Back_End_.AIModel
             if (locationData != null)
                 locationNetwork.SetNeuralNetworkData(locationData);
         }
+
+        /// <summary>
+        /// Calculate risk assessment based on tumor characteristics
+        /// </summary>
+        private string CalculateRiskAssessment(TumorAnalysisResult result)
+        {
+            if (result.TumorGrade >= 4 || result.TypeConfidence > 0.9)
+                return "High Risk";
+            else if (result.TumorGrade >= 3 || result.TypeConfidence > 0.7)
+                return "Moderate Risk";
+            else if (result.TumorGrade >= 2 || result.TypeConfidence > 0.5)
+                return "Low-Moderate Risk";
+            else
+                return "Low Risk";
+        }
+
+        /// <summary>
+        /// Calculate overall confidence score
+        /// </summary>
+        private double CalculateOverallConfidence(TumorAnalysisResult result)
+        {
+            var confidences = new List<double>
+            {
+                result.TumorProbability,
+                result.TypeConfidence,
+                result.GradeConfidence,
+                result.LocationConfidence
+            };
+
+            return confidences.Average();
+        }
     }
 
     /// <summary>
@@ -226,21 +313,25 @@ namespace Aesclea_Back_End_.AIModel
     {
         // Base tumor detection
         public double TumorProbability { get; set; }
-        public bool HasTumor { get; set; }
-
-        // Tumor classification
-        public string TumorType { get; set; }
+        public bool HasTumor { get; set; }        // Tumor classification
+        public string? TumorType { get; set; }
         public double TypeConfidence { get; set; }
 
         public int TumorGrade { get; set; }
-        public string GradeDescription { get; set; }
+        public string? GradeDescription { get; set; }
         public double GradeConfidence { get; set; }
 
-        public string TumorLocation { get; set; }
+        public string? TumorLocation { get; set; }
         public double LocationConfidence { get; set; }
 
         public int EstimatedStage { get; set; }
-        public string StageDescription { get; set; }
+        public string? StageDescription { get; set; }
+
+        // Additional properties for enhanced analysis
+        public DateTime AnalysisTimestamp { get; set; }
+        public string? RiskAssessment { get; set; }
+        public double OverallConfidence { get; set; }
+        public int? BatchIndex { get; set; } // For batch processing
 
         /// <summary>
         /// Returns a formatted summary of the analysis results
@@ -257,7 +348,20 @@ namespace Aesclea_Back_End_.AIModel
                    $"Type: {TumorType} (confidence: {TypeConfidence * 100:F2}%)\n" +
                    $"Grade: {TumorGrade} - {GradeDescription} (confidence: {GradeConfidence * 100:F2}%)\n" +
                    $"Location: {TumorLocation} (confidence: {LocationConfidence * 100:F2}%)\n" +
-                   $"Estimated Stage: {EstimatedStage} - {StageDescription}";
+                   $"Estimated Stage: {EstimatedStage} - {StageDescription}\n" +
+                   $"Risk Assessment: {RiskAssessment}\n" +
+                   $"Overall Confidence: {OverallConfidence * 100:F2}%";
         }
+    }    /// <summary>
+    /// Summary statistics for batch analysis
+    /// </summary>
+    public class BatchAnalysisSummary
+    {
+        public int TotalImages { get; set; }
+        public int TumorsDetected { get; set; }
+        public double AverageConfidence { get; set; }
+        public string? MostCommonType { get; set; }
+        public Dictionary<int, int> GradeDistribution { get; set; } = new();
+        public int HighRiskCases { get; set; }
     }
 }
