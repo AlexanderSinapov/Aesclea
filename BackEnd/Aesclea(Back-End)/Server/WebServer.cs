@@ -2,8 +2,10 @@ using Aesclea_Back_End_.Configuration;
 using Aesclea_Back_End_.Services;
 using Aesclea_Back_End_.AIModel;
 using Aesclea_Back_End_.AIModel.Helpers;
+using Aesclea_Back_End_.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 
 namespace Aesclea_Back_End_.Server
@@ -67,55 +69,45 @@ namespace Aesclea_Back_End_.Server
                     Version = "v1",
                     Description = "Medical management system with AI tumor detection"
                 });
-            });
+            });            // Configure Database
+            builder.Services.Configure<DatabaseConfig>(
+                builder.Configuration.GetSection("Database"));
+            
+            // Configure JWT
+            builder.Services.Configure<JwtConfig>(
+                builder.Configuration.GetSection("Jwt"));
 
-            // Configure Supabase
-            builder.Services.Configure<SupabaseConfig>(
-                builder.Configuration.GetSection("Supabase"));
-
-            // Add Supabase client
-            builder.Services.AddScoped<Supabase.Client>(provider =>
+            // Add PostgreSQL Database Context
+            builder.Services.AddDbContext<AescleaDbContext>(options =>
             {
-                var config = builder.Configuration.GetSection("Supabase").Get<SupabaseConfig>();
-                if (config == null || string.IsNullOrEmpty(config.Url) || string.IsNullOrEmpty(config.Key))
+                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrEmpty(connectionString))
                 {
-                    throw new InvalidOperationException("Supabase configuration is missing or invalid");
+                    throw new InvalidOperationException("Database connection string is missing");
                 }
-
-                var options = new Supabase.SupabaseOptions
-                {
-                    AutoConnectRealtime = true,
-                    // Add this to handle SSL issues in development
-                    AutoRefreshToken = true
-                };
-                
-                var client = new Supabase.Client(config.Url, config.Key, options);
-                
-                // Initialize the client
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await client.InitializeAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to initialize Supabase client: {ex.Message}");
-                    }
-                });
-                
-                return client;
+                options.UseNpgsql(connectionString);
             });
 
-            // Add custom services
+            // Add custom services in correct dependency order with explicit registrations
+            builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<TumorAnalysisService>();
-            builder.Services.AddScoped<ImageProcessingService>();
-            builder.Services.AddScoped<FileService>();            // Configure your existing TumorClassifier with required dependencies
+              // Register base services with no custom dependencies
+            builder.Services.AddScoped<Aesclea_Back_End_.Services.FileService>(provider => 
+            {
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var logger = provider.GetRequiredService<ILogger<Aesclea_Back_End_.Services.FileService>>();
+                return new Aesclea_Back_End_.Services.FileService(configuration, logger);
+            });
+            
+            builder.Services.AddScoped<ImageProcessingService>(provider =>
+            {
+                var logger = provider.GetRequiredService<ILogger<ImageProcessingService>>();
+                return new ImageProcessingService(logger);
+            });
+            
+            // Configure TumorClassifier (no dependencies on other custom services)
             builder.Services.AddScoped<TumorClassifier>(provider =>
             {
-                // You'll need to initialize with your existing NeuronNetwork
-                // This depends on how you currently create your base network
                 var baseNetwork = new NeuronNetwork(new int[] { 16384, 1024, 512, 256, 1 });
                 var classifier = new TumorClassifier(baseNetwork);
                 
@@ -134,6 +126,16 @@ namespace Aesclea_Back_End_.Server
                 }
                 
                 return classifier;
+            });
+              // Register TumorAnalysisService with explicit dependencies
+            builder.Services.AddScoped<TumorAnalysisService>(provider =>
+            {
+                var tumorClassifier = provider.GetRequiredService<TumorClassifier>();
+                var imageProcessingService = provider.GetRequiredService<ImageProcessingService>();
+                var fileService = provider.GetRequiredService<Aesclea_Back_End_.Services.FileService>();
+                var logger = provider.GetRequiredService<ILogger<TumorAnalysisService>>();
+                
+                return new TumorAnalysisService(tumorClassifier, imageProcessingService, fileService, logger);
             });
 
             // Configure CORS - IMPORTANT: This must be configured properly
@@ -159,25 +161,22 @@ namespace Aesclea_Back_End_.Server
                           .AllowAnyMethod()
                           .AllowAnyHeader();
                 });
-            });
-
-            // Configure JWT Authentication
-            var supabaseConfig = builder.Configuration.GetSection("Supabase").Get<SupabaseConfig>();
-            if (supabaseConfig != null && !string.IsNullOrEmpty(supabaseConfig.Url))
+            });            // Configure JWT Authentication
+            var jwtConfig = builder.Configuration.GetSection("Jwt").Get<JwtConfig>();
+            if (jwtConfig != null && !string.IsNullOrEmpty(jwtConfig.Secret))
             {
                 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
-                        options.Authority = $"{supabaseConfig.Url}/auth/v1";
-                        options.Audience = "authenticated";
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuer = true,
                             ValidateAudience = true,
                             ValidateLifetime = true,
                             ValidateIssuerSigningKey = true,
-                            ValidIssuer = $"{supabaseConfig.Url}/auth/v1",
-                            ValidAudience = "authenticated"
+                            ValidIssuer = jwtConfig.Issuer is string issuerProp ? issuerProp : jwtConfig.Issuer.ToString(),
+                            ValidAudience = jwtConfig.Audience,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret))
                         };
                     });
             }
@@ -186,10 +185,11 @@ namespace Aesclea_Back_End_.Server
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
-        }
-
-        private void ConfigureMiddleware(WebApplication app)
+        }        private void ConfigureMiddleware(WebApplication app)
         {
+            // Initialize database
+            InitializeDatabase(app);
+
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
@@ -226,6 +226,24 @@ namespace Aesclea_Back_End_.Server
                 message = "API is working",
                 timestamp = DateTime.UtcNow
             });
+        }
+
+        private void InitializeDatabase(WebApplication app)
+        {
+            try
+            {
+                using var scope = app.Services.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AescleaDbContext>();
+                
+                _logger.LogInformation("Ensuring database is created...");
+                context.Database.EnsureCreated();
+                _logger.LogInformation("Database initialization completed successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Database initialization failed");
+                throw;
+            }
         }
     }
 }

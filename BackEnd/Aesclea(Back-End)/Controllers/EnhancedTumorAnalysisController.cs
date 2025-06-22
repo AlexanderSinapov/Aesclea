@@ -330,6 +330,135 @@ namespace Aesclea_Back_End_.Controllers
                 _logger.LogError(ex, "Error exporting results");
                 return StatusCode(500, "Internal server error");
             }
+        }        /// <summary>
+        /// Load or reload classifier weights from storage
+        /// </summary>
+        [HttpPost("weights/load")]
+        public ActionResult<WeightLoadResponse> LoadWeights(
+            [FromBody] WeightLoadRequest? request = null)
+        {
+            try
+            {
+                var fileHelper = new FileHelper();
+                string baseName = request?.WeightSetName ?? "tgl"; // Default to 'tgl' weights
+                
+                // Check if weight files exist
+                var availableWeightSets = fileHelper.GetAvailableWeightFiles();
+                bool weightsExist = availableWeightSets.Any(w => w.Contains(baseName));
+                
+                if (!weightsExist)
+                {
+                    return BadRequest($"Weight set '{baseName}' not found. Available weight sets: {string.Join(", ", availableWeightSets)}");
+                }
+
+                var loadStartTime = DateTime.UtcNow;
+                var loadResults = new List<string>();
+
+                try
+                {
+                    // Load weights into the classifier
+                    _tumorClassifier.LoadWeights(fileHelper, baseName);
+                    loadResults.Add($"Successfully loaded classifier weights from '{baseName}'");
+
+                    // Verify weights are loaded by checking if networks respond to test data
+                    var testData = Enumerable.Range(0, 16384).Select(x => 0.5).ToList();
+                    var testResult = _tumorClassifier.AnalyzeImage(testData);
+                    
+                    loadResults.Add("Weight loading verified - classifier is responding");
+                    
+                    _logger.LogInformation($"Weights loaded successfully from '{baseName}' at {loadStartTime}");
+
+                    return Ok(new WeightLoadResponse
+                    {
+                        Success = true,
+                        WeightSetName = baseName,
+                        LoadedAt = loadStartTime,
+                        LoadDurationMs = (int)(DateTime.UtcNow - loadStartTime).TotalMilliseconds,
+                        AvailableWeightSets = availableWeightSets,
+                        LoadResults = loadResults,
+                        Message = $"Successfully loaded weights from '{baseName}'"
+                    });
+                }
+                catch (Exception loadEx)
+                {
+                    _logger.LogError(loadEx, $"Failed to load weights from '{baseName}'");
+                    return StatusCode(500, new WeightLoadResponse
+                    {
+                        Success = false,
+                        WeightSetName = baseName,
+                        LoadedAt = loadStartTime,
+                        LoadDurationMs = (int)(DateTime.UtcNow - loadStartTime).TotalMilliseconds,
+                        AvailableWeightSets = availableWeightSets,
+                        LoadResults = loadResults,
+                        Message = $"Failed to load weights: {loadEx.Message}"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in weight loading endpoint");
+                return StatusCode(500, $"Error loading weights: {ex.Message}");
+            }
+        }        /// <summary>
+        /// Get information about available weight sets
+        /// </summary>
+        [HttpGet("weights/available")]
+        public ActionResult<AvailableWeightsResponse> GetAvailableWeights()
+        {
+            try
+            {
+                var fileHelper = new FileHelper();
+                var availableWeightSets = fileHelper.GetAvailableWeightFiles();
+                
+                var weightSetInfo = new List<WeightSetInfo>();
+                
+                foreach (var weightSet in availableWeightSets)
+                {
+                    var info = new WeightSetInfo
+                    {
+                        Name = weightSet,
+                        IsDefault = weightSet == "tgl",
+                        Description = GetWeightSetDescription(weightSet)
+                    };                    // Try to get file info
+                    try
+                    {
+                        var tempHelper = new FileHelper();
+                        tempHelper.OpenFolder(); // Initialize the data path
+                        var fullPath = Path.Combine("NeuronData", $"{weightSet}_type_NeuralData.wbn");
+                        if (System.IO.File.Exists(fullPath))
+                        {
+                            var fileInfo = new FileInfo(fullPath);
+                            info.LastModified = fileInfo.LastWriteTime;
+                            info.SizeBytes = fileInfo.Length;
+                        }
+                    }
+                    catch { }
+
+                    weightSetInfo.Add(info);
+                }
+
+                return Ok(new AvailableWeightsResponse
+                {
+                    AvailableWeightSets = weightSetInfo,
+                    DefaultWeightSet = "tgl",
+                    TotalCount = weightSetInfo.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting available weights");
+                return StatusCode(500, $"Error getting available weights: {ex.Message}");
+            }
+        }
+
+        private string GetWeightSetDescription(string weightSetName)
+        {
+            return weightSetName switch
+            {
+                "tgl" => "Default tumor classification weights for glioma detection",
+                "V2" => "Version 2 weights with enhanced classification",
+                _ => $"Weight set: {weightSetName}"
+            };
         }
 
         // Helper methods
@@ -567,5 +696,38 @@ namespace Aesclea_Back_End_.Controllers
         public string DownloadUrl { get; set; } = string.Empty;
         public DateTime ExportedAt { get; set; }
         public int RecordCount { get; set; }
+    }
+
+    // Request/Response classes for weight loading
+    public class WeightLoadRequest
+    {
+        public string WeightSetName { get; set; } = "tgl";
+    }
+
+    public class WeightLoadResponse
+    {
+        public bool Success { get; set; }
+        public string WeightSetName { get; set; } = string.Empty;
+        public DateTime LoadedAt { get; set; }
+        public int LoadDurationMs { get; set; }
+        public List<string> AvailableWeightSets { get; set; } = new();
+        public List<string> LoadResults { get; set; } = new();
+        public string Message { get; set; } = string.Empty;
+    }
+
+    public class AvailableWeightsResponse
+    {
+        public List<WeightSetInfo> AvailableWeightSets { get; set; } = new();
+        public string DefaultWeightSet { get; set; } = string.Empty;
+        public int TotalCount { get; set; }
+    }
+
+    public class WeightSetInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool IsDefault { get; set; }
+        public DateTime? LastModified { get; set; }
+        public long? SizeBytes { get; set; }
     }
 }

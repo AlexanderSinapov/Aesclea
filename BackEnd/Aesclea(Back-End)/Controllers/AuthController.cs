@@ -96,13 +96,11 @@ namespace Aesclea_Back_End_.Controllers
 
             var result = await _authService.LogoutAsync(token);
             return Ok(result);
-        }
-
-        [HttpGet("me")]
+        }        [HttpGet("me")]
         [Authorize]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var userId = HttpContext.User.FindFirst("sub")?.Value;
+            var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             
             if (string.IsNullOrEmpty(userId))
             {

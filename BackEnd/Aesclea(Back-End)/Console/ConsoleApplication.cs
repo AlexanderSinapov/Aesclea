@@ -1458,18 +1458,24 @@ namespace Aesclea_Back_End_
             int height = Math.Min(regionSize, imageHeight - y);
             
             return new Rectangle(x, y, width, height);
-        }
-
-        private static Point GetConsoleLocationOffset(string location, int imageWidth, int imageHeight)
+        }        private static Point GetConsoleLocationOffset(string location, int imageWidth, int imageHeight)
         {
+            // Fixed location offsets to prevent tumors from appearing at the top of images
             return location switch
             {
-                "Brain & CNS" => new Point(0, -imageHeight / 4),
-                "Head & Neck" => new Point(0, -imageHeight / 6),
-                "Thorax" => new Point(0, -imageHeight / 8),
-                "Abdomen" => new Point(0, imageHeight / 8),
-                "Pelvis" => new Point(0, imageHeight / 4),
-                _ => new Point(0, 0)
+                "Brain & CNS" => new Point(0, -imageHeight / 8),        // Reduced upward offset
+                "Head & Neck" => new Point(0, -imageHeight / 12),       // Reduced upward offset
+                "Thorax" => new Point(0, imageHeight / 16),             // Slight downward for chest
+                "Chest" => new Point(0, imageHeight / 16),              // Chest region
+                "Lung" => new Point(0, imageHeight / 16),               // Lung region
+                "Abdomen" => new Point(0, imageHeight / 6),             // Abdominal region
+                "Liver" => new Point(imageWidth / 8, imageHeight / 6),  // Right-side for liver
+                "Kidney" => new Point(-imageWidth / 8, imageHeight / 8), // Lateral for kidneys
+                "Pelvis" => new Point(0, imageHeight / 4),              // Lower pelvis
+                "Prostate" => new Point(0, imageHeight / 3),            // Lower for prostate
+                "Bladder" => new Point(0, imageHeight / 4),             // Lower for bladder
+                "Breast" => new Point(imageWidth / 6, imageHeight / 12), // Lateral chest
+                _ => new Point(0, imageHeight / 16)                     // Default: slightly below center
             };
         }
 

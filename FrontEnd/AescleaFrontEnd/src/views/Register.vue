@@ -97,9 +97,7 @@
               class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm disabled:opacity-50"
               placeholder="Enter your phone number"
             />
-          </div>
-
-          <div>
+          </div>          <div>
             <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
             <select
               id="role"
@@ -115,6 +113,20 @@
               <option value="admin">Administrator</option>
               <option value="patient">Patient</option>
             </select>
+          </div>
+
+          <div>
+            <label for="medicalNumber" class="block text-sm font-medium text-gray-700">Medical Number</label>
+            <input
+              type="text"
+              id="medicalNumber"
+              name="medicalNumber"
+              required
+              v-model="registerForm.medicalNumber"
+              :disabled="isLoading"
+              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm disabled:opacity-50"
+              placeholder="Enter your medical license/ID number"
+            />
           </div>
 
           <div>
@@ -226,6 +238,7 @@ const registerForm = reactive({
   email: '',
   phone: '',
   role: '',
+  medicalNumber: '',
   password: '',
   confirmPassword: '',
   hospital: '',

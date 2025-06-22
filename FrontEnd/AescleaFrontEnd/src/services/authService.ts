@@ -12,6 +12,7 @@ export interface RegisterRequest {
   lastName: string
   phone: string
   role: string
+  medicalNumber: string
   hospital: string
 }
 
@@ -82,10 +83,30 @@ class AuthService {
         console.log('AuthService: Registration successful, tokens stored')
       }
 
-      return data
-    } catch (error: any) {
+      return data    } catch (error: any) {
       console.error('AuthService: Registration error:', error)
-      const errorMessage = error.response?.data?.message || error.message || 'Registration failed'
+      console.error('AuthService: Error response:', error.response?.data)
+      
+      let errorMessage = 'Registration failed. Please try again.'
+      
+      if (error.response?.data) {
+        if (error.response.data.message) {
+          errorMessage = error.response.data.message
+        } else if (error.response.data.errors) {
+          // Handle validation errors
+          const validationErrors = error.response.data.errors
+          const errorMessages = []
+          for (const field in validationErrors) {
+            errorMessages.push(`${field}: ${validationErrors[field].join(', ')}`)
+          }
+          errorMessage = errorMessages.join('; ')
+        } else if (error.response.data.title) {
+          errorMessage = error.response.data.title
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       throw new Error(errorMessage)
     }
   }

@@ -1,17 +1,20 @@
 using Aesclea_Back_End_.Models;
-using Supabase.Gotrue;
-using AppUser = Aesclea_Back_End_.Models.User;
+using Aesclea_Back_End_.Data;
+using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace Aesclea_Back_End_.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly Supabase.Client _supabase;
+        private readonly AescleaDbContext _context;
+        private readonly IJwtService _jwtService;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(Supabase.Client supabase, ILogger<AuthService> logger)
+        public AuthService(AescleaDbContext context, IJwtService jwtService, ILogger<AuthService> logger)
         {
-            _supabase = supabase;
+            _context = context;
+            _jwtService = jwtService;
             _logger = logger;
         }
 
@@ -20,40 +23,30 @@ namespace Aesclea_Back_End_.Services
             try
             {
                 _logger.LogInformation("Starting registration for email: {Email}", request.Email);
-                
-                // Create user metadata for Supabase Auth
-                var options = new SignUpOptions
-                {
-                    Data = new Dictionary<string, object>
-                    {
-                        ["first_name"] = request.FirstName,
-                        ["last_name"] = request.LastName,
-                        ["phone"] = request.Phone,
-                        ["role"] = request.Role,
-                        ["hospital"] = request.Hospital
-                    }
-                };
 
-                _logger.LogInformation("Calling Supabase Auth SignUp for email: {Email}", request.Email);
-                var response = await _supabase.Auth.SignUp(request.Email, request.Password, options);
+                // Check if user already exists
+                var existingUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower());
 
-                if (response?.User == null)
+                if (existingUser != null)
                 {
-                    _logger.LogWarning("Supabase Auth SignUp returned null user for email: {Email}", request.Email);
+                    _logger.LogWarning("Registration failed: User already exists with email: {Email}", request.Email);
                     return new AuthResponse
                     {
                         Success = false,
-                        Message = "Registration failed. Please try again."
+                        Message = "A user with this email already exists."
                     };
                 }
 
-                _logger.LogInformation("Supabase Auth successful, creating user profile for: {Email}", request.Email);
+                // Hash the password
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-                // Create user profile in your users table
-                var user = new AppUser
+                // Create new user
+                var user = new User
                 {
-                    Id = response.User.Id,
-                    Email = request.Email,
+                    Id = Guid.NewGuid().ToString(),
+                    Email = request.Email.ToLower(),
+                    PasswordHash = passwordHash,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     Phone = request.Phone,
@@ -63,39 +56,37 @@ namespace Aesclea_Back_End_.Services
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                try
-                {
-                    // Insert user profile into database
-                    _logger.LogInformation("Inserting user profile into database for: {Email}", request.Email);
-                    await _supabase
-                        .From<AppUser>()
-                        .Insert(user);
+                // Save to database
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
 
-                    _logger.LogInformation("User profile created successfully for: {Email}", request.Email);
-                }
-                catch (Exception dbEx)
+                _logger.LogInformation("User registered successfully: {Email}", request.Email);
+
+                // Generate tokens
+                var accessToken = _jwtService.GenerateAccessToken(user);
+                var refreshToken = _jwtService.GenerateRefreshToken();
+
+                // Create response without password hash
+                var userResponse = new User
                 {
-                    _logger.LogError(dbEx, "Failed to create user profile in database for: {Email}", request.Email);
-                    // Auth user was created but profile insertion failed
-                    // You might want to handle this scenario differently
-                }
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.Phone,
+                    Role = user.Role,
+                    Hospital = user.Hospital,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt
+                };
 
                 return new AuthResponse
                 {
                     Success = true,
-                    Message = "Registration successful. Please check your email for verification.",
-                    AccessToken = response.AccessToken,
-                    RefreshToken = response.RefreshToken,
-                    User = user
-                };
-            }
-            catch (Supabase.Gotrue.Exceptions.GotrueException gex)
-            {
-                _logger.LogError(gex, "Supabase Auth error during registration for email: {Email}", request.Email);
-                return new AuthResponse
-                {
-                    Success = false,
-                    Message = $"Registration failed: {gex.Message}"
+                    Message = "Registration successful.",
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    User = userResponse
                 };
             }
             catch (Exception ex)
@@ -114,12 +105,14 @@ namespace Aesclea_Back_End_.Services
             try
             {
                 _logger.LogInformation("Login attempt for email: {Email}", request.Email);
-                
-                var response = await _supabase.Auth.SignInWithPassword(request.Email, request.Password);
 
-                if (response?.User == null || response == null)
+                // Find user by email
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower());
+
+                if (user == null)
                 {
-                    _logger.LogWarning("Login failed for email: {Email} - Invalid credentials", request.Email);
+                    _logger.LogWarning("Login failed for email: {Email} - User not found", request.Email);
                     return new AuthResponse
                     {
                         Success = false,
@@ -127,20 +120,47 @@ namespace Aesclea_Back_End_.Services
                     };
                 }
 
-                // Get user profile from database
-                var userResponse = await _supabase
-                    .From<AppUser>()
-                    .Where(u => u.Id == response.User.Id)
-                    .Single();
+                // Verify password
+                if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+                {
+                    _logger.LogWarning("Login failed for email: {Email} - Invalid password", request.Email);
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "Invalid email or password."
+                    };
+                }
+
+                // Update last login time
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Login successful for email: {Email}", request.Email);
+
+                // Generate tokens
+                var accessToken = _jwtService.GenerateAccessToken(user);
+                var refreshToken = _jwtService.GenerateRefreshToken();
+
+                // Create response without password hash
+                var userResponse = new User
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.Phone,
+                    Role = user.Role,
+                    Hospital = user.Hospital,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt
+                };
 
                 return new AuthResponse
                 {
                     Success = true,
                     Message = "Login successful.",
-                    AccessToken = response.AccessToken,
-                    RefreshToken = response.RefreshToken,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
                     User = userResponse
                 };
             }
@@ -153,45 +173,59 @@ namespace Aesclea_Back_End_.Services
                     Message = "Login failed. Please check your credentials."
                 };
             }
-        }
-
-        public async Task<AuthResponse> LogoutAsync(string accessToken)
+        }        public Task<AuthResponse> LogoutAsync(string accessToken)
         {
             try
             {
-                await _supabase.Auth.SignOut();
+                // In a more complex implementation, you might want to blacklist the token
+                // For now, we'll just return success as the client will remove the token
                 
-                return new AuthResponse
+                return Task.FromResult(new AuthResponse
                 {
                     Success = true,
                     Message = "Logout successful."
-                };
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during logout");
-                return new AuthResponse
+                return Task.FromResult(new AuthResponse
                 {
                     Success = false,
                     Message = "Logout failed."
-                };
+                });
             }
         }
 
-        public async Task<AppUser?> GetUserAsync(string userId)
+        public async Task<User?> GetUserAsync(string userId)
         {
             try
             {
-                var user = await _supabase
-                    .From<AppUser>()
-                    .Where(u => u.Id == userId)
-                    .Single();
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Id == userId);
 
-                return user;
+                if (user == null)
+                {
+                    return null;
+                }
+
+                // Return user without password hash
+                return new User
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.Phone,
+                    Role = user.Role,
+                    Hospital = user.Hospital,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving user");
+                _logger.LogError(ex, "Error retrieving user with ID: {UserId}", userId);
                 return null;
             }
         }

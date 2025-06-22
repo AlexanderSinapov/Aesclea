@@ -40,10 +40,9 @@ namespace Aesclea_Back_End_.AIModel.Helpers
             "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by",
             "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did",
             "will", "would", "could", "should", "may", "might", "can", "this", "that", "these", "those"
-        };
-
-        /// <summary>
+        };        /// <summary>
         /// Converts medical text into numerical features for neural network input
+        /// Enhanced version with improved medical context understanding
         /// </summary>
         /// <param name="text">Raw medical text</param>
         /// <param name="maxFeatures">Maximum number of features to extract</param>
@@ -53,14 +52,256 @@ namespace Aesclea_Back_End_.AIModel.Helpers
             if (string.IsNullOrEmpty(text))
                 return new List<double>(new double[maxFeatures]);
 
+            // Enhanced preprocessing with medical context
+            text = PreprocessMedicalText(text);
+            
             // Clean and tokenize text
             var tokens = TokenizeText(text);
             
-            // Extract features
-            var features = ExtractMedicalFeatures(tokens, maxFeatures);
+            // Extract enhanced medical features
+            var features = ExtractEnhancedMedicalFeatures(tokens, maxFeatures);
             
             // Normalize features
             return NormalizeFeatures(features, maxFeatures);
+        }
+
+        /// <summary>
+        /// Enhanced medical text preprocessing
+        /// </summary>
+        private static string PreprocessMedicalText(string text)
+        {
+            // Normalize common medical abbreviations and units
+            var medicalReplacements = new Dictionary<string, string>
+            {
+                { @"\bpt\b", "patient" },
+                { @"\bhx\b", "history" },
+                { @"\bsx\b", "symptoms" },
+                { @"\bdx\b", "diagnosis" },
+                { @"\btx\b", "treatment" },
+                { @"\brx\b", "prescription" },
+                { @"\bc/o\b", "complains of" },
+                { @"\bp/o\b", "postoperative" },
+                { @"\bw/\b", "with" },
+                { @"\bw/o\b", "without" },
+                { @"\bs/p\b", "status post" },
+                { @"\bh/o\b", "history of" },
+                { @"\bf/u\b", "follow up" },
+                { @"\bNKDA\b", "no known drug allergies" },
+                { @"\bNKA\b", "no known allergies" },
+                { @"\bSOB\b", "shortness of breath" },
+                { @"\bDOE\b", "dyspnea on exertion" },
+                { @"\bCPR\b", "cardiopulmonary resuscitation" },
+                { @"\bICU\b", "intensive care unit" },
+                { @"\bER\b", "emergency room" },
+                { @"\bOR\b", "operating room" },
+                { @"\bIV\b", "intravenous" },
+                { @"\bPO\b", "per oral" },
+                { @"\bIM\b", "intramuscular" },
+                { @"\bSC\b", "subcutaneous" }
+            };
+
+            foreach (var replacement in medicalReplacements)
+            {
+                text = Regex.Replace(text, replacement.Key, replacement.Value, RegexOptions.IgnoreCase);
+            }
+
+            // Normalize vital signs patterns
+            text = Regex.Replace(text, @"(\d+)/(\d+)\s*mmhg", "$1 over $2 blood pressure", RegexOptions.IgnoreCase);
+            text = Regex.Replace(text, @"temp\s*(\d+\.?\d*)", "temperature $1", RegexOptions.IgnoreCase);
+            text = Regex.Replace(text, @"hr\s*(\d+)", "heart rate $1", RegexOptions.IgnoreCase);
+            text = Regex.Replace(text, @"rr\s*(\d+)", "respiratory rate $1", RegexOptions.IgnoreCase);
+            text = Regex.Replace(text, @"o2\s*sat\s*(\d+)", "oxygen saturation $1", RegexOptions.IgnoreCase);
+
+            return text;
+        }
+
+        /// <summary>
+        /// Enhanced medical feature extraction with improved context understanding
+        /// </summary>
+        private static List<double> ExtractEnhancedMedicalFeatures(List<string> tokens, int maxFeatures)
+        {
+            var features = new List<double>();
+            
+            // 1. Enhanced term frequency features with medical weighting
+            var termFrequency = CalculateTermFrequency(tokens);
+            features.AddRange(GetEnhancedTermFeatures(termFrequency, maxFeatures / 6));
+            
+            // 2. Medical context features (symptom clustering, body systems)
+            features.AddRange(GetMedicalContextFeatures(tokens, maxFeatures / 6));
+            
+            // 3. Enhanced medical term weight features
+            features.AddRange(GetMedicalTermFeatures(tokens, maxFeatures / 6));
+            
+            // 4. Clinical urgency and severity indicators
+            features.AddRange(GetClinicalUrgencyFeatures(tokens, maxFeatures / 6));
+            
+            // 5. Sentiment and severity features
+            features.AddRange(GetSentimentFeatures(tokens, maxFeatures / 6));
+            
+            // 6. Enhanced statistical features
+            features.AddRange(GetStatisticalFeatures(tokens, maxFeatures / 6));
+            
+            return features;
+        }
+
+        /// <summary>
+        /// Extract medical context features including symptom clusters and body systems
+        /// </summary>
+        private static List<double> GetMedicalContextFeatures(List<string> tokens, int count)
+        {
+            var features = new List<double>();
+            
+            // Define medical context categories
+            var contextCategories = new Dictionary<string, List<string>>
+            {
+                ["cardiovascular"] = new List<string> { "chest", "heart", "cardiac", "blood", "pressure", "circulation", "pulse", "rhythm" },
+                ["respiratory"] = new List<string> { "lung", "breathing", "breath", "respiratory", "oxygen", "airway", "cough", "wheeze" },
+                ["neurological"] = new List<string> { "brain", "nerve", "neural", "cognitive", "memory", "seizure", "consciousness", "reflex" },
+                ["gastrointestinal"] = new List<string> { "stomach", "intestine", "digestive", "bowel", "liver", "pancreas", "bile", "digest" },
+                ["musculoskeletal"] = new List<string> { "muscle", "bone", "joint", "spine", "skeletal", "movement", "mobility", "strength" },
+                ["genitourinary"] = new List<string> { "kidney", "bladder", "urinary", "reproductive", "genital", "urine", "renal", "prostate" },
+                ["endocrine"] = new List<string> { "hormone", "gland", "thyroid", "diabetes", "insulin", "metabolic", "glucose", "cortisol" },
+                ["hematologic"] = new List<string> { "blood", "anemia", "bleeding", "clotting", "platelet", "hemoglobin", "transfusion", "coagulation" },
+                ["immunologic"] = new List<string> { "immune", "allergy", "infection", "inflammatory", "autoimmune", "antibody", "vaccine", "reaction" },
+                ["psychiatric"] = new List<string> { "mental", "mood", "depression", "anxiety", "psychiatric", "psychological", "behavior", "cognitive" }
+            };
+            
+            // Calculate context scores
+            foreach (var category in contextCategories)
+            {
+                double score = 0;
+                foreach (var token in tokens)
+                {
+                    if (category.Value.Any(term => token.Contains(term) || term.Contains(token)))
+                    {
+                        score += 1.0;
+                    }
+                }
+                features.Add(score / Math.Max(1, tokens.Count));
+            }
+            
+            // Symptom clustering features
+            var symptomClusters = new Dictionary<string, List<string>>
+            {
+                ["pain_cluster"] = new List<string> { "pain", "ache", "hurt", "tender", "sore", "cramp", "burning", "sharp", "dull" },
+                ["fever_cluster"] = new List<string> { "fever", "temperature", "hot", "chills", "sweats", "hyperthermia", "pyrexia" },
+                ["respiratory_cluster"] = new List<string> { "cough", "wheeze", "shortness", "dyspnea", "breathing", "sputum", "phlegm" },
+                ["gastrointestinal_cluster"] = new List<string> { "nausea", "vomiting", "diarrhea", "constipation", "bloating", "cramping" },
+                ["neurological_cluster"] = new List<string> { "headache", "dizziness", "confusion", "weakness", "numbness", "tingling" },
+                ["fatigue_cluster"] = new List<string> { "fatigue", "tired", "exhausted", "weakness", "lethargy", "energy", "rest" }
+            };
+            
+            foreach (var cluster in symptomClusters)
+            {
+                double clusterScore = 0;
+                foreach (var token in tokens)
+                {
+                    if (cluster.Value.Any(symptom => token.Contains(symptom) || symptom.Contains(token)))
+                    {
+                        clusterScore += 1.0;
+                    }
+                }
+                features.Add(clusterScore / Math.Max(1, tokens.Count));
+            }
+            
+            // Pad to target count
+            while (features.Count < count)
+                features.Add(0.0);
+            
+            return features.Take(count).ToList();
+        }
+
+        /// <summary>
+        /// Extract clinical urgency and severity indicators
+        /// </summary>
+        private static List<double> GetClinicalUrgencyFeatures(List<string> tokens, int count)
+        {
+            var features = new List<double>();
+            
+            // Emergency indicators
+            var emergencyTerms = new List<string> 
+            { 
+                "emergency", "urgent", "critical", "severe", "acute", "immediate", "stat", "code", "arrest", 
+                "trauma", "hemorrhage", "stroke", "infarction", "shock", "respiratory_distress", "cardiac_arrest"
+            };
+            
+            var moderateTerms = new List<string>
+            {
+                "moderate", "significant", "concerning", "notable", "marked", "pronounced", "substantial"
+            };
+            
+            var mildTerms = new List<string>
+            {
+                "mild", "minor", "slight", "minimal", "small", "trace", "stable", "improved"
+            };
+            
+            // Calculate urgency scores
+            double emergencyScore = tokens.Count(t => emergencyTerms.Any(e => t.Contains(e) || e.Contains(t)));
+            double moderateScore = tokens.Count(t => moderateTerms.Any(m => t.Contains(m) || m.Contains(t)));
+            double mildScore = tokens.Count(t => mildTerms.Any(m => t.Contains(m) || m.Contains(t)));
+            
+            features.Add(emergencyScore / Math.Max(1, tokens.Count));
+            features.Add(moderateScore / Math.Max(1, tokens.Count));
+            features.Add(mildScore / Math.Max(1, tokens.Count));
+            
+            // Time-based urgency indicators
+            var timeIndicators = new List<string>
+            {
+                "sudden", "sudden_onset", "rapid", "progressive", "chronic", "acute", "subacute"
+            };
+            
+            double timeUrgency = tokens.Count(t => timeIndicators.Any(ti => t.Contains(ti) || ti.Contains(t)));
+            features.Add(timeUrgency / Math.Max(1, tokens.Count));
+            
+            // Functional impact indicators
+            var functionalImpact = new List<string>
+            {
+                "unable", "difficulty", "impaired", "reduced", "limited", "restricted", "compromised"
+            };
+            
+            double functionalScore = tokens.Count(t => functionalImpact.Any(fi => t.Contains(fi) || fi.Contains(t)));
+            features.Add(functionalScore / Math.Max(1, tokens.Count));
+            
+            // Pad to target count
+            while (features.Count < count)
+                features.Add(0.0);
+            
+            return features.Take(count).ToList();
+        }
+
+        /// <summary>
+        /// Enhanced term frequency features with medical term prioritization
+        /// </summary>
+        private static List<double> GetEnhancedTermFeatures(Dictionary<string, int> termFreq, int count)
+        {
+            var features = new List<double>();
+            
+            // Prioritize medical terms in frequency analysis
+            var medicalTermFreq = termFreq.Where(kv => MedicalTermWeights.ContainsKey(kv.Key))
+                                         .OrderByDescending(kv => kv.Value * MedicalTermWeights[kv.Key])
+                                         .Take(count / 2);
+            
+            var generalTermFreq = termFreq.Where(kv => !MedicalTermWeights.ContainsKey(kv.Key))
+                                         .OrderByDescending(kv => kv.Value)
+                                         .Take(count / 2);
+            
+            // Add medical term features
+            foreach (var term in medicalTermFreq)
+            {
+                features.Add(Math.Log(1 + term.Value * MedicalTermWeights[term.Key]));
+            }
+            
+            // Add general term features
+            foreach (var term in generalTermFreq)
+            {
+                features.Add(Math.Log(1 + term.Value));
+            }
+            
+            // Pad with zeros if needed
+            while (features.Count < count)
+                features.Add(0.0);
+            
+            return features.Take(count).ToList();
         }
 
         /// <summary>
@@ -406,52 +647,120 @@ namespace Aesclea_Back_End_.AIModel.Helpers
             }
             
             return features;
-        }
-
-        /// <summary>
-        /// Extracts key medical information from text for summary
+        }        /// <summary>
+        /// Extracts key medical information from text for summary - Enhanced version
         /// </summary>
         public static Dictionary<string, object> ExtractMedicalInfo(string text)
         {
             var info = new Dictionary<string, object>();
             var tokens = TokenizeText(text);
             
-            // Extract symptoms
+            // Enhanced symptom extraction with medical context
             var symptoms = new List<string>();
-            var symptomTerms = new[] { "pain", "fever", "headache", "nausea", "fatigue", "dizziness", "shortness", "breathing" };
+            var enhancedSymptomTerms = new[] { 
+                "pain", "fever", "headache", "nausea", "fatigue", "dizziness", "shortness", "breathing",
+                "chest_pain", "abdominal_pain", "back_pain", "joint_pain", "muscle_pain",
+                "cough", "wheeze", "vomiting", "diarrhea", "constipation", "weakness", "numbness",
+                "tingling", "swelling", "rash", "bleeding", "bruising", "palpitations", "syncope",
+                "confusion", "memory_loss", "vision_changes", "hearing_loss", "weight_loss", "weight_gain"
+            };
             
             foreach (var token in tokens)
             {
-                if (symptomTerms.Any(s => token.Contains(s)))
+                if (enhancedSymptomTerms.Any(s => token.Contains(s) || s.Contains(token)))
                 {
                     symptoms.Add(token);
                 }
             }
-            
             info["symptoms"] = symptoms.Distinct().ToList();
             
-            // Extract severity
-            var severityTerms = new[] { "severe", "critical", "emergency", "acute", "urgent", "mild", "moderate" };
+            // Enhanced severity extraction with context
+            var severityTerms = new[] { 
+                "severe", "critical", "emergency", "acute", "urgent", "mild", "moderate", "chronic",
+                "life_threatening", "debilitating", "excruciating", "unbearable", "intense"
+            };
             var severity = tokens.FirstOrDefault(t => severityTerms.Any(s => t.Contains(s))) ?? "unknown";
             info["severity"] = severity;
             
-            // Extract numbers (vital signs, lab values)
+            // Enhanced numerical values extraction (vital signs, lab values)
             var numbers = ExtractNumbers(tokens);
             info["numerical_values"] = numbers;
             
-            // Extract body systems mentioned
+            // Extract body systems mentioned with enhanced detection
             var systems = new List<string>();
-            var systemTerms = new[] { "cardiac", "respiratory", "neurological", "gastrointestinal", "musculoskeletal" };
+            var enhancedSystemTerms = new[] { 
+                "cardiac", "cardiovascular", "respiratory", "pulmonary", "neurological", "neural",
+                "gastrointestinal", "digestive", "musculoskeletal", "orthopedic", "dermatological",
+                "genitourinary", "renal", "endocrine", "hematologic", "immunologic", "psychiatric",
+                "ophthalmologic", "otolaryngologic", "reproductive"
+            };
             
             foreach (var token in tokens)
             {
-                if (systemTerms.Any(s => token.Contains(s)))
+                if (enhancedSystemTerms.Any(s => token.Contains(s)))
                 {
                     systems.Add(token);
                 }
             }
-            
             info["body_systems"] = systems.Distinct().ToList();
+            
+            // Enhanced temporal pattern extraction
+            var temporalPatterns = new Dictionary<string, string>();
+            if (tokens.Any(t => t.Contains("sudden") || t.Contains("acute")))
+                temporalPatterns["onset"] = "acute";
+            else if (tokens.Any(t => t.Contains("gradual") || t.Contains("progressive")))
+                temporalPatterns["onset"] = "gradual";
+            else if (tokens.Any(t => t.Contains("chronic") || t.Contains("longstanding")))
+                temporalPatterns["onset"] = "chronic";
+                
+            if (tokens.Any(t => t.Contains("worse") || t.Contains("worsening")))
+                temporalPatterns["course"] = "worsening";
+            else if (tokens.Any(t => t.Contains("better") || t.Contains("improving")))
+                temporalPatterns["course"] = "improving";
+            else if (tokens.Any(t => t.Contains("stable") || t.Contains("unchanged")))
+                temporalPatterns["course"] = "stable";
+                
+            info["temporal_patterns"] = temporalPatterns;
+            
+            // Enhanced medication extraction
+            var medications = new List<string>();
+            var commonMedications = new[] {
+                "aspirin", "ibuprofen", "acetaminophen", "tylenol", "advil", "motrin",
+                "lisinopril", "metformin", "atorvastatin", "amlodipine", "metoprolol",
+                "omeprazole", "albuterol", "prednisone", "warfarin", "insulin",
+                "hydrochlorothiazide", "furosemide", "gabapentin", "tramadol", "morphine"
+            };
+            
+            foreach (var token in tokens)
+            {
+                if (commonMedications.Any(med => token.Contains(med)))
+                {
+                    medications.Add(token);
+                }
+            }
+            info["medications"] = medications.Distinct().ToList();
+            
+            // Enhanced functional status assessment
+            var functionalImpact = new List<string>();
+            if (tokens.Any(t => t.Contains("unable") || t.Contains("cannot")))
+                functionalImpact.Add("severe_limitation");
+            if (tokens.Any(t => t.Contains("difficulty") || t.Contains("trouble")))
+                functionalImpact.Add("moderate_limitation");
+            if (tokens.Any(t => t.Contains("independent") || t.Contains("normal_activity")))
+                functionalImpact.Add("independent");
+                
+            info["functional_status"] = functionalImpact;
+            
+            // Enhanced psychosocial factors
+            var psychosocial = new List<string>();
+            if (tokens.Any(t => t.Contains("anxiety") || t.Contains("worried") || t.Contains("stress")))
+                psychosocial.Add("psychological_distress");
+            if (tokens.Any(t => t.Contains("family") || t.Contains("support")))
+                psychosocial.Add("family_involvement");
+            if (tokens.Any(t => t.Contains("work") || t.Contains("job") || t.Contains("occupation")))
+                psychosocial.Add("work_related");
+                
+            info["psychosocial_factors"] = psychosocial;
             
             return info;
         }
