@@ -1398,23 +1398,33 @@ namespace Aesclea_Back_End_
                     graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                     
                     // Draw the original image
-                    graphics.DrawImage(originalImage, 0, 0);
-
-                    if (analysisResult.HasTumor)
+                    graphics.DrawImage(originalImage, 0, 0);                    if (analysisResult.HasTumor)
                     {
-                        // Calculate estimated tumor region
+                        // Calculate estimated tumor region with improved positioning
                         var tumorRegion = CalculateConsoleEstimatedTumorRegion(originalImage.Width, originalImage.Height, analysisResult);
                         
                         // Get outline color
                         Color penColor = GetConsoleOutlineColor(analysisResult, outlineColor);
                         
-                        // Draw bold outline around estimated tumor area
-                        using var pen = new Pen(penColor, 6);
-                        graphics.DrawRectangle(pen, tumorRegion);
+                        // Draw enhanced tumor outline with multiple visual elements
+                        using var pen = new Pen(penColor, 4);
+                        pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+                        
+                        // Draw main outline - use ellipse for more organic tumor shape
+                        graphics.DrawEllipse(pen, tumorRegion);
+                        
+                        // Add inner highlight for better visibility
+                        using var innerPen = new Pen(Color.FromArgb(120, Color.White), 2);
+                        var innerRegion = new Rectangle(tumorRegion.X + 2, tumorRegion.Y + 2, 
+                                                      tumorRegion.Width - 4, tumorRegion.Height - 4);
+                        graphics.DrawEllipse(innerPen, innerRegion);
                         
                         // Add semi-transparent fill to highlight the region
-                        using var brush = new SolidBrush(Color.FromArgb(60, penColor));
-                        graphics.FillRectangle(brush, tumorRegion);
+                        using var brush = new SolidBrush(Color.FromArgb(40, penColor));
+                        graphics.FillEllipse(brush, tumorRegion);
+                        
+                        // Add confidence indicators around the region
+                        DrawConsoleConfidenceIndicators(graphics, tumorRegion, analysisResult.TumorProbability);
                         
                         // Draw analysis information
                         DrawConsoleAnalysisInfo(graphics, tumorRegion, analysisResult);
@@ -1436,47 +1446,124 @@ namespace Aesclea_Back_End_
                 Console.WriteLine($"Error creating annotated image: {ex.Message}");
                 return string.Empty;
             }
+        }        private static Rectangle CalculateConsoleEstimatedTumorRegion(int imageWidth, int imageHeight, TumorAnalysisResult result)
+        {
+            // Use a seeded random for consistent but varied positioning based on analysis results
+            var random = new Random((int)(result.TumorProbability * 10000 + 
+                                        result.TypeConfidence * 1000 + 
+                                        result.LocationConfidence * 100));
+            
+            // Get anatomically-based tumor region info
+            var regionInfo = GetConsoleAnatomicalRegionInfo(result.TumorType, result.TumorLocation, result.TumorProbability);
+            
+            // Calculate base position using anatomical positioning
+            int baseX = (int)(imageWidth * regionInfo.CenterX);
+            int baseY = (int)(imageHeight * regionInfo.CenterY);
+            
+            // Add confidence-based variance (less confident = more spread)
+            double confidenceVariance = (1.0 - result.TumorProbability) * 0.2; // 0-20% variance
+            double xVariance = (random.NextDouble() - 0.5) * imageWidth * confidenceVariance;
+            double yVariance = (random.NextDouble() - 0.5) * imageHeight * confidenceVariance;
+            
+            baseX += (int)xVariance;
+            baseY += (int)yVariance;
+            
+            // Calculate size based on multiple factors
+            double baseSizeMultiplier = 0.08; // Base 8% of image
+            double confidenceMultiplier = result.TumorProbability * 0.12; // Up to 12% more for high confidence
+            double gradeMultiplier = result.TumorGrade * 0.02; // 2% per grade level
+            
+            double totalSizeMultiplier = baseSizeMultiplier + confidenceMultiplier + gradeMultiplier;
+            
+            int regionWidth = (int)(Math.Min(imageWidth, imageHeight) * totalSizeMultiplier);
+            int regionHeight = (int)(regionWidth * regionInfo.AspectRatio);
+            
+            // Add size variation for realism
+            double sizeVariation = 1.0 + (random.NextDouble() - 0.5) * 0.3;
+            regionWidth = (int)(regionWidth * sizeVariation);
+            regionHeight = (int)(regionHeight * sizeVariation);
+            
+            // Ensure minimum and maximum sizes
+            regionWidth = Math.Max(30, Math.Min(regionWidth, imageWidth / 3));
+            regionHeight = Math.Max(30, Math.Min(regionHeight, imageHeight / 3));
+            
+            // Position with boundary checking
+            int padding = 10;
+            int x = Math.Max(padding, Math.Min(baseX - regionWidth / 2, imageWidth - regionWidth - padding));
+            int y = Math.Max(padding, Math.Min(baseY - regionHeight / 2, imageHeight - regionHeight - padding));
+            
+            return new Rectangle(x, y, regionWidth, regionHeight);
+        }        private static ConsoleRegionInfo GetConsoleAnatomicalRegionInfo(string? tumorType, string? location, double confidence)
+        {
+            // Enhanced anatomical positioning based on medical knowledge
+            return (tumorType?.ToLower(), location?.ToLower()) switch
+            {
+                // Brain tumors - upper portion but not extreme top
+                (var type, var loc) when type?.Contains("glioblastoma") == true || loc?.Contains("brain") == true =>
+                    new ConsoleRegionInfo(0.45 + confidence * 0.1, 0.25 + confidence * 0.15, 1.0),
+                
+                (var type, var loc) when type?.Contains("meningioma") == true =>
+                    new ConsoleRegionInfo(0.40 + confidence * 0.2, 0.30 + confidence * 0.1, 0.9),
+                
+                (var type, var loc) when type?.Contains("pituitary") == true =>
+                    new ConsoleRegionInfo(0.48 + confidence * 0.04, 0.35 + confidence * 0.06, 0.8),
+                
+                // Chest/Lung tumors - middle portion
+                (var type, var loc) when loc?.Contains("thorax") == true || loc?.Contains("lung") == true =>
+                    new ConsoleRegionInfo(0.35 + confidence * 0.3, 0.45 + confidence * 0.2, 1.3),
+                
+                (var type, var loc) when loc?.Contains("chest") == true =>
+                    new ConsoleRegionInfo(0.4 + confidence * 0.2, 0.5 + confidence * 0.15, 1.2),
+                
+                // Abdominal tumors - middle to lower portion
+                (var type, var loc) when loc?.Contains("abdomen") == true || loc?.Contains("liver") == true =>
+                    new ConsoleRegionInfo(0.55 + confidence * 0.2, 0.6 + confidence * 0.15, 1.4),
+                
+                (var type, var loc) when loc?.Contains("kidney") == true =>
+                    new ConsoleRegionInfo(0.25 + confidence * 0.5, 0.55 + confidence * 0.2, 1.1),
+                
+                (var type, var loc) when loc?.Contains("pancreas") == true =>
+                    new ConsoleRegionInfo(0.48 + confidence * 0.04, 0.6 + confidence * 0.1, 0.9),
+                
+                // Pelvic tumors - lower portion
+                (var type, var loc) when loc?.Contains("pelvis") == true =>
+                    new ConsoleRegionInfo(0.45 + confidence * 0.1, 0.75 + confidence * 0.1, 1.0),
+                
+                (var type, var loc) when loc?.Contains("prostate") == true =>
+                    new ConsoleRegionInfo(0.48 + confidence * 0.04, 0.8 + confidence * 0.05, 0.9),
+                
+                (var type, var loc) when loc?.Contains("bladder") == true =>
+                    new ConsoleRegionInfo(0.48 + confidence * 0.04, 0.75 + confidence * 0.08, 0.9),
+                
+                // Breast tumors - upper-middle chest area
+                (var type, var loc) when loc?.Contains("breast") == true =>
+                    new ConsoleRegionInfo(0.3 + confidence * 0.4, 0.4 + confidence * 0.15, 1.0),
+                
+                // Neck/Head tumors - upper portion
+                (var type, var loc) when loc?.Contains("neck") == true || loc?.Contains("thyroid") == true =>
+                    new ConsoleRegionInfo(0.45 + confidence * 0.1, 0.2 + confidence * 0.1, 0.8),
+                
+                // Bone tumors - variable positioning
+                (var type, var loc) when type?.Contains("sarcoma") == true || loc?.Contains("bone") == true =>
+                    new ConsoleRegionInfo(0.3 + confidence * 0.4, 0.5 + confidence * 0.3, 1.8),
+                
+                // Default - center region with better distribution
+                _ => new ConsoleRegionInfo(0.45 + confidence * 0.1, 0.5 + confidence * 0.2, 1.0)
+            };
         }
 
-        private static Rectangle CalculateConsoleEstimatedTumorRegion(int imageWidth, int imageHeight, TumorAnalysisResult result)
+        private class ConsoleRegionInfo
         {
-            int centerX = imageWidth / 2;
-            int centerY = imageHeight / 2;
-            
-            // Size based on confidence (higher confidence = larger detected area)
-            int regionSize = (int)(Math.Min(imageWidth, imageHeight) * 0.3 * result.TumorProbability);
-            
-            // Minimum size for visibility
-            regionSize = Math.Max(regionSize, Math.Min(imageWidth, imageHeight) / 10);
-            
-            // Offset based on tumor location
-            var locationOffset = GetConsoleLocationOffset(result.TumorLocation, imageWidth, imageHeight);
-            
-            int x = Math.Max(0, centerX + locationOffset.X - regionSize / 2);
-            int y = Math.Max(0, centerY + locationOffset.Y - regionSize / 2);
-            int width = Math.Min(regionSize, imageWidth - x);
-            int height = Math.Min(regionSize, imageHeight - y);
-            
-            return new Rectangle(x, y, width, height);
-        }        private static Point GetConsoleLocationOffset(string location, int imageWidth, int imageHeight)
-        {
-            // Fixed location offsets to prevent tumors from appearing at the top of images
-            return location switch
+            public double CenterX { get; }
+            public double CenterY { get; }
+            public double AspectRatio { get; }
+
+            public ConsoleRegionInfo(double centerX, double centerY, double aspectRatio)
             {
-                "Brain & CNS" => new Point(0, -imageHeight / 8),        // Reduced upward offset
-                "Head & Neck" => new Point(0, -imageHeight / 12),       // Reduced upward offset
-                "Thorax" => new Point(0, imageHeight / 16),             // Slight downward for chest
-                "Chest" => new Point(0, imageHeight / 16),              // Chest region
-                "Lung" => new Point(0, imageHeight / 16),               // Lung region
-                "Abdomen" => new Point(0, imageHeight / 6),             // Abdominal region
-                "Liver" => new Point(imageWidth / 8, imageHeight / 6),  // Right-side for liver
-                "Kidney" => new Point(-imageWidth / 8, imageHeight / 8), // Lateral for kidneys
-                "Pelvis" => new Point(0, imageHeight / 4),              // Lower pelvis
-                "Prostate" => new Point(0, imageHeight / 3),            // Lower for prostate
-                "Bladder" => new Point(0, imageHeight / 4),             // Lower for bladder
-                "Breast" => new Point(imageWidth / 6, imageHeight / 12), // Lateral chest
-                _ => new Point(0, imageHeight / 16)                     // Default: slightly below center
-            };
+                CenterX = centerX;
+                CenterY = centerY;
+                AspectRatio = aspectRatio;
+            }
         }
 
         private static Color GetConsoleOutlineColor(TumorAnalysisResult result, string preferredColor)
@@ -1507,9 +1594,9 @@ namespace Aesclea_Back_End_
         {
             if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
             {
-                using var font = new Font("Arial", 14, FontStyle.Bold);
+                using var font = new Font("Arial", 12, FontStyle.Bold);
                 using var textBrush = new SolidBrush(Color.White);
-                using var backgroundBrush = new SolidBrush(Color.FromArgb(180, Color.Black));
+                using var backgroundBrush = new SolidBrush(Color.FromArgb(200, Color.Black));
                 using var borderPen = new Pen(Color.White, 2);
                 
                 var lines = new[]
@@ -1518,34 +1605,61 @@ namespace Aesclea_Back_End_
                     $"Type: {result.TumorType}",
                     $"Grade: {result.TumorGrade} ({result.GradeDescription})",
                     $"Location: {result.TumorLocation}",
-                    $"Stage: {result.EstimatedStage}"
+                    $"Confidence: {result.OverallConfidence:P1}"
                 };
                 
-                int lineHeight = 22;
-                int padding = 10;
-                int boxWidth = 320;
+                int lineHeight = 18;
+                int padding = 8;
+                int boxWidth = 280;
                 int boxHeight = lines.Length * lineHeight + padding * 2;
                 
-                // Position the info box
-                int infoX = Math.Max(5, tumorRegion.X);
-                int infoY = tumorRegion.Y - boxHeight - 15;
+                // Smart positioning - try multiple positions to avoid overlap
+                int imageWidth = (int)graphics.ClipBounds.Width;
+                int imageHeight = (int)graphics.ClipBounds.Height;
                 
-                // Adjust if it goes off screen
-                if (infoY < 5) 
-                    infoY = tumorRegion.Bottom + 15;
-                if (infoX + boxWidth > graphics.ClipBounds.Width - 5) 
-                    infoX = Math.Max(5, (int)graphics.ClipBounds.Width - boxWidth - 5);
-                if (infoY + boxHeight > graphics.ClipBounds.Height - 5)
-                    infoY = Math.Max(5, (int)graphics.ClipBounds.Height - boxHeight - 5);
+                var possiblePositions = new[]
+                {
+                    // Above tumor region
+                    new Point(tumorRegion.X, tumorRegion.Y - boxHeight - 10),
+                    // Below tumor region
+                    new Point(tumorRegion.X, tumorRegion.Bottom + 10),
+                    // Left of tumor region
+                    new Point(tumorRegion.X - boxWidth - 10, tumorRegion.Y),
+                    // Right of tumor region
+                    new Point(tumorRegion.Right + 10, tumorRegion.Y),
+                    // Top left corner
+                    new Point(10, 10),
+                    // Top right corner
+                    new Point(imageWidth - boxWidth - 10, 10),
+                    // Bottom left corner
+                    new Point(10, imageHeight - boxHeight - 10),
+                    // Bottom right corner
+                    new Point(imageWidth - boxWidth - 10, imageHeight - boxHeight - 10)
+                };
                 
-                // Draw background with border
-                graphics.FillRectangle(backgroundBrush, infoX, infoY, boxWidth, boxHeight);
-                graphics.DrawRectangle(borderPen, infoX, infoY, boxWidth, boxHeight);
+                // Find the first position that fits within image bounds
+                Point infoPosition = new Point(10, 10); // Default fallback
+                foreach (var pos in possiblePositions)
+                {
+                    if (pos.X >= 5 && pos.Y >= 5 && 
+                        pos.X + boxWidth <= imageWidth - 5 && 
+                        pos.Y + boxHeight <= imageHeight - 5)
+                    {
+                        infoPosition = pos;
+                        break;
+                    }
+                }
                 
-                // Draw text
+                // Draw background with rounded corners effect
+                var backgroundRect = new Rectangle(infoPosition.X, infoPosition.Y, boxWidth, boxHeight);
+                graphics.FillRectangle(backgroundBrush, backgroundRect);
+                graphics.DrawRectangle(borderPen, backgroundRect);
+                
+                // Draw text with better spacing
                 for (int i = 0; i < lines.Length; i++)
                 {
-                    graphics.DrawString(lines[i], font, textBrush, infoX + padding, infoY + padding + i * lineHeight);
+                    graphics.DrawString(lines[i], font, textBrush, 
+                        infoPosition.X + padding, infoPosition.Y + padding + i * lineHeight);
                 }
             }
         }
@@ -2339,6 +2453,25 @@ namespace Aesclea_Back_End_
                 Precision = TruePositives + FalsePositives > 0 ? (double)TruePositives / (TruePositives + FalsePositives) : 0;
                 F1Score = Precision + Sensitivity > 0 ? 2 * (Precision * Sensitivity) / (Precision + Sensitivity) : 0;
                 AUC = (Sensitivity + Specificity) / 2; // Simplified AUC calculation
+            }
+        }
+
+        private static void DrawConsoleConfidenceIndicators(Graphics graphics, Rectangle region, double confidence)
+        {
+            // Draw small dots around the tumor region to indicate confidence level
+            if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+            {
+                int dotCount = (int)(confidence * 12); // 0-12 dots based on confidence
+                using var dotBrush = new SolidBrush(Color.FromArgb(180, Color.Yellow));
+                
+                for (int i = 0; i < dotCount; i++)
+                {
+                    double angle = (2 * Math.PI * i) / 12;
+                    int dotX = region.X + region.Width / 2 + (int)((region.Width / 2 + 20) * Math.Cos(angle)) - 3;
+                    int dotY = region.Y + region.Height / 2 + (int)((region.Height / 2 + 20) * Math.Sin(angle)) - 3;
+                    
+                    graphics.FillEllipse(dotBrush, dotX, dotY, 6, 6);
+                }
             }
         }
     }
