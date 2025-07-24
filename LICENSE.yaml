@@ -1,0 +1,158 @@
+AESCLEA PROPRIETARY SOFTWARE LICENSE AGREEMENT
+VERSION 1.0 - EFFECTIVE AS OF 24-07-2025
+
+COPYRIGHT © 2025 | ALEXANDER SINAPOV \ SIMEON PETKOV
+ALL RIGHTS RESERVED.
+
+---
+### 0. PREAMBLE 
+
+This Software License Agreement("Agreement") is a legal contract between any individual or entity("User")
+and Alexander Sinapov \ Simeon Petkov ("Licensor", "Author", or "Owner") regarding access to and use of
+the proprietary software, source code, binaries, documentation, and any associated files contained within
+this repository (collectively, the "Software").
+
+By accessing, downloading, copying, installing, or otherwise using the Software, the User agrees to be bound
+by the terms of this Agreement. If the User does not agree to these terms, they must not use or access
+the Software in any way.
+
+---
+
+### 1. DEFINITIONS
+
+1.1 **"Software"** means all files, code, documentation, binaries, assets, or other components provided
+    by the Licensor through this repository.
+
+1.2 **"User"** means any person, organization, or system that accesses, attempts to access, or uses any
+    part of the Software, with or without the Licensors's permission.
+
+1.3 **"Pre-release"** refers to any period prior to the official release date declared by the Licensor.
+
+1.4 **"Release Date"** means the date on which the Software is formally made publicly available under a
+    license explicitly defined by the Licensor.
+
+---
+
+### 2. OWNERSHIP AND COPYRIGHT
+
+2.1 The Software is the exclusive property of the Licensor. All rights, title, and interest in and to
+    the Software, including all intelectual property rights, are and shall remain solely with the Licensor.
+
+2.2 This Agreemeny does not grant any ownershop rights in the Software to the User.
+
+---
+
+### 3. LICENSE GRANT - PRE-RELEASE
+
+3.1 The Software is **not licensed for use, copying, distribution, or modification prior to its official Release Date**.
+
+3.2 During the pre-release period, access to the Software is restricted to the Licensor and explicitly authorized 
+    collaborators under non-disclosure or private testing agreements.
+
+3.3 Unauthorized access, inspection, usage, copying, modification, or distribution of the Software prior to its Release Date
+    is strictly prohibited and may result in civil and/or criminal liability.
+
+---
+
+### 4. LICENSE GRANT — POST-RELEASE
+
+4.1 Upon release, the Software does **not** become open source or public domain. No rights are automatically conferred.
+
+4.2 Post-release usage, copying, modification, or redistribution of the Software requires an explicit written license from
+    the Licensor. Such licenses may be commercial or non-commercial, limited or unlimited, as solely determined by the Licensor.
+
+4.3 If the Licensor provides a subsequent license (e.g., MIT, Apache, or commercial), it will be published in writing and replace
+    or supplement this Agreement accordingly.
+
+---
+
+### 5. RESTRICTIONS
+
+The User may **not**, without prior written permission from the Licensor:
+
+- Use the Software for any commercial purpose
+- Distribute the Software to any third party
+- Reverse engineer, decompile, or disassemble the Software
+- Modify, adapt, or create derivative works from the Software
+- Remove or obscure any copyright, trademark, or proprietary notices
+- Use the Software in any unlawful, unethical, or exploitative manner
+
+---
+
+### 6. CONFIDENTIALITY (IF PRE-RELEASE)
+
+6.1 If the User is granted access during the pre-release phase, they acknowledge that the Software constitutes confidential 
+    information and agree not to disclose any part of it to any third party without the Licensor’s express written consent.
+
+---
+
+### 7. TERMINATION
+
+7.1 This Agreement is effective until terminated by the Licensor.
+
+7.2 The User’s rights under this Agreement will terminate automatically without notice if they fail to comply with any
+    term(s) of this Agreement.
+
+7.3 Upon termination, the User shall cease all use of the Software and destroy all copies, in whole or in part.
+
+---
+
+### 8. NO WARRANTY
+
+8.1 THE SOFTWARE IS PROVIDED “AS IS” AND WITHOUT WARRANTY OF ANY KIND.
+
+8.2 TO THE MAXIMUM EXTENT PERMITTED UNDER APPLICABLE LAW, THE LICENSOR DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED,
+    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE,
+    AND NON-INFRINGEMENT.
+
+---
+
+### 9. LIMITATION OF LIABILITY
+
+9.1 UNDER NO CIRCUMSTANCES SHALL THE LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    OR CONSEQUENTIAL DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF DATA, LOSS OF PROFITS,
+    OR BUSINESS INTERRUPTION, ARISING OUT OF THE USE OR INABILITY TO USE THE SOFTWARE,
+    EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+---
+
+### 10. INDEMNITY
+
+10.1 The User agrees to indemnify, defend, and hold harmless the Licensor from and against all claims, damages, losses,
+    and expenses (including attorneys’ fees) arising out of or resulting from the User’s unauthorized use of the Software or
+    breach of this Agreement.
+
+---
+
+### 11. EXPORT CONTROL
+
+11.1 The Software may be subject to export laws and regulations. The User agrees not to export or re-export the Software
+    in violation of any such laws or regulations.
+
+---
+
+### 12. GOVERNING LAW
+
+12.1 This Agreement shall be governed by and construed in accordance with the laws of Bulgaria, without regard to
+    its conflict of law principles.
+
+12.2 Any disputes arising under or in connection with this Agreement shall be subject to the exclusive jurisdiction
+    of the courts located in Sofia, Bulgaria.
+
+---
+
+### 13. ENTIRE AGREEMENT
+
+13.1 This Agreement constitutes the entire agreement between the User and the Licensor and supersedes all prior or
+    contemporaneous understandings, representations, and agreements, whether oral or written.
+
+13.2 Any waiver or modification of any provision must be in writing and signed by the Licensor.
+
+---
+
+### END OF TERMS AND CONDITIONS
+
+Contact the Licensor for commercial licensing, exceptions, or partnership inquiries:
+
+Alexander Sinapov \ Simeon Petkov  
+Date: 24-07-2025
