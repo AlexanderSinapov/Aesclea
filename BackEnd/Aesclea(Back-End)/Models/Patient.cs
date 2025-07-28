@@ -1,4 +1,4 @@
-﻿namespace Aesclea_Back_End_.Models
+namespace Aesclea_Back_End_.Models
 {
     public class Patient
     {

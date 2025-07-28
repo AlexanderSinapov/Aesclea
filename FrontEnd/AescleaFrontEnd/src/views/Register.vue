@@ -1,19 +1,21 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-      <div>
-        <div class="mx-auto h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
-          <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-          </svg>
+  <div class="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 dark:from-gray-900 dark:to-gray-800">
+    <AppNavbar />
+    <div class="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <div>
+          <div class="mx-auto h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
+            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+            </svg>
+          </div>
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            Create your account
+          </h2>
+          <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            Join Aesclea Medical Management System
+          </p>
         </div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Join Aesclea Medical Management System
-        </p>
-      </div>
 
       <!-- Error message -->
       <div v-if="error" class="bg-red-50 border border-red-200 rounded-md p-4">
@@ -34,7 +36,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div class="ml-3">
-            <p class="text-sm text-green-600">Registration successful! Redirecting to dashboard...</p>
+            <p class="text-sm text-green-600">Registration successful! Please check your email for verification...</p>
           </div>
         </div>
       </div>
@@ -218,6 +220,7 @@
         </div>
       </form>
     </div>
+    </div>
   </div>
 </template>
 
@@ -226,6 +229,7 @@ import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { testApiConnection } from '../services/api'
+import AppNavbar from '../components/AppNavbar.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -276,9 +280,9 @@ const handleRegister = async () => {
     registrationSuccess.value = true
     console.log('Register: Registration successful!')
     
-    // Redirect to dashboard after a short delay
+    // Send verification email and redirect to email verification page
     setTimeout(() => {
-      router.push('/dashboard')
+      router.push(`/email-verification?email=${encodeURIComponent(registerForm.email)}`)
     }, 2000)
   } catch (err: any) {
     console.error('Register: Registration failed:', err)

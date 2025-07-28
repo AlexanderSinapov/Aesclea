@@ -90,6 +90,14 @@ namespace Aesclea_Back_End_.Server
 
             // Add custom services in correct dependency order with explicit registrations
             builder.Services.AddScoped<IJwtService, JwtService>();
+            
+            // Configure EmailConfiguration
+            builder.Services.Configure<Aesclea_Back_End_.Services.EmailConfiguration>(
+                builder.Configuration.GetSection("EmailConfiguration"));
+            
+            // Register EmailService
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            
             builder.Services.AddScoped<IAuthService, AuthService>();
               // Register base services with no custom dependencies
             builder.Services.AddScoped<Aesclea_Back_End_.Services.FileService>(provider => 
@@ -117,12 +125,12 @@ namespace Aesclea_Back_End_.Server
                     var fileHelper = new FileHelper();
                     fileHelper.OpenFolder();
                     classifier.LoadWeights(fileHelper, "tgl");
-                    Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classifier weights");
+                    global::System.Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classifier weights");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"⚠️  API: Could not load existing weights: {ex.Message}");
-                    Console.WriteLine("   You may need to train the classifier first via console application.");
+                    global::System.Console.WriteLine($"⚠️  API: Could not load existing weights: {ex.Message}");
+                    global::System.Console.WriteLine("   You may need to train the classifier first via console application.");
                 }
                 
                 return classifier;

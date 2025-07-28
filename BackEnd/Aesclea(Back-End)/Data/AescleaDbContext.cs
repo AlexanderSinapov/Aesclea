@@ -26,8 +26,11 @@ namespace Aesclea_Back_End_.Data
                 entity.Property(e => e.LastName).HasColumnName("LastName").IsRequired();
                 entity.Property(e => e.Phone).HasColumnName("Phone").IsRequired();
                 entity.Property(e => e.Role).HasColumnName("Role").IsRequired();
-                entity.Property(e => e.MedicalNumber).HasColumnName("medical_number").IsRequired();                entity.Property(e => e.MedicalNumber).HasColumnName("MedicalNumber").IsRequired();
+                entity.Property(e => e.MedicalNumber).HasColumnName("MedicalNumber").IsRequired();
                 entity.Property(e => e.Hospital).HasColumnName("Hospital").IsRequired();
+                entity.Property(e => e.EmailVerified).HasColumnName("EmailVerified").HasDefaultValue(false);
+                entity.Property(e => e.EmailVerificationToken).HasColumnName("EmailVerificationToken");
+                entity.Property(e => e.EmailVerificationTokenExpiry).HasColumnName("EmailVerificationTokenExpiry");
                 entity.Property(e => e.CreatedAt).HasColumnName("CreatedAt");
                 entity.Property(e => e.UpdatedAt).HasColumnName("UpdatedAt");
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Aesclea_Back_End_.AIModel.Helpers
 {

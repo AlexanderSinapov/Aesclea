@@ -8,5 +8,7 @@ namespace Aesclea_Back_End_.Services
         Task<AuthResponse> LoginAsync(LoginRequest request);
         Task<AuthResponse> LogoutAsync(string accessToken);
         Task<User?> GetUserAsync(string userId);
+        Task<AuthResponse> VerifyEmailAsync(string token);
+        Task<AuthResponse> ResendVerificationEmailAsync(string email);
     }
 }

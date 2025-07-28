@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Aesclea_Back_End_.AIModel.Helpers;
@@ -144,16 +144,16 @@ namespace Aesclea_Back_End_.AIModel
             int epochs,
             double learningRate)
         {
-            Console.WriteLine("Training tumor type classifier...");
+            global::System.Console.WriteLine("Training tumor type classifier...");
             TrainTypeNetwork(inputs, types, epochs, learningRate);
 
-            Console.WriteLine("Training tumor grade classifier...");
+            global::System.Console.WriteLine("Training tumor grade classifier...");
             TrainGradeNetwork(inputs, grades, epochs, learningRate);
 
-            Console.WriteLine("Training tumor location classifier...");
+            global::System.Console.WriteLine("Training tumor location classifier...");
             TrainLocationNetwork(inputs, locations, epochs, learningRate);
 
-            Console.WriteLine("Training complete for all classifiers.");
+            global::System.Console.WriteLine("Training complete for all classifiers.");
         }
 
         private void TrainTypeNetwork(List<List<double>> inputs, List<string> types, int epochs, double learningRate)

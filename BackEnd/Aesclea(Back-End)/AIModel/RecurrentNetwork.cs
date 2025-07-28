@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Aesclea_Back_End_.DDOs;
 
 namespace Aesclea_Back_End_.AIModel
@@ -289,7 +289,7 @@ namespace Aesclea_Back_End_.AIModel
             // Initial learning rate
             double initialLearningRate = learningRate;
 
-            Console.WriteLine($"Starting training with {inputSequences.Count} sequences for {epochs} epochs");
+            global::System.Console.WriteLine($"Starting training with {inputSequences.Count} sequences for {epochs} epochs");
 
             // For early stopping
             double bestError = double.MaxValue;
@@ -344,12 +344,12 @@ namespace Aesclea_Back_End_.AIModel
                     // Display progress for every 10% of sequences
                     if (i % Math.Max(1, indices.Count / 10) == 0)
                     {
-                        Console.WriteLine($"Epoch {epoch + 1}/{epochs}: {i * 100 / indices.Count}% complete, Current Error: {sequenceError:F6}");
+                        global::System.Console.WriteLine($"Epoch {epoch + 1}/{epochs}: {i * 100 / indices.Count}% complete, Current Error: {sequenceError:F6}");
                     }
                 }
 
                 totalError /= sequenceCount;
-                Console.WriteLine($"Epoch {epoch + 1}/{epochs}: Average Error = {totalError:F6}, Learning Rate = {currentLearningRate:F6}");
+                global::System.Console.WriteLine($"Epoch {epoch + 1}/{epochs}: Average Error = {totalError:F6}, Learning Rate = {currentLearningRate:F6}");
 
                 // Early stopping check
                 if (totalError < bestError)
@@ -362,7 +362,7 @@ namespace Aesclea_Back_End_.AIModel
                     patienceCounter++;
                     if (patienceCounter >= patienceLimit)
                     {
-                        Console.WriteLine($"Early stopping triggered after {epoch + 1} epochs");
+                        global::System.Console.WriteLine($"Early stopping triggered after {epoch + 1} epochs");
                         break;
                     }
                 }
@@ -370,12 +370,12 @@ namespace Aesclea_Back_End_.AIModel
                 // Very low error check
                 if (totalError < 0.001)
                 {
-                    Console.WriteLine($"Training converged at epoch {epoch + 1}");
+                    global::System.Console.WriteLine($"Training converged at epoch {epoch + 1}");
                     break;
                 }
             }
 
-            Console.WriteLine("Training complete!");
+            global::System.Console.WriteLine("Training complete!");
         }
 
         /// <summary>
@@ -501,11 +501,11 @@ namespace Aesclea_Back_End_.AIModel
                     }
                 }
 
-                Console.WriteLine("Network data successfully loaded.");
+                global::System.Console.WriteLine("Network data successfully loaded.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error setting network data: {ex.Message}");
+                global::System.Console.WriteLine($"Error setting network data: {ex.Message}");
                 throw;
             }
         }
@@ -520,11 +520,11 @@ namespace Aesclea_Back_End_.AIModel
                 var networkData = GetNetworkData();
                 var json = JsonConvert.SerializeObject(networkData, Formatting.Indented);
                 File.WriteAllText(filePath, json);
-                Console.WriteLine($"Network saved to {filePath}");
+                global::System.Console.WriteLine($"Network saved to {filePath}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving network: {ex.Message}");
+                global::System.Console.WriteLine($"Error saving network: {ex.Message}");
                 throw;
             }
         }
@@ -542,11 +542,11 @@ namespace Aesclea_Back_End_.AIModel
                 var json = File.ReadAllText(filePath);
                 var networkData = JsonConvert.DeserializeObject<RecurrentNeuralData>(json);
                 SetNetworkData(networkData);
-                Console.WriteLine($"Network loaded from {filePath}");
+                global::System.Console.WriteLine($"Network loaded from {filePath}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading network: {ex.Message}");
+                global::System.Console.WriteLine($"Error loading network: {ex.Message}");
                 throw;
             }
         }

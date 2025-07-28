@@ -29,7 +29,12 @@
               </div>
               <div class="hidden md:block">
                 <p class="text-sm font-medium text-gray-900">{{ userDisplayName }}</p>
-                <p class="text-xs text-gray-500 capitalize">{{ authStore.user?.role || 'User' }}</p>
+                <div class="flex items-center space-x-2">
+                  <p class="text-xs text-gray-500 capitalize">{{ authStore.user?.role || 'User' }}</p>
+                  <span v-if="subscriptionStore.currentPlan" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                    {{ subscriptionStore.currentPlan.name }}
+                  </span>
+                </div>
               </div>
             </div>
             
@@ -50,6 +55,35 @@
           Good {{ getTimeOfDay() }}, {{ authStore.user?.firstName || 'User' }}
         </h2>
         <p class="text-gray-600">Here's what's happening at {{ authStore.user?.hospital || 'your hospital' }} today.</p>
+        
+        <!-- Subscription Banner -->
+        <div v-if="!subscriptionStore.hasActiveSubscription" class="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-medium text-purple-900 dark:text-purple-100">
+                  Unlock AI-Powered Medical Analysis
+                </h3>
+                <p class="text-sm text-purple-700 dark:text-purple-300">
+                  Subscribe to access advanced AI diagnostics and unlimited patient records.
+                </p>
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              <button
+                @click="router.push('/subscription-selection')"
+                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Upgrade Now
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Stats Cards -->
@@ -168,11 +202,44 @@
             </div>
             <div class="p-6">
               <div class="space-y-3">
+                <button class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  :class="{ 'opacity-50 cursor-not-allowed': !subscriptionStore.canAccessAI }"
+                  :disabled="!subscriptionStore.canAccessAI"
+                  @click="subscriptionStore.canAccessAI ? null : showUpgradeModal()"
+                >
+                  <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  <div class="flex-1">
+                    <span>AI Medical Analysis</span>
+                    <span v-if="!subscriptionStore.canAccessAI" class="block text-xs text-amber-600 mt-1">
+                      🔒 Subscription required
+                    </span>
+                  </div>
+                </button>
                 <button class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                   <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                   Add New Patient
+                </button>
+                <button class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                  <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 12v-8m0 0V7a2 2 0 012-2h4a2 2 0 012 2v2m-6 0h8" />
+                  </svg>
+                  Schedule Appointment
+                </button>
+                <button class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                  <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Generate Report
+                </button>
+                <button class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                  <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Search Records
                 </button>
                 <button class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                   <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,9 +332,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useSubscriptionStore } from '../stores/subscription'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const subscriptionStore = useSubscriptionStore()
 
 const userDisplayName = computed(() => {
   const user = authStore.user
@@ -297,10 +366,31 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
-onMounted(() => {
+const showUpgradeModal = () => {
+  // Navigate to subscription selection or pricing page
+  router.push('/subscription-selection')
+}
+
+onMounted(async () => {
   // Redirect to login if not authenticated
   if (!authStore.isAuthenticated) {
     router.push('/login')
+    return
+  }
+
+  // Load user's subscription status
+  await subscriptionStore.loadUserSubscription()
+
+  // If user doesn't have email verified, redirect to verification
+  if (authStore.user && !authStore.user.emailVerified) {
+    router.push(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
+    return
+  }
+
+  // If user doesn't have an active subscription, redirect to subscription selection
+  if (!subscriptionStore.hasActiveSubscription) {
+    router.push('/subscription-selection')
+    return
   }
 })
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -62,7 +62,7 @@ namespace Aesclea_Back_End_.AIModel
             {
                 currentActivation = Layers[i].FeedForward(currentActivation, true);
                 activations.Add(new List<double>(currentActivation));
-                //Console.WriteLine($"Layer {i + 1} activation: {string.Join(", ", currentActivation)}");
+                //global::System.Console.WriteLine($"Layer {i + 1} activation: {string.Join(", ", currentActivation)}");
             }
 
             // Calculate output layer errors
@@ -128,8 +128,8 @@ namespace Aesclea_Back_End_.AIModel
             double lastPercentageReported = -1.0;
             DateTime startTime = DateTime.Now;
 
-            Console.WriteLine($"Starting training with {inputs.Count} samples for {epochs} epochs ({totalIterations} total iterations)");
-            Console.WriteLine($"Using batch size: {batchSize}");
+            global::System.Console.WriteLine($"Starting training with {inputs.Count} samples for {epochs} epochs ({totalIterations} total iterations)");
+            global::System.Console.WriteLine($"Using batch size: {batchSize}");
 
             // For early stopping
             double bestError = double.MaxValue;
@@ -137,7 +137,7 @@ namespace Aesclea_Back_End_.AIModel
             int patienceLimit = 10; // Stop after 10 epochs without improvement
             List<double> trainingErrors = new List<double>();
 
-            Console.Out.Flush();
+            global::System.Console.Out.Flush();
 
             for (int epoch = 0; epoch < epochs; epoch++)
             {
@@ -198,8 +198,8 @@ namespace Aesclea_Back_End_.AIModel
                         TimeSpan estimated = TimeSpan.FromTicks((long)(elapsed.Ticks / (currentIteration / (double)totalIterations)));
                         TimeSpan remaining = estimated - elapsed;
 
-                        Console.Write($"\rTraining progress: {currentPercentage.ToString("N2")}% | Error: {batchError:F6} | Time remaining: {FormatTimeSpan(remaining)} | Epoch: {epoch}/{epochs} | Iterations: {currentIteration}/{totalIterations}        ");
-                        Console.Out.Flush();
+                        global::System.Console.Write($"\rTraining progress: {currentPercentage.ToString("N2")}% | Error: {batchError:F6} | Time remaining: {FormatTimeSpan(remaining)} | Epoch: {epoch}/{epochs} | Iterations: {currentIteration}/{totalIterations}        ");
+                        global::System.Console.Out.Flush();
                         lastPercentageReported = currentPercentage;
                     }
                 }
@@ -208,7 +208,7 @@ namespace Aesclea_Back_End_.AIModel
                 trainingErrors.Add(totalError);
 
                 // Print detailed progress after each epoch
-                Console.WriteLine($"\nEpoch {epoch + 1}/{epochs}: Error = {totalError:F6}, Learning Rate = {currentLearningRate:F6}");
+                global::System.Console.WriteLine($"\nEpoch {epoch + 1}/{epochs}: Error = {totalError:F6}, Learning Rate = {currentLearningRate:F6}");
 
                 // Early stopping check
                 if (totalError < bestError)
@@ -221,7 +221,7 @@ namespace Aesclea_Back_End_.AIModel
                     patienceCounter++;
                     if (patienceCounter >= patienceLimit)
                     {
-                        Console.WriteLine($"\nEarly stopping triggered after {epoch + 1} epochs with no improvement for {patienceLimit} epochs");
+                        global::System.Console.WriteLine($"\nEarly stopping triggered after {epoch + 1} epochs with no improvement for {patienceLimit} epochs");
                         break;
                     }
                 }
@@ -229,21 +229,21 @@ namespace Aesclea_Back_End_.AIModel
                 // Very low error check
                 if (totalError < 0.001)
                 {
-                    Console.WriteLine($"\nTraining converged at epoch {epoch + 1} with error {totalError:F6}");
+                    global::System.Console.WriteLine($"\nTraining converged at epoch {epoch + 1} with error {totalError:F6}");
                     break;
                 }
             }
 
-            Console.WriteLine("\nTraining complete!");
+            global::System.Console.WriteLine("\nTraining complete!");
 
             // Show error evolution if requested
-            Console.WriteLine("Would you like to see the error evolution? (Y/N)");
-            if (Console.ReadLine().Trim().ToUpper() == "Y")
+            global::System.Console.WriteLine("Would you like to see the error evolution? (Y/N)");
+            if (global::System.Console.ReadLine().Trim().ToUpper() == "Y")
             {
-                Console.WriteLine("Error evolution across epochs:");
+                global::System.Console.WriteLine("Error evolution across epochs:");
                 for (int i = 0; i < trainingErrors.Count; i++)
                 {
-                    Console.WriteLine($"Epoch {i + 1}: {trainingErrors[i]:F6}");
+                    global::System.Console.WriteLine($"Epoch {i + 1}: {trainingErrors[i]:F6}");
                 }
             }
         }
@@ -300,7 +300,7 @@ namespace Aesclea_Back_End_.AIModel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving weights: {ex.Message}");
+                global::System.Console.WriteLine($"Error saving weights: {ex.Message}");
                 throw;
             }
         }
@@ -336,11 +336,11 @@ namespace Aesclea_Back_End_.AIModel
                         layer.Neurons[neuronIndex].Bias = allBiases[layerIndex][neuronIndex];
                     }
                 }
-                Console.WriteLine("Weights successfully loaded.");
+                global::System.Console.WriteLine("Weights successfully loaded.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error setting weights: {ex.Message}");
+                global::System.Console.WriteLine($"Error setting weights: {ex.Message}");
                 throw;
             }
 
@@ -405,11 +405,11 @@ namespace Aesclea_Back_End_.AIModel
                     }
                 }
 
-                Console.WriteLine("Weights successfully loaded.");
+                global::System.Console.WriteLine("Weights successfully loaded.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading weights: {ex.Message}");
+                global::System.Console.WriteLine($"Error loading weights: {ex.Message}");
                 throw;
             }
         }

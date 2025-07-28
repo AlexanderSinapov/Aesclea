@@ -1,19 +1,21 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-      <div>
-        <div class="mx-auto h-12 w-12 bg-indigo-600 rounded-full flex items-center justify-center">
-          <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <AppNavbar />
+    <div class="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <div>
+          <div class="mx-auto h-12 w-12 bg-indigo-600 rounded-full flex items-center justify-center">
+            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            Sign in to Aesclea
+          </h2>
+          <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            Medical Management System
+          </p>
         </div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to Aesclea
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Medical Management System
-        </p>
-      </div>
 
       <!-- Error message -->
       <div v-if="error" class="bg-red-50 border border-red-200 rounded-md p-4">
@@ -108,6 +110,7 @@
         </div>
       </form>
     </div>
+    </div>
   </div>
 </template>
 
@@ -115,6 +118,7 @@
 import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import AppNavbar from '../components/AppNavbar.vue'
 
 const router = useRouter()
 const isLoading = ref(false)

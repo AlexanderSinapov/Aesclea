@@ -32,6 +32,7 @@ export interface User {
   phone: string
   role: string
   hospital: string
+  emailVerified: boolean
   createdAt: string
   updatedAt: string
 }
@@ -139,6 +140,55 @@ class AuthService {
   getUser(): User | null {
     const userStr = localStorage.getItem('user')
     return userStr ? JSON.parse(userStr) : null
+  }
+
+  async sendVerificationEmail(email: string): Promise<AuthResponse> {
+    try {
+      console.log('AuthService: Sending verification email to:', email)
+      const response = await api.post('/auth/resend-verification', { email })
+      return response.data
+    } catch (error: any) {
+      console.error('Send verification email error:', error)
+      let errorMessage = 'Failed to send verification email'
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
+      throw new Error(errorMessage)
+    }
+  }
+
+  async verifyEmail(token: string): Promise<AuthResponse> {
+    try {
+      console.log('AuthService: Verifying email with token:', token)
+      const response = await api.post('/auth/verify-email', { token })
+      const data = response.data
+
+      // If verification successful, update stored user data
+      if (data.success) {
+        const currentUser = this.getUser()
+        if (currentUser) {
+          currentUser.emailVerified = true
+          localStorage.setItem('user', JSON.stringify(currentUser))
+        }
+      }
+
+      return data
+    } catch (error: any) {
+      console.error('Verify email error:', error)
+      let errorMessage = 'Failed to verify email'
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
+      throw new Error(errorMessage)
+    }
   }
 }
 

@@ -78,6 +78,54 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
   }
 
+  const clearAllData = () => {
+    // Clear all localStorage data
+    localStorage.clear()
+    
+    // Reset store state
+    user.value = null
+    error.value = null
+    isLoading.value = false
+    
+    console.log('All localStorage data cleared!')
+  }
+
+  const sendVerificationEmail = async (email: string) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await authService.sendVerificationEmail(email)
+      return response
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const verifyEmail = async (token: string) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await authService.verifyEmail(token)
+      
+      // Update user verification status in store
+      if (response.success && user.value) {
+        user.value.emailVerified = true
+      }
+      
+      return response
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -87,6 +135,9 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    clearError
+    clearError,
+    clearAllData,
+    sendVerificationEmail,
+    verifyEmail
   }
 })

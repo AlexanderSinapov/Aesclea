@@ -439,7 +439,7 @@ namespace Aesclea_Back_End_.AIModel
             int epochs,
             double learningRate)
         {
-            Console.WriteLine("Processing medical texts for training...");
+            global::System.Console.WriteLine("Processing medical texts for training...");
             
             // Convert texts to features
             var inputs = new List<List<double>>();
@@ -449,21 +449,21 @@ namespace Aesclea_Back_End_.AIModel
                 inputs.Add(features);
             }
 
-            Console.WriteLine($"Processed {inputs.Count} medical texts into feature vectors.");
+            global::System.Console.WriteLine($"Processed {inputs.Count} medical texts into feature vectors.");
 
             // Train diagnostic network
-            Console.WriteLine("Training diagnostic classification network...");
+            global::System.Console.WriteLine("Training diagnostic classification network...");
             TrainDiagnosticNetwork(inputs, diagnosticCategories, epochs, learningRate);
 
             // Train severity network
-            Console.WriteLine("Training severity assessment network...");
+            global::System.Console.WriteLine("Training severity assessment network...");
             TrainSeverityNetwork(inputs, severityLevels, epochs, learningRate);
 
             // Train urgency network
-            Console.WriteLine("Training urgency classification network...");
+            global::System.Console.WriteLine("Training urgency classification network...");
             TrainUrgencyNetwork(inputs, urgencyLevels, epochs, learningRate);
 
-            Console.WriteLine("Medical diagnosis network training complete!");
+            global::System.Console.WriteLine("Medical diagnosis network training complete!");
         }
 
         private void TrainDiagnosticNetwork(List<List<double>> inputs, List<string> categories, int epochs, double learningRate)

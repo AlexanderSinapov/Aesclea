@@ -1,4 +1,4 @@
-﻿namespace Aesclea_Back_End_.AIModel
+namespace Aesclea_Back_End_.AIModel
 {
     public class RecurrentLayer
     {

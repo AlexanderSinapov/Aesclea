@@ -1,4 +1,4 @@
-﻿using static Aesclea_Back_End_.AIModel.Neuron;
+using static Aesclea_Back_End_.AIModel.Neuron;
 using System;
 
 namespace Aesclea_Back_End_.AIModel

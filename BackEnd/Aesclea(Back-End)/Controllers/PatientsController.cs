@@ -1,4 +1,4 @@
-﻿using Aesclea_Back_End_.Models;
+using Aesclea_Back_End_.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aesclea_Back_End_.Controllers
