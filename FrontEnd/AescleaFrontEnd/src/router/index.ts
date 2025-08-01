@@ -7,7 +7,7 @@ import Register from '../views/Register.vue'
 import EmailVerification from '../views/EmailVerification.vue'
 import EmailVerificationSuccess from '../views/EmailVerificationSuccess.vue'
 import SubscriptionSelection from '../views/SubscriptionSelection.vue'
-import Home from '../views/Home.vue'
+import Dashboard from '../views/Dashboard.vue'
 import Features from '../views/Features.vue'
 import Pricing from '../views/Pricing.vue'
 import Security from '../views/Security.vue'
@@ -51,13 +51,13 @@ const routes = [
     path: '/subscription-selection',
     name: 'SubscriptionSelection',
     component: SubscriptionSelection,
-    meta: { requiresAuth: true, requiresEmailVerified: true }
+    meta: { requiresAuth: true, requiresEmailVerified: true, requiresNoSubscription: true }
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: Home,
-    meta: { requiresAuth: true }
+    component: Dashboard,
+    meta: { requiresAuth: true, requiresEmailVerified: true }
   },
   {
     path: '/home',
@@ -122,6 +122,8 @@ router.beforeEach(async (to, _from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const requiresGuest = to.matched.some(record => record.meta.requiresGuest)
   const requiresEmailVerified = to.matched.some(record => record.meta.requiresEmailVerified)
+  const requiresSubscription = to.matched.some(record => record.meta.requiresSubscription)
+  const requiresNoSubscription = to.matched.some(record => record.meta.requiresNoSubscription)
 
   // Check authentication
   if (requiresAuth && !authStore.isAuthenticated) {
@@ -130,6 +132,19 @@ router.beforeEach(async (to, _from, next) => {
   }
   
   if (requiresGuest && authStore.isAuthenticated) {
+    // If user is authenticated, check if they need email verification
+    if (authStore.user && !authStore.user.emailVerified) {
+      next(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
+      return
+    }
+    
+    // If email is verified, check subscription and route accordingly
+    await subscriptionStore.loadUserSubscription()
+    if (!subscriptionStore.hasActiveSubscription) {
+      next('/subscription-selection')
+      return
+    }
+    
     next('/dashboard')
     return
   }
@@ -140,8 +155,14 @@ router.beforeEach(async (to, _from, next) => {
     return
   }
 
-  // Check subscription for email verified users accessing dashboard
-  if (authStore.isAuthenticated && authStore.user?.emailVerified && to.path === '/dashboard') {
+  // Check email verification requirement
+  if (requiresEmailVerified && authStore.user && !authStore.user.emailVerified) {
+    next(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
+    return
+  }
+
+  // Check subscription requirement
+  if (requiresSubscription && authStore.isAuthenticated && authStore.user?.emailVerified) {
     await subscriptionStore.loadUserSubscription()
     if (!subscriptionStore.hasActiveSubscription) {
       next('/subscription-selection')
@@ -149,10 +170,13 @@ router.beforeEach(async (to, _from, next) => {
     }
   }
 
-  // Check email verification requirement
-  if (requiresEmailVerified && authStore.user && !authStore.user.emailVerified) {
-    next(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
-    return
+  // Check no subscription requirement (for subscription selection page)
+  if (requiresNoSubscription && authStore.isAuthenticated && authStore.user?.emailVerified) {
+    await subscriptionStore.loadUserSubscription()
+    if (subscriptionStore.hasActiveSubscription) {
+      next('/dashboard')
+      return
+    }
   }
 
   next()

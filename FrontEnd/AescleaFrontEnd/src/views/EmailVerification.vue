@@ -143,8 +143,12 @@ const resendVerificationEmail = async () => {
   resendError.value = null
 
   try {
-    // Make API call to resend verification email
-    await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
+    // Import the auth store
+    const { useAuthStore } = await import('../stores/auth')
+    const authStore = useAuthStore()
+    
+    // Make actual API call to resend verification email
+    await authStore.sendVerificationEmail(email.value)
     
     resendSuccess.value = true
     startCountdown()

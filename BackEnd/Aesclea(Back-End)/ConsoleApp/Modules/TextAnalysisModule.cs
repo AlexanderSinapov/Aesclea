@@ -67,7 +67,7 @@ namespace Aesclea_Back_End_.ConsoleApp.Modules
         public async Task<string> GetStatusAsync()
         {
             await Task.CompletedTask;
-            return _textAnalysisService != null ? "✅ Ready" : "❌ Not Initialized";
+            return _textAnalysisService is not null ? "✅ Ready" : "❌ Not Initialized";
         }
 
         private void DisplayTextAnalysisMenu()
@@ -135,7 +135,7 @@ namespace Aesclea_Back_End_.ConsoleApp.Modules
             global::System.Console.WriteLine();
             global::System.Console.WriteLine("🔍 Analyzing text...");
 
-            if (_textAnalysisService == null)
+            if (_textAnalysisService is null)
             {
                 global::System.Console.WriteLine("❌ Text analysis service not initialized.");
                 return;
@@ -366,7 +366,7 @@ namespace Aesclea_Back_End_.ConsoleApp.Modules
             global::System.Console.WriteLine();
             global::System.Console.WriteLine($"🔍 Analyzing {texts.Count} texts...");
 
-            if (_textAnalysisService == null)
+            if (_textAnalysisService is null)
             {
                 global::System.Console.WriteLine("❌ Text analysis service not initialized.");
                 return;
@@ -471,7 +471,7 @@ namespace Aesclea_Back_End_.ConsoleApp.Modules
                 global::System.Console.WriteLine();
                 global::System.Console.WriteLine("🔍 Analyzing file content...");
 
-                if (_textAnalysisService == null)
+                if (_textAnalysisService is null)
                 {
                     global::System.Console.WriteLine("❌ Text analysis service not initialized.");
                     return;

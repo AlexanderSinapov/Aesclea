@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import api from '../services/api'
 
 export interface SubscriptionPlan {
   id: string
@@ -25,62 +26,7 @@ export interface UserSubscription {
 
 export const useSubscriptionStore = defineStore('subscription', () => {
   const userSubscription = ref<UserSubscription | null>(null)
-  const availablePlans = ref<SubscriptionPlan[]>([
-    {
-      id: 'starter',
-      name: 'Starter',
-      price: 49,
-      interval: 'month',
-      maxPatients: 50,
-      aiAnalysisLimit: 10,
-      priority: 1,
-      features: [
-        'Up to 50 patients',
-        '10 AI analyses per month',
-        'Basic reporting',
-        'Email support',
-        'Secure data storage'
-      ]
-    },
-    {
-      id: 'professional',
-      name: 'Professional',
-      price: 149,
-      interval: 'month',
-      maxPatients: 200,
-      aiAnalysisLimit: 50,
-      priority: 2,
-      recommended: true,
-      features: [
-        'Up to 200 patients',
-        '50 AI analyses per month',
-        'Advanced reporting',
-        'Priority email support',
-        'Secure data storage',
-        'Custom templates',
-        'Team collaboration'
-      ]
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      price: 399,
-      interval: 'month',
-      maxPatients: -1, // Unlimited
-      aiAnalysisLimit: -1, // Unlimited
-      priority: 3,
-      features: [
-        'Unlimited patients',
-        'Unlimited AI analyses',
-        'Advanced reporting & analytics',
-        '24/7 phone & email support',
-        'Secure data storage',
-        'Custom templates',
-        'Team collaboration',
-        'API access',
-      ]
-    }
-  ])
+  const availablePlans = ref<SubscriptionPlan[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -105,34 +51,21 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     return !hasActiveSubscription.value
   })
 
-  const subscribeToPlan = async (planId: string) => {
+  const subscribeToPlan = async (planId: string, paymentMethodId: string = 'pm_test_card') => {
     isLoading.value = true
     error.value = null
 
     try {
-      // This would make an API call to your backend
-      // For now, we'll simulate it
-      const plan = availablePlans.value.find(p => p.id === planId)
-      if (!plan) {
-        throw new Error('Plan not found')
-      }
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await api.post('/api/subscriptions/subscribe', {
+        planId,
+        paymentMethodId
+      })
       
-      userSubscription.value = {
-        id: `sub_${Date.now()}`,
-        planId: plan.id,
-        status: 'active',
-        currentPeriodStart: new Date().toISOString(),
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        cancelAtPeriodEnd: false,
-        plan
-      }
-
+      userSubscription.value = response.data
+      
       return { success: true }
     } catch (err: any) {
-      error.value = err.message
+      error.value = err.response?.data?.message || err.message || 'Failed to subscribe'
       throw err
     } finally {
       isLoading.value = false
@@ -140,20 +73,21 @@ export const useSubscriptionStore = defineStore('subscription', () => {
   }
 
   const cancelSubscription = async () => {
-    if (!userSubscription.value) return
+    if (!userSubscription.value) {
+      throw new Error('No active subscription found')
+    }
 
     isLoading.value = true
     error.value = null
 
     try {
-      // Make API call to cancel subscription
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await api.post(`/api/subscriptions/cancel/${userSubscription.value.id}`)
       
       userSubscription.value.cancelAtPeriodEnd = true
       
-      return { success: true }
+      return response.data
     } catch (err: any) {
-      error.value = err.message
+      error.value = err.response?.data?.message || err.message || 'Failed to cancel subscription'
       throw err
     } finally {
       isLoading.value = false
@@ -165,12 +99,11 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     error.value = null
 
     try {
-      // Make API call to get user's subscription
-      // For now, simulate no subscription
-      await new Promise(resolve => setTimeout(resolve, 500))
-      userSubscription.value = null
+      const response = await api.get('/api/subscriptions/user/current-user')
+      userSubscription.value = response.data
     } catch (err: any) {
-      error.value = err.message
+      error.value = err.response?.data?.message || err.message || 'Failed to load subscription'
+      userSubscription.value = null
     } finally {
       isLoading.value = false
     }
@@ -178,6 +111,60 @@ export const useSubscriptionStore = defineStore('subscription', () => {
 
   const clearError = () => {
     error.value = null
+  }
+
+  const loadAvailablePlans = async () => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await api.get('/api/subscriptions/plans')
+      availablePlans.value = response.data
+    } catch (err: any) {
+      error.value = err.response?.data?.message || err.message || 'Failed to load plans'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const reactivateSubscription = async () => {
+    if (!userSubscription.value) {
+      throw new Error('No subscription found')
+    }
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await api.post(`/api/subscriptions/reactivate/${userSubscription.value.id}`)
+      userSubscription.value = response.data
+      return response.data
+    } catch (err: any) {
+      error.value = err.response?.data?.message || err.message || 'Failed to reactivate subscription'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const changePlan = async (planId: string, paymentMethodId: string = 'pm_test_change') => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await api.put('/api/subscriptions/change-plan', {
+        planId,
+        paymentMethodId
+      })
+      
+      userSubscription.value = response.data
+      return response.data
+    } catch (err: any) {
+      error.value = err.response?.data?.message || err.message || 'Failed to change plan'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {
@@ -192,6 +179,9 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     subscribeToPlan,
     cancelSubscription,
     loadUserSubscription,
+    loadAvailablePlans,
+    reactivateSubscription,
+    changePlan,
     clearError
   }
 })

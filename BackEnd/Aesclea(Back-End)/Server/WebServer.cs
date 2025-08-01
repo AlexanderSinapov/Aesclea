@@ -98,6 +98,9 @@ namespace Aesclea_Back_End_.Server
             // Register EmailService
             builder.Services.AddScoped<IEmailService, EmailService>();
             
+            // Register SubscriptionService
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            
             builder.Services.AddScoped<IAuthService, AuthService>();
               // Register base services with no custom dependencies
             builder.Services.AddScoped<Aesclea_Back_End_.Services.FileService>(provider => 
@@ -242,10 +245,16 @@ namespace Aesclea_Back_End_.Server
             {
                 using var scope = app.Services.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AescleaDbContext>();
+                var subscriptionService = scope.ServiceProvider.GetRequiredService<ISubscriptionService>();
                 
                 _logger.LogInformation("Ensuring database is created...");
                 context.Database.EnsureCreated();
                 _logger.LogInformation("Database initialization completed successfully.");
+
+                // Seed subscription plans
+                _logger.LogInformation("Seeding subscription plans...");
+                subscriptionService.SeedSubscriptionPlansAsync().Wait();
+                _logger.LogInformation("Subscription plans seeded successfully.");
             }
             catch (Exception ex)
             {
