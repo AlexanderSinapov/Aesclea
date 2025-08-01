@@ -2,7 +2,7 @@ import axios from 'axios'
 
 console.log('API_BASE_URL from env:', import.meta.env.VITE_API_URL)
 // Check if running in development or production
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7000/api' || 'http://localhost:5000/api'
 
 // Create axios instance
 const api = axios.create({
