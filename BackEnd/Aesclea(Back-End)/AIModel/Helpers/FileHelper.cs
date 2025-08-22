@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -43,7 +43,7 @@ namespace Aesclea_Back_End_.AIModel.Helpers
             }
             else
             {
-                global::System.Console.WriteLine($"[ERROR] Directory {DataPath} does not exist.");
+                Console.WriteLine($"[ERROR] Directory {DataPath} does not exist.");
                 return false;
             }
         }
@@ -66,10 +66,12 @@ namespace Aesclea_Back_End_.AIModel.Helpers
                 string filePath = Path.Combine(DataPath, filename);
 
                 if (!File.Exists(filePath))
-            {
-                // File doesn't exist - return null instead of writing to console
-                return null;
-            }                var json = File.ReadAllText(filePath);
+                {
+                    Console.WriteLine($"[ERROR] File {filePath} does not exist.");
+                    return null;
+                }
+
+                var json = File.ReadAllText(filePath);
                 dynamic modelData = JsonConvert.DeserializeObject(json);
 
                 var allWeights = JsonConvert.DeserializeObject<List<List<List<double>>>>(modelData.Weights.ToString());
@@ -82,7 +84,7 @@ namespace Aesclea_Back_End_.AIModel.Helpers
             }
             else
             {
-                // Directory doesn't exist - return null instead of writing to console
+                Console.WriteLine($"[ERROR] Directory {DataPath} does not exist.");
                 return null;
             }
         }
@@ -94,7 +96,7 @@ namespace Aesclea_Back_End_.AIModel.Helpers
                 // Make sure we have valid paths
                 if (string.IsNullOrEmpty(inputFile) || !File.Exists(inputFile))
                 {
-                    // Input file doesn't exist or is null - return false
+                    Console.WriteLine($"[ERROR] Input file {inputFile} does not exist.");
                     return false;
                 }
 
@@ -118,12 +120,12 @@ namespace Aesclea_Back_End_.AIModel.Helpers
                 // Save in the standard .wbn format
                 SaveNeuralData(neuralData, outputName);
 
-                // Conversion successful
+                Console.WriteLine($"Successfully converted {inputFile} to {outputName}_NeuralData.wbn");
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Error during conversion - return false
+                Console.WriteLine($"Error converting file: {ex.Message}");
                 return false;
             }
         }

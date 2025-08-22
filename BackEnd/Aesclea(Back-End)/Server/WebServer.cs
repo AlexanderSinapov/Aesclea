@@ -90,17 +90,6 @@ namespace Aesclea_Back_End_.Server
 
             // Add custom services in correct dependency order with explicit registrations
             builder.Services.AddScoped<IJwtService, JwtService>();
-            
-            // Configure EmailConfiguration
-            builder.Services.Configure<Aesclea_Back_End_.Services.EmailConfiguration>(
-                builder.Configuration.GetSection("EmailConfiguration"));
-            
-            // Register EmailService
-            builder.Services.AddScoped<IEmailService, EmailService>();
-            
-            // Register SubscriptionService
-            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
-            
             builder.Services.AddScoped<IAuthService, AuthService>();
               // Register base services with no custom dependencies
             builder.Services.AddScoped<Aesclea_Back_End_.Services.FileService>(provider => 
@@ -128,12 +117,12 @@ namespace Aesclea_Back_End_.Server
                     var fileHelper = new FileHelper();
                     fileHelper.OpenFolder();
                     classifier.LoadWeights(fileHelper, "tgl");
-                    global::System.Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classifier weights");
+                    Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classifier weights");
                 }
                 catch (Exception ex)
                 {
-                    global::System.Console.WriteLine($"⚠️  API: Could not load existing weights: {ex.Message}");
-                    global::System.Console.WriteLine("   You may need to train the classifier first via console application.");
+                    Console.WriteLine($"⚠️  API: Could not load existing weights: {ex.Message}");
+                    Console.WriteLine("   You may need to train the classifier first via console application.");
                 }
                 
                 return classifier;
@@ -156,7 +145,7 @@ namespace Aesclea_Back_End_.Server
                 {
                     corsBuilder.WithOrigins(
                         "http://localhost:5173", 
-                        "http://localhost:7000",
+                        "http://localhost:3000",
                         "http://localhost:8080",
                         "http://127.0.0.1:5173"
                     )
@@ -245,16 +234,10 @@ namespace Aesclea_Back_End_.Server
             {
                 using var scope = app.Services.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AescleaDbContext>();
-                var subscriptionService = scope.ServiceProvider.GetRequiredService<ISubscriptionService>();
                 
                 _logger.LogInformation("Ensuring database is created...");
                 context.Database.EnsureCreated();
                 _logger.LogInformation("Database initialization completed successfully.");
-
-                // Seed subscription plans
-                _logger.LogInformation("Seeding subscription plans...");
-                subscriptionService.SeedSubscriptionPlansAsync().Wait();
-                _logger.LogInformation("Subscription plans seeded successfully.");
             }
             catch (Exception ex)
             {

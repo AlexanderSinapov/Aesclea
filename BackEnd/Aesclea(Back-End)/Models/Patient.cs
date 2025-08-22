@@ -1,4 +1,4 @@
-namespace Aesclea_Back_End_.Models
+﻿namespace Aesclea_Back_End_.Models
 {
     public class Patient
     {
@@ -10,10 +10,7 @@ namespace Aesclea_Back_End_.Models
         public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; } = string.Empty;
         public string MedicalHistory { get; set; } = string.Empty;
-        public string? Department { get; set; }
-        public string Status { get; set; } = "active"; // active, inactive, critical
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? LastVisit { get; set; }
     }
 }

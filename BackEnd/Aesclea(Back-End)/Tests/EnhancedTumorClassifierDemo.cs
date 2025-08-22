@@ -13,8 +13,8 @@ namespace Aesclea_Back_End_.Tests
 
         public static void RunDemo()
         {
-            global::System.Console.WriteLine("=== ENHANCED TUMOR CLASSIFIER DEMO ===");
-            global::System.Console.WriteLine("This demo showcases the new enhanced features.\n");
+            Console.WriteLine("=== ENHANCED TUMOR CLASSIFIER DEMO ===");
+            Console.WriteLine("This demo showcases the new enhanced features.\n");
 
             // Initialize the classifier
             InitializeClassifier();
@@ -25,108 +25,108 @@ namespace Aesclea_Back_End_.Tests
             DemoAdvancedMetrics();
             DemoRiskAssessment();
 
-            global::System.Console.WriteLine("\n=== DEMO COMPLETED ===");
-            global::System.Console.WriteLine("The enhanced tumor classifier now provides:");
-            global::System.Console.WriteLine("✓ Configurable detection and classification thresholds");
-            global::System.Console.WriteLine("✓ Batch processing capabilities");
-            global::System.Console.WriteLine("✓ Advanced confidence metrics");
-            global::System.Console.WriteLine("✓ Risk assessment calculations");
-            global::System.Console.WriteLine("✓ Detailed analysis timestamps");
-            global::System.Console.WriteLine("✓ Clinical recommendations");
-            global::System.Console.WriteLine("✓ Batch summary statistics");
+            Console.WriteLine("\n=== DEMO COMPLETED ===");
+            Console.WriteLine("The enhanced tumor classifier now provides:");
+            Console.WriteLine("✓ Configurable detection and classification thresholds");
+            Console.WriteLine("✓ Batch processing capabilities");
+            Console.WriteLine("✓ Advanced confidence metrics");
+            Console.WriteLine("✓ Risk assessment calculations");
+            Console.WriteLine("✓ Detailed analysis timestamps");
+            Console.WriteLine("✓ Clinical recommendations");
+            Console.WriteLine("✓ Batch summary statistics");
         }
 
         private static void InitializeClassifier()
         {
-            global::System.Console.WriteLine("1. Initializing Enhanced Tumor Classifier...");
-
+            Console.WriteLine("1. Initializing Enhanced Tumor Classifier...");
+            
             // Create a base network for tumor detection
             var baseNetwork = new NeuronNetwork(new int[] { 16384, 256, 64, 16, 1 });
             
             // Initialize the enhanced classifier
             tumorClassifier = new TumorClassifier(baseNetwork);
             
-            global::System.Console.WriteLine("   ✓ Base network created with 16,384 input neurons");
-            global::System.Console.WriteLine("   ✓ Specialized classification networks initialized");
-            global::System.Console.WriteLine("   ✓ Default thresholds set (Detection: 0.5, Classification: 0.3)");
-            global::System.Console.WriteLine();
+            Console.WriteLine("   ✓ Base network created with 16,384 input neurons");
+            Console.WriteLine("   ✓ Specialized classification networks initialized");
+            Console.WriteLine("   ✓ Default thresholds set (Detection: 0.5, Classification: 0.3)");
+            Console.WriteLine();
         }
 
         private static void DemoConfigurableThresholds()
         {
-            global::System.Console.WriteLine("2. Demonstrating Configurable Thresholds...");
+            Console.WriteLine("2. Demonstrating Configurable Thresholds...");
             
             if (tumorClassifier == null) return;
 
             // Show default settings
-            global::System.Console.WriteLine($"   Default Detection Threshold: {tumorClassifier.DetectionThreshold}");
-            global::System.Console.WriteLine($"   Default Classification Threshold: {tumorClassifier.ClassificationThreshold}");
-            global::System.Console.WriteLine($"   Detailed Analysis Enabled: {tumorClassifier.EnableDetailedAnalysis}");
+            Console.WriteLine($"   Default Detection Threshold: {tumorClassifier.DetectionThreshold}");
+            Console.WriteLine($"   Default Classification Threshold: {tumorClassifier.ClassificationThreshold}");
+            Console.WriteLine($"   Detailed Analysis Enabled: {tumorClassifier.EnableDetailedAnalysis}");
 
             // Demonstrate threshold adjustment
-            global::System.Console.WriteLine("\n   Adjusting for high-sensitivity screening:");
+            Console.WriteLine("\n   Adjusting for high-sensitivity screening:");
             tumorClassifier.DetectionThreshold = 0.3;
             tumorClassifier.ClassificationThreshold = 0.2;
-            global::System.Console.WriteLine($"   → Detection Threshold: {tumorClassifier.DetectionThreshold} (more sensitive)");
-            global::System.Console.WriteLine($"   → Classification Threshold: {tumorClassifier.ClassificationThreshold} (more inclusive)");
+            Console.WriteLine($"   → Detection Threshold: {tumorClassifier.DetectionThreshold} (more sensitive)");
+            Console.WriteLine($"   → Classification Threshold: {tumorClassifier.ClassificationThreshold} (more inclusive)");
 
-            global::System.Console.WriteLine("\n   Adjusting for high-specificity diagnosis:");
+            Console.WriteLine("\n   Adjusting for high-specificity diagnosis:");
             tumorClassifier.DetectionThreshold = 0.7;
             tumorClassifier.ClassificationThreshold = 0.5;
-            global::System.Console.WriteLine($"   → Detection Threshold: {tumorClassifier.DetectionThreshold} (more specific)");
-            global::System.Console.WriteLine($"   → Classification Threshold: {tumorClassifier.ClassificationThreshold} (more strict)");
+            Console.WriteLine($"   → Detection Threshold: {tumorClassifier.DetectionThreshold} (more specific)");
+            Console.WriteLine($"   → Classification Threshold: {tumorClassifier.ClassificationThreshold} (more strict)");
 
             // Reset to defaults
             tumorClassifier.DetectionThreshold = 0.5;
             tumorClassifier.ClassificationThreshold = 0.3;
-            global::System.Console.WriteLine("\n   ✓ Thresholds reset to defaults for remaining demos");
-            global::System.Console.WriteLine();
+            Console.WriteLine("\n   ✓ Thresholds reset to defaults for remaining demos");
+            Console.WriteLine();
         }
 
         private static void DemoBatchAnalysis()
         {
-            global::System.Console.WriteLine("3. Demonstrating Batch Analysis Capabilities...");
+            Console.WriteLine("3. Demonstrating Batch Analysis Capabilities...");
             
             if (tumorClassifier == null) return;
 
             // Simulate multiple image data (normally these would be real processed images)
             var simulatedImageData = GenerateSimulatedImageData(5);
-
-            global::System.Console.WriteLine($"   Processing batch of {simulatedImageData.Count} images...");
+            
+            Console.WriteLine($"   Processing batch of {simulatedImageData.Count} images...");
 
             // Perform batch analysis with progress callback
             var results = tumorClassifier.AnalyzeBatch(simulatedImageData, (current, total) =>
             {
                 double percentage = (double)current / total * 100;
-                global::System.Console.Write($"\r   Progress: {current}/{total} ({percentage:F0}%)");
+                Console.Write($"\r   Progress: {current}/{total} ({percentage:F0}%)");
             });
 
-            global::System.Console.WriteLine("\n\n   Batch Analysis Results:");
+            Console.WriteLine("\n\n   Batch Analysis Results:");
             for (int i = 0; i < results.Count; i++)
             {
                 var result = results[i];
-                global::System.Console.WriteLine($"   Image {i + 1}: {(result.HasTumor ? "TUMOR DETECTED" : "No tumor")} " +
+                Console.WriteLine($"   Image {i + 1}: {(result.HasTumor ? "TUMOR DETECTED" : "No tumor")} " +
                                 $"(Confidence: {result.TumorProbability:P1})");
                 if (result.HasTumor)
                 {
-                    global::System.Console.WriteLine($"            Type: {result.TumorType}, Grade: {result.TumorGrade}, Risk: {result.RiskAssessment}");
+                    Console.WriteLine($"            Type: {result.TumorType}, Grade: {result.TumorGrade}, Risk: {result.RiskAssessment}");
                 }
             }
 
             // Generate and display batch summary
             var summary = tumorClassifier.GetBatchSummary(results);
-            global::System.Console.WriteLine("\n   Batch Summary:");
-            global::System.Console.WriteLine($"   → Total Images: {summary.TotalImages}");
-            global::System.Console.WriteLine($"   → Tumors Detected: {summary.TumorsDetected} ({(double)summary.TumorsDetected / summary.TotalImages:P1})");
-            global::System.Console.WriteLine($"   → Average Confidence: {summary.AverageConfidence:P1}");
-            global::System.Console.WriteLine($"   → High Risk Cases: {summary.HighRiskCases}");
-            global::System.Console.WriteLine($"   → Most Common Type: {summary.MostCommonType ?? "None"}");
-            global::System.Console.WriteLine();
+            Console.WriteLine("\n   Batch Summary:");
+            Console.WriteLine($"   → Total Images: {summary.TotalImages}");
+            Console.WriteLine($"   → Tumors Detected: {summary.TumorsDetected} ({(double)summary.TumorsDetected / summary.TotalImages:P1})");
+            Console.WriteLine($"   → Average Confidence: {summary.AverageConfidence:P1}");
+            Console.WriteLine($"   → High Risk Cases: {summary.HighRiskCases}");
+            Console.WriteLine($"   → Most Common Type: {summary.MostCommonType ?? "None"}");
+            Console.WriteLine();
         }
 
         private static void DemoAdvancedMetrics()
         {
-            global::System.Console.WriteLine("4. Demonstrating Advanced Metrics...");
+            Console.WriteLine("4. Demonstrating Advanced Metrics...");
             
             if (tumorClassifier == null) return;
 
@@ -134,26 +134,26 @@ namespace Aesclea_Back_End_.Tests
             var simulatedImage = GenerateSimulatedImageData(1)[0];
             var result = tumorClassifier.AnalyzeImage(simulatedImage);
 
-            global::System.Console.WriteLine("   Enhanced Analysis Result:");
-            global::System.Console.WriteLine($"   → Analysis Timestamp: {result.AnalysisTimestamp}");
-            global::System.Console.WriteLine($"   → Overall Confidence: {result.OverallConfidence:P2}");
-            global::System.Console.WriteLine($"   → Risk Assessment: {result.RiskAssessment}");
-
+            Console.WriteLine("   Enhanced Analysis Result:");
+            Console.WriteLine($"   → Analysis Timestamp: {result.AnalysisTimestamp}");
+            Console.WriteLine($"   → Overall Confidence: {result.OverallConfidence:P2}");
+            Console.WriteLine($"   → Risk Assessment: {result.RiskAssessment}");
+            
             if (result.HasTumor)
             {
-                global::System.Console.WriteLine($"   → Tumor Detection: {result.TumorProbability:P2}");
-                global::System.Console.WriteLine($"   → Type Classification: {result.TumorType} ({result.TypeConfidence:P2})");
-                global::System.Console.WriteLine($"   → Grade Assessment: Grade {result.TumorGrade} ({result.GradeConfidence:P2})");
-                global::System.Console.WriteLine($"   → Location Analysis: {result.TumorLocation} ({result.LocationConfidence:P2})");
-                global::System.Console.WriteLine($"   → Stage Estimation: Stage {result.EstimatedStage} - {result.StageDescription}");
+                Console.WriteLine($"   → Tumor Detection: {result.TumorProbability:P2}");
+                Console.WriteLine($"   → Type Classification: {result.TumorType} ({result.TypeConfidence:P2})");
+                Console.WriteLine($"   → Grade Assessment: Grade {result.TumorGrade} ({result.GradeConfidence:P2})");
+                Console.WriteLine($"   → Location Analysis: {result.TumorLocation} ({result.LocationConfidence:P2})");
+                Console.WriteLine($"   → Stage Estimation: Stage {result.EstimatedStage} - {result.StageDescription}");
             }
-
-            global::System.Console.WriteLine();
+            
+            Console.WriteLine();
         }
 
         private static void DemoRiskAssessment()
         {
-            global::System.Console.WriteLine("5. Demonstrating Risk Assessment System...");
+            Console.WriteLine("5. Demonstrating Risk Assessment System...");
             
             if (tumorClassifier == null) return;
 
@@ -170,10 +170,10 @@ namespace Aesclea_Back_End_.Tests
             {
                 var result = tumorClassifier.AnalyzeImage(imageData);
                 
-                global::System.Console.WriteLine($"   Scenario: {description}");
-                global::System.Console.WriteLine($"   → Risk Level: {result.RiskAssessment}");
-                global::System.Console.WriteLine($"   → Recommended Action: {GetRecommendedAction(result.RiskAssessment)}");
-                global::System.Console.WriteLine();
+                Console.WriteLine($"   Scenario: {description}");
+                Console.WriteLine($"   → Risk Level: {result.RiskAssessment}");
+                Console.WriteLine($"   → Recommended Action: {GetRecommendedAction(result.RiskAssessment)}");
+                Console.WriteLine();
             }
         }
 

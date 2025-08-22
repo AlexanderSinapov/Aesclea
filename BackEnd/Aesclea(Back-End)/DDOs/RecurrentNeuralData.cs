@@ -1,4 +1,4 @@
-namespace Aesclea_Back_End_.DDOs
+﻿namespace Aesclea_Back_End_.DDOs
 {
     public class RecurrentNeuralData
     {

@@ -62,9 +62,6 @@ namespace Aesclea_Back_End_.Models
         public string Role { get; set; } = string.Empty;
         public string MedicalNumber { get; set; } = string.Empty;
         public string Hospital { get; set; } = string.Empty;
-        public bool EmailVerified { get; set; } = false;
-        public string? EmailVerificationToken { get; set; }
-        public DateTime? EmailVerificationTokenExpiry { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

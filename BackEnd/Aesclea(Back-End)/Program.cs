@@ -11,10 +11,10 @@ namespace Aesclea_Back_End_
             try
             {
                 // Handle Ctrl+C gracefully
-                global::System.Console.CancelKeyPress += async (sender, e) =>
+                Console.CancelKeyPress += async (sender, e) =>
                 {
                     e.Cancel = true;
-                    global::System.Console.WriteLine("\nShutting down gracefully...");
+                    Console.WriteLine("\nShutting down gracefully...");
                     await serverManager.StopAsync();
                     Environment.Exit(0);
                 };
@@ -23,7 +23,7 @@ namespace Aesclea_Back_End_
             }
             catch (Exception ex)
             {
-                global::System.Console.WriteLine($"Application error: {ex.Message}");
+                Console.WriteLine($"Application error: {ex.Message}");
                 Environment.Exit(1);
             }
         }

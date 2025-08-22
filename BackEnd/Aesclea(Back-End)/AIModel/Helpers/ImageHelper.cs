@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -31,7 +31,7 @@ namespace Aesclea_Back_End_.AIModel
                     .Where(file => supportedExtensions.Contains(Path.GetExtension(file).ToLower()))
                     .ToArray();
 
-                global::System.Console.WriteLine($"Found {files.Length} images in {folderPath}");
+                Console.WriteLine($"Found {files.Length} images in {folderPath}");
 
                 int processedCount = 0;
                 int errorCount = 0;
@@ -44,7 +44,7 @@ namespace Aesclea_Back_End_.AIModel
                         // Show progress percentage
                         if (files.Length > 10)
                         {
-                            global::System.Console.Write($"\rLoading images: {(int)((i + 1) / (double)files.Length * 100)}% ({i + 1}/{files.Length})");
+                            Console.Write($"\rLoading images: {(int)((i + 1) / (double)files.Length * 100)}% ({i + 1}/{files.Length})");
                         }
 
                         using (Bitmap bitmap = new Bitmap(file))
@@ -69,15 +69,15 @@ namespace Aesclea_Back_End_.AIModel
                     catch (Exception ex)
                     {
                         errorCount++;
-                        global::System.Console.WriteLine($"\nError processing image {file}: {ex.Message}");
+                        Console.WriteLine($"\nError processing image {file}: {ex.Message}");
                     }
                 }
 
-                global::System.Console.WriteLine($"\nSuccessfully processed {processedCount} images. {errorCount} images had errors.");
+                Console.WriteLine($"\nSuccessfully processed {processedCount} images. {errorCount} images had errors.");
             }
             catch (Exception ex)
             {
-                global::System.Console.WriteLine($"Error accessing folder {folderPath}: {ex.Message}");
+                Console.WriteLine($"Error accessing folder {folderPath}: {ex.Message}");
             }
 
             return inputs;
@@ -398,7 +398,7 @@ namespace Aesclea_Back_End_.AIModel
                 File.WriteAllText(infoFilename, predictionText);
             }
 
-            global::System.Console.WriteLine($"Generated {samplesToVisualize} visualization samples in {outputFolder}");
+            Console.WriteLine($"Generated {samplesToVisualize} visualization samples in {outputFolder}");
         }
     }
 }

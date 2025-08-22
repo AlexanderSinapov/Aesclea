@@ -1,4 +1,4 @@
-@Aesclea_Back_End__HostAddress = http://localhost:7000
+@Aesclea_Back_End__HostAddress = http://localhost:5285
 
 GET {{Aesclea_Back_End__HostAddress}}/weatherforecast/
 Accept: application/json

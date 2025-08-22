@@ -1,6 +1,5 @@
 using Aesclea_Back_End_.AIModel;
 using Aesclea_Back_End_.AIModel.Helpers;
-using Aesclea_Back_End_.ConsoleApp;
 
 namespace Aesclea_Back_End_.Server
 {
@@ -21,16 +20,16 @@ namespace Aesclea_Back_End_.Server
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
-            global::System.Console.WriteLine("Aesclea Medical Management System");
-            global::System.Console.WriteLine("================================");
-            global::System.Console.WriteLine();
-            global::System.Console.WriteLine("Select mode:");
-            global::System.Console.WriteLine("1. Console Mode (AI Training/Testing)");
-            global::System.Console.WriteLine("2. Web Server Mode (API Server)");
-            global::System.Console.WriteLine("3. Both Modes (Console + Web Server)");
-            global::System.Console.Write("Enter your choice (1-3): ");
+            Console.WriteLine("Aesclea Medical Management System");
+            Console.WriteLine("================================");
+            Console.WriteLine();
+            Console.WriteLine("Select mode:");
+            Console.WriteLine("1. Console Mode (AI Training/Testing)");
+            Console.WriteLine("2. Web Server Mode (API Server)");
+            Console.WriteLine("3. Both Modes (Console + Web Server)");
+            Console.Write("Enter your choice (1-3): ");
 
-            var choice = global::System.Console.ReadLine();
+            var choice = Console.ReadLine();
 
             switch (choice)
             {
@@ -44,7 +43,7 @@ namespace Aesclea_Back_End_.Server
                     await RunBothModes(args);
                     break;
                 default:
-                    global::System.Console.WriteLine("Invalid choice. Starting console mode by default.");
+                    Console.WriteLine("Invalid choice. Starting console mode by default.");
                     await RunConsoleMode();
                     break;
             }
@@ -52,22 +51,21 @@ namespace Aesclea_Back_End_.Server
 
         private async Task RunConsoleMode()
         {
-            global::System.Console.WriteLine("Starting Console Mode for AI Training/Testing...");
-            global::System.Console.WriteLine("Press Ctrl+C to exit.");
-            global::System.Console.WriteLine();
+            Console.WriteLine("Starting Console Mode for AI Training/Testing...");
+            Console.WriteLine("Press Ctrl+C to exit.");
+            Console.WriteLine();
 
-            // Run the organized console application
-            var consoleApp = new OrganizedConsoleApplication();
-            await consoleApp.RunAsync();
+            // Run the original AI console application
+            await Task.Run(() => ConsoleApplication.Run(), _cancellationTokenSource.Token);
         }
 
         private async Task RunWebServerMode(string[] args)
         {
-            global::System.Console.WriteLine("Starting Web Server Mode...");
-            global::System.Console.WriteLine("API will be available at: https://localhost:7000");
-            global::System.Console.WriteLine("Swagger UI will be available at: https://localhost:7000/swagger");
-            global::System.Console.WriteLine("Press Ctrl+C to exit.");
-            global::System.Console.WriteLine();
+            Console.WriteLine("Starting Web Server Mode...");
+            Console.WriteLine("API will be available at: https://localhost:7000");
+            Console.WriteLine("Swagger UI will be available at: https://localhost:7000/swagger");
+            Console.WriteLine("Press Ctrl+C to exit.");
+            Console.WriteLine();
 
             try
             {
@@ -85,11 +83,11 @@ namespace Aesclea_Back_End_.Server
 
         private async Task RunBothModes(string[] args)
         {
-            global::System.Console.WriteLine("Starting Both Console and Web Server Modes...");
-            global::System.Console.WriteLine("API will be available at: https://localhost:7000");
-            global::System.Console.WriteLine("Console commands available below.");
-            global::System.Console.WriteLine("Press Ctrl+C to exit both modes.");
-            global::System.Console.WriteLine();
+            Console.WriteLine("Starting Both Console and Web Server Modes...");
+            Console.WriteLine("API will be available at: https://localhost:7000");
+            Console.WriteLine("Console commands available below.");
+            Console.WriteLine("Press Ctrl+C to exit both modes.");
+            Console.WriteLine();
 
             try
             {
@@ -107,10 +105,10 @@ namespace Aesclea_Back_End_.Server
                 }, _cancellationTokenSource.Token);
 
                 // Start console application in foreground
-                var consoleTask = Task.Run(async () =>
+                var consoleTask = Task.Run(() =>
                 {
-                    var consoleApp = new OrganizedConsoleApplication();
-                    await consoleApp.RunAsync();
+                    var consoleApp = new ConsoleApplication();
+                    ConsoleApplication.Run();
                 }, _cancellationTokenSource.Token);
 
                 // Wait for either to complete
