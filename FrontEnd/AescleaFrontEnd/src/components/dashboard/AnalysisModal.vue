@@ -1,20 +1,20 @@
 <template>
-  <div class="fixed inset-0 z-50 overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Background overlay -->
+  <div class="fixed inset-0 z-[9999] overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <!-- Background overlay with blur effect -->
       <div 
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+        class="fixed inset-0 backdrop-blur-sm bg-black/20 transition-opacity" 
         @click="$emit('close')"
       ></div>
 
       <!-- Modal panel -->
-      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+      <div class="relative inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-10">
         <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <component :is="getAnalysisIcon()" class="h-8 w-8 text-purple-600" />
+                <component :is="getAnalysisIcon()" class="w-8 h-8 text-purple-600" />
               </div>
               <div class="ml-3">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white">
@@ -29,7 +29,7 @@
               @click="$emit('close')"
               class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
             >
-              <XMarkIcon class="h-6 w-6" />
+              <XMarkIcon class="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -39,7 +39,7 @@
           <!-- View Mode - Analysis Results -->
           <div v-if="isViewMode && analysis" class="space-y-6">
             <!-- Analysis Info -->
-            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Patient</dt>
@@ -47,7 +47,7 @@
                 </div>
                 <div>
                   <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Analysis Type</dt>
-                  <dd class="mt-1 text-sm text-gray-900 dark:text-white capitalize">{{ analysis.analysisType.replace('-', ' ') }}</dd>
+                  <dd class="mt-1 text-sm text-gray-900 capitalize dark:text-white">{{ analysis.analysisType.replace('-', ' ') }}</dd>
                 </div>
                 <div>
                   <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
@@ -76,14 +76,14 @@
             </div>
 
             <!-- Results -->
-            <div v-if="analysis.results" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Analysis Results</h4>
-              <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ JSON.stringify(analysis.results, null, 2) }}</pre>
+            <div v-if="analysis.results" class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+              <h4 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">Analysis Results</h4>
+              <pre class="text-sm text-gray-700 whitespace-pre-wrap dark:text-gray-300">{{ JSON.stringify(analysis.results, null, 2) }}</pre>
             </div>
 
             <!-- Recommendations -->
-            <div v-if="analysis.recommendations && analysis.recommendations.length > 0" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Recommendations</h4>
+            <div v-if="analysis.recommendations && analysis.recommendations.length > 0" class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+              <h4 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">Recommendations</h4>
               <ul class="space-y-2">
                 <li v-for="(recommendation, index) in analysis.recommendations" :key="index" class="flex items-start">
                   <CheckCircleIcon class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
@@ -105,7 +105,7 @@
                   id="patientId"
                   v-model="formData.patientId"
                   required
-                  class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 >
                   <option value="">Choose a patient</option>
                   <option v-for="patient in availablePatients" :key="patient.id" :value="patient.id">
@@ -123,7 +123,7 @@
                   id="department"
                   v-model="formData.department"
                   required
-                  class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 >
                   <option value="">Select department</option>
                   <option value="cardiology">Cardiology</option>
@@ -144,7 +144,7 @@
                   <select
                     id="tumorType"
                     v-model="formData.data.tumorType"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                    class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   >
                     <option value="brain">Brain Tumor</option>
                     <option value="breast">Breast Cancer</option>
@@ -152,17 +152,76 @@
                     <option value="skin">Skin Cancer</option>
                   </select>
                 </div>
+                
+                <!-- Image Upload Section -->
                 <div>
-                  <label for="imageUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Medical Image URL
+                  <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Medical Image *
                   </label>
-                  <input
-                    id="imageUrl"
-                    v-model="formData.data.imageUrl"
-                    type="url"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                    placeholder="https://example.com/medical-image.jpg"
-                  />
+                  
+                  <!-- File Upload -->
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-center w-full">
+                      <label for="imageFile" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                          <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.13 5.13l4.24 4.24M15 9.75l-6.75 6.75H3v-5.25l6.75-6.75m.75.75l1.5 1.5m3-3l1.5 1.5M9 12.75h6.75"/>
+                          </svg>
+                          <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                            <span class="font-semibold">Click to upload</span> medical image
+                          </p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">DICOM, PNG, JPG, JPEG (MAX. 10MB)</p>
+                        </div>
+                        <input 
+                          id="imageFile" 
+                          type="file" 
+                          class="hidden" 
+                          accept=".dcm,.png,.jpg,.jpeg,.tiff,.bmp"
+                          @change="handleImageUpload"
+                        />
+                      </label>
+                    </div>
+                    
+                    <!-- Image Preview -->
+                    <div v-if="selectedImage" class="relative">
+                      <img 
+                        :src="selectedImage.preview" 
+                        alt="Medical image preview" 
+                        class="mx-auto border border-gray-300 rounded-lg max-h-48 dark:border-gray-600"
+                      />
+                      <button
+                        @click="removeImage"
+                        class="absolute p-1 text-white bg-red-500 rounded-full top-2 right-2 hover:bg-red-600"
+                      >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        <p>File: {{ selectedImage.name }}</p>
+                        <p>Size: {{ formatFileSize(selectedImage.size) }}</p>
+                      </div>
+                    </div>
+                    
+                    <!-- Alternative: URL Input -->
+                    <div class="relative">
+                      <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-600" />
+                      </div>
+                      <div class="relative flex justify-center text-sm">
+                        <span class="px-2 text-gray-500 bg-white dark:bg-gray-800">Or provide image URL</span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <input
+                        v-model="formData.data.imageUrl"
+                        type="url"
+                        placeholder="https://example.com/medical-image.jpg"
+                        class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -178,7 +237,7 @@
                       type="number"
                       min="30"
                       max="200"
-                      class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                      class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     />
                   </div>
                   <div>
@@ -190,7 +249,7 @@
                       v-model="formData.data.bloodPressure"
                       type="text"
                       placeholder="120/80"
-                      class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                      class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     />
                   </div>
                   <div>
@@ -204,7 +263,7 @@
                       step="0.1"
                       min="95"
                       max="110"
-                      class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                      class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     />
                   </div>
                   <div>
@@ -217,7 +276,7 @@
                       type="number"
                       min="80"
                       max="100"
-                      class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                      class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     />
                   </div>
                 </div>
@@ -233,7 +292,7 @@
                     v-model="formData.data.symptoms"
                     rows="4"
                     required
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                    class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     placeholder="Describe the patient's symptoms..."
                   ></textarea>
                 </div>
@@ -245,7 +304,7 @@
                     id="medicalHistory"
                     v-model="formData.data.medicalHistory"
                     rows="3"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                    class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     placeholder="Any relevant medical history..."
                   ></textarea>
                 </div>
@@ -261,7 +320,7 @@
                     v-model="formData.data.textData"
                     rows="6"
                     required
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                    class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     placeholder="Paste the medical report text here for analysis..."
                   ></textarea>
                 </div>
@@ -272,7 +331,7 @@
                   <select
                     id="analysisType"
                     v-model="formData.data.analysisType"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                    class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   >
                     <option value="general">General Analysis</option>
                     <option value="pathology">Pathology Report</option>
@@ -291,29 +350,29 @@
                   id="notes"
                   v-model="formData.notes"
                   rows="3"
-                  class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   placeholder="Any additional notes or instructions for the analysis..."
                 ></textarea>
               </div>
             </div>
 
             <!-- Footer -->
-            <div class="mt-6 flex justify-end space-x-3">
+            <div class="flex justify-end mt-6 space-x-3">
               <button
                 type="button"
                 @click="$emit('close')"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                :disabled="isSubmitting"
-                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="isSubmitting || !isFormValid"
+                class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg 
                   v-if="isSubmitting" 
-                  class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" 
+                  class="w-5 h-5 mr-3 -ml-1 text-white animate-spin" 
                   fill="none" 
                   viewBox="0 0 24 24"
                 >
@@ -352,6 +411,13 @@ const patientsStore = usePatientsStore()
 
 // Local state
 const isSubmitting = ref(false)
+const selectedImage = ref<{
+  file: File
+  preview: string
+  name: string
+  size: number
+} | null>(null)
+
 const formData = ref({
   patientId: '',
   department: '',
@@ -361,6 +427,24 @@ const formData = ref({
 
 // Computed properties
 const availablePatients = computed(() => patientsStore.patients)
+
+const isFormValid = computed(() => {
+  if (!formData.value.patientId) return false
+  
+  if (formData.value.department === 'tumor') {
+    return (selectedImage.value || formData.value.data.imageUrl) && formData.value.data.tumorType
+  }
+  
+  if (formData.value.department === 'diagnosis') {
+    return formData.value.data.symptoms
+  }
+  
+  if (formData.value.department === 'enhanced-text') {
+    return formData.value.data.text
+  }
+  
+  return true
+})
 
 // Icon components
 const XMarkIcon = {
@@ -463,6 +547,56 @@ const formatDateTime = (dateTime: string) => {
   return new Date(dateTime).toLocaleString()
 }
 
+// Image handling functions
+const handleImageUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) return
+  
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/tiff', 'image/bmp', 'application/dicom']
+  if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.dcm')) {
+    alert('Please select a valid medical image file (DICOM, PNG, JPG, JPEG, TIFF, BMP)')
+    return
+  }
+  
+  // Validate file size (10MB max)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size must be less than 10MB')
+    return
+  }
+  
+  // Create preview
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    selectedImage.value = {
+      file,
+      preview: e.target?.result as string,
+      name: file.name,
+      size: file.size
+    }
+  }
+  reader.readAsDataURL(file)
+}
+
+const removeImage = () => {
+  selectedImage.value = null
+  // Clear the file input
+  const fileInput = document.getElementById('imageFile') as HTMLInputElement
+  if (fileInput) {
+    fileInput.value = ''
+  }
+}
+
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
 const handleSubmit = async () => {
   isSubmitting.value = true
   
@@ -475,8 +609,23 @@ const handleSubmit = async () => {
       patientName: patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown',
       analysisType: props.analysisType?.id || 'unknown',
       department: formData.value.department,
-      data: formData.value.data,
+      data: { ...formData.value.data },
       notes: formData.value.notes
+    }
+    
+    // Handle image for tumor analysis
+    if (props.analysisType?.id === 'tumor' && selectedImage.value) {
+      // Convert file to base64 for API request
+      const reader = new FileReader()
+      reader.onload = async () => {
+        analysisRequest.data.imageData = reader.result as string
+        analysisRequest.data.imageName = selectedImage.value!.name
+        analysisRequest.data.imageSize = selectedImage.value!.size
+        
+        emit('save', analysisRequest)
+      }
+      reader.readAsDataURL(selectedImage.value.file)
+      return
     }
     
     emit('save', analysisRequest)

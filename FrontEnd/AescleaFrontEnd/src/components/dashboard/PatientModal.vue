@@ -1,14 +1,14 @@
 <template>
-  <div class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="fixed inset-0 z-[9999] overflow-y-auto">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Background overlay -->
+      <!-- Background overlay with blur effect -->
       <div 
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+        class="fixed inset-0 backdrop-blur-sm bg-black/20 transition-opacity" 
         @click="$emit('close')"
       ></div>
 
       <!-- Modal panel -->
-      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-10">
         <!-- Header -->
         <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
           <div class="flex items-center justify-between">
@@ -36,9 +36,11 @@
                   </label>
                   <input
                     id="firstName"
+                    name="firstName"
                     v-model="formData.firstName"
                     type="text"
                     required
+                    autocomplete="given-name"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   />
                 </div>
@@ -48,9 +50,11 @@
                   </label>
                   <input
                     id="lastName"
+                    name="lastName"
                     v-model="formData.lastName"
                     type="text"
                     required
+                    autocomplete="family-name"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   />
                 </div>
@@ -64,9 +68,11 @@
                   </label>
                   <input
                     id="email"
+                    name="email"
                     v-model="formData.email"
                     type="email"
                     required
+                    autocomplete="email"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   />
                 </div>
@@ -76,9 +82,11 @@
                   </label>
                   <input
                     id="phone"
+                    name="phone"
                     v-model="formData.phone"
                     type="tel"
                     required
+                    autocomplete="tel"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   />
                 </div>
@@ -92,8 +100,10 @@
                   </label>
                   <input
                     id="dateOfBirth"
+                    name="dateOfBirth"
                     v-model="formData.dateOfBirth"
                     type="date"
+                    autocomplete="bday"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   />
                 </div>
@@ -103,7 +113,9 @@
                   </label>
                   <select
                     id="gender"
+                    name="gender"
                     v-model="formData.gender"
+                    autocomplete="sex"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   >
                     <option value="">Select gender</option>
@@ -122,7 +134,9 @@
                   </label>
                   <select
                     id="department"
+                    name="department"
                     v-model="formData.department"
+                    autocomplete="organization"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   >
                     <option value="">Select department</option>
@@ -140,6 +154,7 @@
                   </label>
                   <select
                     id="status"
+                    name="status"
                     v-model="formData.status"
                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                   >
@@ -157,6 +172,7 @@
                 </label>
                 <textarea
                   id="medicalHistory"
+                  name="medicalHistory"
                   v-model="formData.medicalHistory"
                   rows="4"
                   class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"

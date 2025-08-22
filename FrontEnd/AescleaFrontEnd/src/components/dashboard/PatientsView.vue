@@ -11,10 +11,10 @@
           </span>
         </p>
       </div>
-      <div class="mt-4 sm:mt-0 flex space-x-3">
+      <div class="flex mt-4 space-x-3 sm:mt-0">
         <button
           @click="showAddPatientModal = true"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
           <PlusIcon class="w-4 h-4 mr-2" />
           Add Patient
@@ -23,20 +23,20 @@
     </div>
 
     <!-- Filters and Search -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
           <!-- Search -->
           <div class="md:col-span-2">
             <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <MagnifyingGlassIcon class="w-5 h-5 text-gray-400" />
               </div>
               <input
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search patients..."
-                class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                class="block w-full py-2 pl-10 pr-3 leading-5 text-gray-900 placeholder-gray-500 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               />
             </div>
           </div>
@@ -45,7 +45,7 @@
           <div>
             <select
               v-model="departmentFilter"
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="">All Departments</option>
               <option value="cardiology">Cardiology</option>
@@ -61,7 +61,7 @@
           <div>
             <select
               v-model="statusFilter"
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="">All Statuses</option>
               <option value="active">Active</option>
@@ -74,7 +74,7 @@
     </div>
 
     <!-- Patients Table -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
           Patient List ({{ filteredPatients.length }})
@@ -85,19 +85,19 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Patient
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Contact
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Department
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Status
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Last Visit
               </th>
               <th class="relative px-6 py-3">
@@ -105,12 +105,12 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
             <tr v-for="patient in paginatedPatients" :key="patient.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10">
-                    <div class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                  <div class="flex-shrink-0 w-10 h-10">
+                    <div class="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full dark:bg-purple-900">
                       <span class="text-sm font-medium text-purple-600 dark:text-purple-300">
                         {{ patient.firstName.charAt(0) }}{{ patient.lastName.charAt(0) }}
                       </span>
@@ -146,10 +146,10 @@
                   {{ patient.status }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+              <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
                 {{ formatDate(patient.lastVisit) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                 <div class="flex items-center space-x-2">
                   <button
                     @click="viewPatient(patient)"
@@ -176,8 +176,8 @@
         </table>
         
         <!-- Empty State -->
-        <div v-if="filteredPatients.length === 0" class="text-center py-12">
-          <UsersIcon class="mx-auto h-12 w-12 text-gray-400" />
+        <div v-if="filteredPatients.length === 0" class="py-12 text-center">
+          <UsersIcon class="w-12 h-12 mx-auto text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No patients found</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {{ searchQuery ? 'Try adjusting your search criteria.' : 'Get started by adding a new patient.' }}
@@ -185,7 +185,7 @@
           <div class="mt-6">
             <button
               @click="showAddPatientModal = true"
-              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <PlusIcon class="w-4 h-4 mr-2" />
               Add Patient

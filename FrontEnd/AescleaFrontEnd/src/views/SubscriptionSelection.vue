@@ -182,6 +182,8 @@ const selectPlan = async (plan: SubscriptionPlan) => {
     await subscriptionStore.subscribeToPlan(plan.id)
     // Redirect to dashboard after successful subscription
     router.push('/dashboard')
+    console.log(plan)
+    console.log(userInitials.value)
   } catch (error) {
     console.error('Subscription failed:', error)
   }

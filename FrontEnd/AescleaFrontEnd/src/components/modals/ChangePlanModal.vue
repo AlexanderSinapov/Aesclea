@@ -1,6 +1,6 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-3xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+  <div v-if="isOpen" class="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div class="relative w-11/12 max-w-3xl p-5 mx-auto bg-white border rounded-md shadow-lg top-20 dark:bg-gray-800">
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -25,12 +25,12 @@
 
       <!-- Available Plans -->
       <div class="py-6">
-        <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Available Plans</h4>
+        <h4 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Available Plans</h4>
         <div class="space-y-4">
           <div
             v-for="plan in otherPlans"
             :key="plan.id"
-            class="border rounded-lg p-4 hover:border-purple-300 transition-colors cursor-pointer"
+            class="p-4 transition-colors border rounded-lg cursor-pointer hover:border-purple-300"
             :class="[
               selectedPlanId === plan.id 
                 ? 'border-purple-500 ring-2 ring-purple-500 ring-opacity-50' 
@@ -56,12 +56,12 @@
             </div>
             
             <!-- Price Difference -->
-            <div v-if="selectedPlanId === plan.id && priceComparison" class="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded">
+            <div v-if="selectedPlanId === plan.id && priceComparison" class="p-3 mt-3 rounded bg-gray-50 dark:bg-gray-700">
               <p class="text-sm" :class="priceComparison.isUpgrade ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'">
                 {{ priceComparison.isUpgrade ? 'Upgrade' : 'Downgrade' }}: 
                 {{ priceComparison.isUpgrade ? '+' : '-' }}${{ Math.abs(priceComparison.difference) }}/{{ plan.interval }}
               </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ priceComparison.isUpgrade 
                   ? 'You will be charged the prorated amount immediately' 
                   : 'Credit will be applied to your next billing cycle' 
@@ -73,17 +73,17 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex justify-end pt-4 space-x-3 border-t border-gray-200 dark:border-gray-700">
         <button
           @click="$emit('close')"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
         >
           Cancel
         </button>
         <button
           @click="changePlan"
           :disabled="!selectedPlanId || loading"
-          class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span v-if="loading">Changing Plan...</span>
           <span v-else>Change Plan</span>
@@ -100,11 +100,6 @@ import { useSubscriptionStore } from '../../stores/subscription'
 interface Props {
   isOpen: boolean
 }
-
-defineProps<Props>()
-defineEmits<{
-  close: []
-}>()
 
 const subscriptionStore = useSubscriptionStore()
 const selectedPlanId = ref<string>('')

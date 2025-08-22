@@ -139,10 +139,15 @@ router.beforeEach(async (to, _from, next) => {
     }
     
     // If email is verified, check subscription and route accordingly
-    await subscriptionStore.loadUserSubscription()
-    if (!subscriptionStore.hasActiveSubscription) {
-      next('/subscription-selection')
-      return
+    try {
+      await subscriptionStore.loadUserSubscription()
+      if (!subscriptionStore.hasActiveSubscription) {
+        next('/subscription-selection')
+        return
+      }
+    } catch (error) {
+      // If subscription loading fails, still allow access to dashboard
+      console.warn('Failed to load subscription, proceeding to dashboard:', error)
     }
     
     next('/dashboard')
@@ -163,19 +168,29 @@ router.beforeEach(async (to, _from, next) => {
 
   // Check subscription requirement
   if (requiresSubscription && authStore.isAuthenticated && authStore.user?.emailVerified) {
-    await subscriptionStore.loadUserSubscription()
-    if (!subscriptionStore.hasActiveSubscription) {
-      next('/subscription-selection')
-      return
+    try {
+      await subscriptionStore.loadUserSubscription()
+      if (!subscriptionStore.hasActiveSubscription) {
+        next('/subscription-selection')
+        return
+      }
+    } catch (error) {
+      // If subscription loading fails, log but don't block access
+      console.warn('Failed to load subscription for required check:', error)
     }
   }
 
   // Check no subscription requirement (for subscription selection page)
   if (requiresNoSubscription && authStore.isAuthenticated && authStore.user?.emailVerified) {
-    await subscriptionStore.loadUserSubscription()
-    if (subscriptionStore.hasActiveSubscription) {
-      next('/dashboard')
-      return
+    try {
+      await subscriptionStore.loadUserSubscription()
+      if (subscriptionStore.hasActiveSubscription) {
+        next('/dashboard')
+        return
+      }
+    } catch (error) {
+      // If subscription loading fails, allow access to subscription selection
+      console.warn('Failed to load subscription for no-subscription check:', error)
     }
   }
 

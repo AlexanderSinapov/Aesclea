@@ -56,7 +56,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     error.value = null
 
     try {
-      const response = await api.post('/api/subscriptions/subscribe', {
+      const response = await api.post('/subscriptions/subscribe', {
         planId,
         paymentMethodId
       })
@@ -81,7 +81,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     error.value = null
 
     try {
-      const response = await api.post(`/api/subscriptions/cancel/${userSubscription.value.id}`)
+      const response = await api.post(`/subscriptions/cancel/${userSubscription.value.id}`)
       
       userSubscription.value.cancelAtPeriodEnd = true
       
@@ -99,7 +99,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     error.value = null
 
     try {
-      const response = await api.get('/api/subscriptions/user/current-user')
+      const response = await api.get('/subscriptions/user/current-user')
       userSubscription.value = response.data
     } catch (err: any) {
       error.value = err.response?.data?.message || err.message || 'Failed to load subscription'
@@ -118,7 +118,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     error.value = null
 
     try {
-      const response = await api.get('/api/subscriptions/plans')
+      const response = await api.get('/subscriptions/plans')
       availablePlans.value = response.data
     } catch (err: any) {
       error.value = err.response?.data?.message || err.message || 'Failed to load plans'
@@ -136,7 +136,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     error.value = null
 
     try {
-      const response = await api.post(`/api/subscriptions/reactivate/${userSubscription.value.id}`)
+      const response = await api.post(`/subscriptions/reactivate/${userSubscription.value.id}`)
       userSubscription.value = response.data
       return response.data
     } catch (err: any) {
@@ -152,7 +152,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     error.value = null
 
     try {
-      const response = await api.put('/api/subscriptions/change-plan', {
+      const response = await api.put('/subscriptions/change-plan', {
         planId,
         paymentMethodId
       })

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 console.log('API_BASE_URL from env:', import.meta.env.VITE_API_URL)
 // Check if running in development or production
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7000/api' || 'http://localhost:5000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7000/api'
 
 // Create axios instance
 const api = axios.create({
@@ -38,12 +38,23 @@ api.interceptors.response.use(
   (error) => {
     console.error('API Response Error:', error.response?.status, error.response?.data || error.message)
     
+    // Only redirect to login on 401 for auth-related endpoints, not subscription endpoints
     if (error.response?.status === 401) {
-      // Clear tokens and redirect to login
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      const url = error.config?.url || ''
+      const isAuthEndpoint = url.includes('/auth/')
+      const isSubscriptionEndpoint = url.includes('/subscriptions/')
+      
+      // Don't auto-logout for subscription endpoint failures - they might just not have a subscription yet
+      if (isAuthEndpoint || (!isSubscriptionEndpoint && !url.includes('/user'))) {
+        console.log('401 error on auth endpoint, clearing tokens and redirecting to login')
+        // Clear tokens and redirect to login
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
+        window.location.href = '/login'
+      } else {
+        console.log('401 error on non-auth endpoint, not auto-logging out:', url)
+      }
     }
     return Promise.reject(error)
   }
