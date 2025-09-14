@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
@@ -11,10 +17,10 @@
           </span>
         </p>
       </div>
-      <div class="mt-4 sm:mt-0 flex space-x-3">
+      <div class="flex mt-4 space-x-3 sm:mt-0">
         <button
           @click="showScheduleModal = true"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
           <PlusIcon class="w-4 h-4 mr-2" />
           Schedule Appointment
@@ -23,7 +29,7 @@
     </div>
 
     <!-- Calendar View Toggle and Filters -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="p-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <!-- View Toggle -->
@@ -33,9 +39,9 @@
               :class="viewMode === 'list' 
                 ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' 
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
-              class="px-3 py-2 rounded-md text-sm font-medium"
+              class="px-3 py-2 text-sm font-medium rounded-md"
             >
-              <ListBulletIcon class="w-4 h-4 mr-2 inline" />
+              <ListBulletIcon class="inline w-4 h-4 mr-2" />
               List View
             </button>
             <button
@@ -43,9 +49,9 @@
               :class="viewMode === 'calendar' 
                 ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' 
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
-              class="px-3 py-2 rounded-md text-sm font-medium"
+              class="px-3 py-2 text-sm font-medium rounded-md"
             >
-              <CalendarIcon class="w-4 h-4 mr-2 inline" />
+              <CalendarIcon class="inline w-4 h-4 mr-2" />
               Calendar View
             </button>
           </div>
@@ -54,7 +60,7 @@
           <div class="flex items-center space-x-4">
             <select
               v-model="statusFilter"
-              class="block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="">All Statuses</option>
               <option value="scheduled">Scheduled</option>
@@ -65,7 +71,7 @@
 
             <select
               v-model="departmentFilter"
-              class="block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="">All Departments</option>
               <option value="cardiology">Cardiology</option>
@@ -79,7 +85,7 @@
             <input
               v-model="dateFilter"
               type="date"
-              class="block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             />
           </div>
         </div>
@@ -87,16 +93,16 @@
     </div>
 
     <!-- Appointments Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <CalendarIcon class="h-6 w-6 text-blue-400" />
+              <CalendarIcon class="w-6 h-6 text-blue-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Today's Appointments</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Today's Appointments</dt>
                 <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ todayAppointments.length }}</dd>
               </dl>
             </div>
@@ -104,15 +110,15 @@
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <ClockIcon class="h-6 w-6 text-yellow-400" />
+              <ClockIcon class="w-6 h-6 text-yellow-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Upcoming</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Upcoming</dt>
                 <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ upcomingAppointments.length }}</dd>
               </dl>
             </div>
@@ -120,15 +126,15 @@
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <CheckCircleIcon class="h-6 w-6 text-green-400" />
+              <CheckCircleIcon class="w-6 h-6 text-green-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Completed</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Completed</dt>
                 <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ completedAppointments.length }}</dd>
               </dl>
             </div>
@@ -136,15 +142,15 @@
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <XCircleIcon class="h-6 w-6 text-red-400" />
+              <XCircleIcon class="w-6 h-6 text-red-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Cancelled/No Show</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Cancelled/No Show</dt>
                 <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ cancelledAppointments.length }}</dd>
               </dl>
             </div>
@@ -154,7 +160,7 @@
     </div>
 
     <!-- List View -->
-    <div v-if="viewMode === 'list'" class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div v-if="viewMode === 'list'" class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
           Appointments ({{ filteredAppointments.length }})
@@ -165,19 +171,19 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Patient & Time
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Appointment Type
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Department
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Doctor
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Status
               </th>
               <th class="relative px-6 py-3">
@@ -185,12 +191,12 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
             <tr v-for="appointment in paginatedAppointments" :key="appointment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10">
-                    <div class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                  <div class="flex-shrink-0 w-10 h-10">
+                    <div class="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full dark:bg-purple-900">
                       <span class="text-sm font-medium text-purple-600 dark:text-purple-300">
                         {{ appointment.patientName.split(' ').map((n: string) => n[0]).join('') }}
                       </span>
@@ -217,7 +223,7 @@
                   {{ appointment.department }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
                 {{ appointment.doctor }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -228,7 +234,7 @@
                   {{ appointment.status }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                 <div class="flex items-center space-x-2">
                   <button
                     @click="viewAppointment(appointment)"
@@ -257,8 +263,8 @@
         </table>
         
         <!-- Empty State -->
-        <div v-if="filteredAppointments.length === 0" class="text-center py-12">
-          <CalendarIcon class="mx-auto h-12 w-12 text-gray-400" />
+        <div v-if="filteredAppointments.length === 0" class="py-12 text-center">
+          <CalendarIcon class="w-12 h-12 mx-auto text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No appointments found</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Get started by scheduling a new appointment.
@@ -266,7 +272,7 @@
           <div class="mt-6">
             <button
               @click="showScheduleModal = true"
-              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <PlusIcon class="w-4 h-4 mr-2" />
               Schedule Appointment
@@ -302,14 +308,248 @@
     </div>
 
     <!-- Calendar View -->
-    <div v-else class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div v-else class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="p-6">
-        <div class="text-center py-8">
-          <CalendarIcon class="mx-auto h-12 w-12 text-gray-400" />
-          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Calendar View</h3>
+        <!-- Calendar Header -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-4">
+            <button
+              @click="previousMonth"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+            >
+              <ChevronLeftIcon class="w-5 h-5" />
+            </button>
+            
+            <!-- Month/Year Selection -->
+            <div class="flex items-center space-x-2">
+              <select 
+                v-model="selectedMonth"
+                @change="updateCalendarDate"
+                class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              >
+                <option v-for="(month, index) in monthNames" :key="index" :value="index">
+                  {{ month }}
+                </option>
+              </select>
+              
+              <select 
+                v-model="selectedYear"
+                @change="updateCalendarDate"
+                class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              >
+                <option v-for="year in availableYears" :key="year" :value="year">
+                  {{ year }}
+                </option>
+              </select>
+            </div>
+            
+            <button
+              @click="nextMonth"
+              class="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+            >
+              <ChevronRightIcon class="w-5 h-5" />
+            </button>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button
+              @click="goToToday"
+              class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
+            >
+              Today
+            </button>
+          </div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="grid grid-cols-7 gap-px overflow-hidden bg-gray-200 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+          <!-- Day Headers -->
+          <div 
+            v-for="day in dayHeaders" 
+            :key="day"
+            class="p-2 text-xs font-medium text-center text-gray-500 bg-gray-50 dark:bg-gray-800 dark:text-gray-400"
+          >
+            {{ day }}
+          </div>
+
+          <!-- Calendar Days -->
+          <div
+            v-for="day in calendarDays"
+            :key="`${day.date.getTime()}`"
+            @click="selectDay(day.date)"
+            :class="[
+              'bg-white dark:bg-gray-900 p-2 min-h-[120px] border-b border-r border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors',
+              {
+                'bg-gray-50 dark:bg-gray-800': !day.isCurrentMonth,
+                'bg-blue-50 dark:bg-blue-900/20': day.isToday && day.isCurrentMonth,
+                'ring-2 ring-blue-500 ring-inset bg-blue-100 dark:bg-blue-900/30': selectedDay && selectedDay.toDateString() === day.date.toDateString()
+              }
+            ]"
+          >
+            <!-- Date Number -->
+            <div class="flex items-center justify-between mb-1">
+              <span 
+                :class="[
+                  'text-sm font-medium',
+                  {
+                    'text-gray-900 dark:text-white': day.isCurrentMonth,
+                    'text-gray-400 dark:text-gray-500': !day.isCurrentMonth,
+                    'text-blue-600 dark:text-blue-400 font-bold': day.isToday && day.isCurrentMonth
+                  }
+                ]"
+              >
+                {{ day.date.getDate() }}
+              </span>
+              <span v-if="getAppointmentsForDate(day.date).length > 0" 
+                    class="px-2 py-1 text-xs font-medium text-purple-600 bg-purple-100 rounded-full dark:bg-purple-900 dark:text-purple-300">
+                {{ getAppointmentsForDate(day.date).length }}
+              </span>
+            </div>
+
+            <!-- Appointments for this day -->
+            <div class="space-y-1">
+              <div
+                v-for="appointment in getAppointmentsForDate(day.date).slice(0, 3)"
+                :key="appointment.id"
+                @click="viewAppointmentDetails(appointment)"
+                :class="[
+                  'text-xs p-1 rounded cursor-pointer text-white font-medium truncate',
+                  getAppointmentColorClass(appointment.status)
+                ]"
+                :title="`${formatAppointmentTime(appointment.dateTime)} - ${appointment.patientName} (${appointment.appointmentType})`"
+              >
+                {{ formatAppointmentTime(appointment.dateTime) }} {{ appointment.patientName }}
+              </div>
+              
+              <!-- More indicator -->
+              <div v-if="getAppointmentsForDate(day.date).length > 3"
+                   class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                +{{ getAppointmentsForDate(day.date).length - 3 }} more
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar Legend -->
+        <div class="flex items-center justify-center mt-6 space-x-6">
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 bg-green-500 rounded"></div>
+            <span class="text-xs text-gray-600 dark:text-gray-400">Completed</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 bg-blue-500 rounded"></div>
+            <span class="text-xs text-gray-600 dark:text-gray-400">Scheduled</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 bg-red-500 rounded"></div>
+            <span class="text-xs text-gray-600 dark:text-gray-400">Cancelled</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 bg-yellow-500 rounded"></div>
+            <span class="text-xs text-gray-600 dark:text-gray-400">Rescheduled</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected Day Appointments Section -->
+    <div v-if="selectedDay" class="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            Appointments for {{ formatSelectedDate(selectedDay) }}
+          </h3>
+          <button
+            @click="scheduleForSelectedDay"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
+          >
+            <PlusIcon class="w-4 h-4 mr-2" />
+            Schedule Appointment
+          </button>
+        </div>
+
+        <div v-if="selectedDayAppointments.length === 0" class="py-8 text-center">
+          <CalendarIcon class="w-12 h-12 mx-auto text-gray-400" />
+          <h4 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No appointments scheduled</h4>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Calendar view implementation coming soon.
+            No appointments are scheduled for this day.
           </p>
+        </div>
+
+        <div v-else class="space-y-4">
+          <div
+            v-for="appointment in selectedDayAppointments"
+            :key="appointment.id"
+            class="p-4 border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <ClockIcon class="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                      {{ formatAppointmentTime(appointment.dateTime) }} - {{ appointment.patientName }}
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      {{ appointment.appointmentType }} • {{ appointment.department }}
+                      <span v-if="appointment.duration"> • {{ appointment.duration }} min</span>
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="mt-2 flex items-center space-x-2">
+                  <span
+                    :class="[
+                      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                      getStatusBadgeClass(appointment.status)
+                    ]"
+                  >
+                    {{ appointment.status }}
+                  </span>
+                  <span
+                    v-if="appointment.priority"
+                    :class="[
+                      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                      getPriorityBadgeClass(appointment.priority)
+                    ]"
+                  >
+                    {{ appointment.priority }} priority
+                  </span>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center space-x-2 ml-4">
+                <button
+                  @click="viewAppointment(appointment)"
+                  class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
+                >
+                  View
+                </button>
+                <button
+                  @click="editAppointment(appointment)"
+                  class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+                >
+                  Edit
+                </button>
+                <button
+                  v-if="appointment.status === 'scheduled'"
+                  @click="cancelAppointment(appointment)"
+                  class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 border border-transparent rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <!-- Additional appointment details if needed -->
+            <div v-if="appointment.notes" class="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                <span class="font-medium">Notes:</span> {{ appointment.notes }}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -362,11 +602,80 @@ const showEditModal = ref(false)
 const showDetailsModal = ref(false)
 const selectedAppointment = ref<Appointment | null>(null)
 
+// Calendar state
+const currentCalendarDate = ref(new Date())
+const selectedDay = ref<Date | null>(null)
+
+// Date selection variables
+const selectedMonth = ref(new Date().getMonth())
+const selectedYear = ref(new Date().getFullYear())
+
+// Calendar computed properties
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December']
+
+const availableYears = computed(() => {
+  const currentYear = new Date().getFullYear()
+  const years = []
+  for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+    years.push(i)
+  }
+  return years
+})
+
+
+const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+interface CalendarDay {
+  date: Date
+  isCurrentMonth: boolean
+  isToday: boolean
+}
+
+const calendarDays = computed((): CalendarDay[] => {
+  const year = currentCalendarDate.value.getFullYear()
+  const month = currentCalendarDate.value.getMonth()
+  
+  // First day of current month
+  const firstDay = new Date(year, month, 1)
+  // Last day of current month
+  const lastDay = new Date(year, month + 1, 0)
+  
+  // Start from the first Sunday before or on the first day of month
+  const startDate = new Date(firstDay)
+  startDate.setDate(startDate.getDate() - startDate.getDay())
+  
+  // End at the last Saturday after or on the last day of month
+  const endDate = new Date(lastDay)
+  endDate.setDate(endDate.getDate() + (6 - endDate.getDay()))
+  
+  const days: CalendarDay[] = []
+  const today = new Date()
+  const todayStr = today.toDateString()
+  
+  for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+    const currentDate = new Date(date)
+    days.push({
+      date: currentDate,
+      isCurrentMonth: currentDate.getMonth() === month,
+      isToday: currentDate.toDateString() === todayStr
+    })
+  }
+  
+  return days
+})
+
 // Watch for department changes from parent
 watch(() => props.selectedDepartment, (newDepartment) => {
   if (newDepartment) {
     departmentFilter.value = newDepartment
   }
+}, { immediate: true })
+
+// Watch for calendar date changes to sync dropdowns
+watch(currentCalendarDate, (newDate) => {
+  selectedMonth.value = newDate.getMonth()
+  selectedYear.value = newDate.getFullYear()
 }, { immediate: true })
 
 // Computed properties
@@ -426,6 +735,16 @@ const cancelledAppointments = computed(() =>
   )
 )
 
+const selectedDayAppointments = computed(() => {
+  if (!selectedDay.value) return []
+  const selectedDateStr = selectedDay.value.toDateString()
+  return filteredAppointments.value.filter((appointment: Appointment) => 
+    new Date(appointment.dateTime).toDateString() === selectedDateStr
+  ).sort((a: Appointment, b: Appointment) => 
+    new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+  )
+})
+
 // Icon components
 const PlusIcon = {
   template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>`
@@ -451,9 +770,105 @@ const XCircleIcon = {
   template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
 }
 
+const ChevronLeftIcon = {
+  template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>`
+}
+
+const ChevronRightIcon = {
+  template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>`
+}
+
 // Methods
 const formatDateTime = (dateTime: string) => {
   return new Date(dateTime).toLocaleString()
+}
+
+// Calendar methods
+const previousMonth = () => {
+  currentCalendarDate.value = new Date(
+    currentCalendarDate.value.getFullYear(),
+    currentCalendarDate.value.getMonth() - 1,
+    1
+  )
+}
+
+const nextMonth = () => {
+  currentCalendarDate.value = new Date(
+    currentCalendarDate.value.getFullYear(),
+    currentCalendarDate.value.getMonth() + 1,
+    1
+  )
+}
+
+const goToToday = () => {
+  const today = new Date()
+  currentCalendarDate.value = today
+  selectedMonth.value = today.getMonth()
+  selectedYear.value = today.getFullYear()
+  selectedDay.value = today
+}
+
+const updateCalendarDate = () => {
+  currentCalendarDate.value = new Date(selectedYear.value, selectedMonth.value, 1)
+}
+
+const selectDay = (date: Date) => {
+  selectedDay.value = date
+}
+
+const getAppointmentsForDate = (date: Date): Appointment[] => {
+  const dateStr = date.toDateString()
+  return filteredAppointments.value.filter((appointment: Appointment) => 
+    new Date(appointment.dateTime).toDateString() === dateStr
+  )
+}
+
+const formatAppointmentTime = (dateTime: string): string => {
+  return new Date(dateTime).toLocaleTimeString([], { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  })
+}
+
+const getAppointmentColorClass = (status: string): string => {
+  const classes: Record<string, string> = {
+    scheduled: 'bg-blue-500',
+    completed: 'bg-green-500',
+    cancelled: 'bg-red-500',
+    rescheduled: 'bg-yellow-500',
+    'no-show': 'bg-gray-500'
+  }
+  return classes[status] || classes.scheduled
+}
+
+const viewAppointmentDetails = (appointment: Appointment) => {
+  viewAppointment(appointment)
+}
+
+const formatSelectedDate = (date: Date): string => {
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+}
+
+const scheduleForSelectedDay = () => {
+  if (selectedDay.value) {
+    // Pre-fill the appointment modal with the selected date
+    showScheduleModal.value = true
+  }
+}
+
+const getPriorityBadgeClass = (priority: string): string => {
+  const classes: Record<string, string> = {
+    high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    urgent: 'bg-red-200 text-red-900 dark:bg-red-800 dark:text-red-100'
+  }
+  return classes[priority] || classes.medium
 }
 
 const getDepartmentBadgeClass = (department: string) => {

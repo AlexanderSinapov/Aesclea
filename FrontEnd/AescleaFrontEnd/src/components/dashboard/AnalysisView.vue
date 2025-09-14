@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
@@ -11,10 +17,10 @@
           </span>
         </p>
       </div>
-      <div class="mt-4 sm:mt-0 flex space-x-3">
+      <div class="flex mt-4 space-x-3 sm:mt-0">
         <button
           @click="showNewAnalysisModal = true"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
           <PlusIcon class="w-4 h-4 mr-2" />
           New Analysis
@@ -23,16 +29,16 @@
     </div>
 
     <!-- Analysis Types Quick Access -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <div 
         v-for="analysisType in analysisTypes" 
         :key="analysisType.id"
         @click="showAnalysisModal(analysisType)"
-        class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
+        class="p-6 transition-shadow bg-white border border-gray-200 rounded-lg cursor-pointer dark:bg-gray-800 dark:border-gray-700 hover:shadow-md"
       >
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <component :is="analysisType.icon" :class="analysisType.iconColor" class="h-8 w-8" />
+            <component :is="analysisType.icon" :class="analysisType.iconColor" class="w-8 h-8" />
           </div>
           <div class="ml-4">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ analysisType.name }}</h3>
@@ -43,7 +49,7 @@
           <div class="flex items-center justify-between text-sm">
             <span class="text-gray-500 dark:text-gray-400">Available</span>
             <span 
-              class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+              class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full"
               :class="analysisType.available ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
             >
               {{ analysisType.available ? 'Active' : 'Requires Subscription' }}
@@ -54,14 +60,14 @@
     </div>
 
     <!-- Filters and Stats -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-4">
           <!-- Status Filter -->
           <div>
             <select
               v-model="statusFilter"
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
@@ -75,7 +81,7 @@
           <div>
             <select
               v-model="typeFilter"
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="">All Types</option>
               <option value="tumor">Tumor Analysis</option>
@@ -89,7 +95,7 @@
           <div>
             <select
               v-model="departmentFilter"
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="">All Departments</option>
               <option value="cardiology">Cardiology</option>
@@ -106,13 +112,13 @@
             <input
               v-model="dateFilter"
               type="date"
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             />
           </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div class="text-center">
             <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ analysisStore.analyses.length }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Total Analyses</div>
@@ -134,7 +140,7 @@
     </div>
 
     <!-- Analysis Results -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
           Analysis Results ({{ filteredAnalyses.length }})
@@ -145,19 +151,19 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Patient & Analysis
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Type & Department
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Status
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Confidence
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                 Date
               </th>
               <th class="relative px-6 py-3">
@@ -165,13 +171,13 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
             <tr v-for="analysis in paginatedAnalyses" :key="analysis.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10">
-                    <div class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                      <component :is="getAnalysisIcon(analysis.analysisType)" class="h-5 w-5 text-purple-600 dark:text-purple-300" />
+                  <div class="flex-shrink-0 w-10 h-10">
+                    <div class="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full dark:bg-purple-900">
+                      <component :is="getAnalysisIcon(analysis.analysisType)" class="w-5 h-5 text-purple-600 dark:text-purple-300" />
                     </div>
                   </div>
                   <div class="ml-4">
@@ -185,8 +191,8 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-white capitalize">{{ analysis.analysisType.replace('-', ' ') }}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400 capitalize">{{ analysis.department }}</div>
+                <div class="text-sm text-gray-900 capitalize dark:text-white">{{ analysis.analysisType.replace('-', ' ') }}</div>
+                <div class="text-sm text-gray-500 capitalize dark:text-gray-400">{{ analysis.department }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span 
@@ -199,7 +205,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div v-if="analysis.confidence" class="flex items-center">
                   <div class="text-sm text-gray-900 dark:text-white">{{ Math.round(analysis.confidence * 100) }}%</div>
-                  <div class="ml-2 w-16 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                  <div class="w-16 h-2 ml-2 bg-gray-200 rounded-full dark:bg-gray-700">
                     <div 
                       class="h-2 rounded-full" 
                       :class="getConfidenceColor(analysis.confidence)"
@@ -209,10 +215,10 @@
                 </div>
                 <div v-else class="text-sm text-gray-500 dark:text-gray-400">N/A</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+              <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
                 {{ formatDateTime(analysis.createdAt) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                 <div class="flex items-center space-x-2">
                   <button
                     @click="viewAnalysis(analysis)"
@@ -240,8 +246,8 @@
         </table>
         
         <!-- Empty State -->
-        <div v-if="filteredAnalyses.length === 0" class="text-center py-12">
-          <ChartBarIcon class="mx-auto h-12 w-12 text-gray-400" />
+        <div v-if="filteredAnalyses.length === 0" class="py-12 text-center">
+          <ChartBarIcon class="w-12 h-12 mx-auto text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No analyses found</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Get started by running your first AI analysis.
@@ -249,7 +255,7 @@
           <div class="mt-6">
             <button
               @click="showNewAnalysisModal = true"
-              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <PlusIcon class="w-4 h-4 mr-2" />
               Run Analysis

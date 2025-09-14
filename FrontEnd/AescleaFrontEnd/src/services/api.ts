@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 import axios from 'axios'
 
 console.log('API_BASE_URL from env:', import.meta.env.VITE_API_URL)

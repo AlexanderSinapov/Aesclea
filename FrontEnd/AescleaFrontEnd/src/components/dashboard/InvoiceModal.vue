@@ -1,6 +1,12 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
-  <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+  <div class="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div class="relative w-11/12 max-w-4xl p-5 mx-auto bg-white border rounded-md shadow-lg top-20 dark:bg-gray-800">
       <!-- Header -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
@@ -19,13 +25,13 @@
         <!-- View Mode - Invoice Details -->
         <div class="space-y-6">
           <!-- Invoice Header -->
-          <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-            <div class="flex justify-between items-start">
+          <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-900">
+            <div class="flex items-start justify-between">
               <div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
                   Invoice #{{ invoice.invoiceNumber }}
                 </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Created: {{ formatDate(invoice.createdAt) }}
                 </p>
               </div>
@@ -34,7 +40,7 @@
                   ${{ invoice.totalAmount.toLocaleString() }}
                 </div>
                 <span 
-                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-2"
+                  class="inline-flex items-center px-3 py-1 mt-2 text-sm font-medium rounded-full"
                   :class="getStatusBadgeClass(invoice.status)"
                 >
                   {{ invoice.status }}
@@ -44,9 +50,9 @@
           </div>
 
           <!-- Patient Information -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Patient Information</h4>
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div class="p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+              <h4 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">Patient Information</h4>
               <div class="space-y-2">
                 <div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">Patient Name</div>
@@ -59,8 +65,8 @@
               </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Invoice Details</h4>
+            <div class="p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+              <h4 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">Invoice Details</h4>
               <div class="space-y-2">
                 <div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">Due Date</div>
@@ -75,7 +81,7 @@
           </div>
 
           <!-- Services -->
-          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div class="bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h4 class="text-sm font-medium text-gray-900 dark:text-white">Services & Charges</h4>
             </div>
@@ -83,28 +89,28 @@
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Service</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantity</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unit Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
+                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Service</th>
+                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Department</th>
+                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Quantity</th>
+                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Unit Price</th>
+                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Total</th>
                   </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                   <tr v-for="service in invoice.services" :key="service.id">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="text-sm font-medium text-gray-900 dark:text-white">{{ service.name }}</div>
                       <div v-if="service.description" class="text-xs text-gray-500 dark:text-gray-400">{{ service.description }}</div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white capitalize">{{ service.department }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ service.quantity }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">${{ service.amount.toLocaleString() }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${{ (service.amount * service.quantity).toLocaleString() }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 capitalize whitespace-nowrap dark:text-white">{{ service.department }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">{{ service.quantity }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">${{ service.amount.toLocaleString() }}</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">${{ (service.amount * service.quantity).toLocaleString() }}</td>
                   </tr>
                 </tbody>
                 <tfoot class="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">Total Amount:</td>
+                    <td colspan="4" class="px-6 py-3 text-sm font-medium text-right text-gray-900 dark:text-white">Total Amount:</td>
                     <td class="px-6 py-3 text-sm font-bold text-purple-600 dark:text-purple-400">${{ invoice.totalAmount.toLocaleString() }}</td>
                   </tr>
                 </tfoot>
@@ -116,7 +122,7 @@
           <div class="flex justify-end space-x-3">
             <button
               @click="downloadInvoice"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               <DocumentArrowDownIcon class="w-4 h-4 mr-2" />
               Download PDF
@@ -137,7 +143,7 @@
             v-model="form.patientId"
             required
             @change="updatePatientInfo"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+            class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="">Select a patient</option>
             <option 
@@ -151,7 +157,7 @@
         </div>
 
         <!-- Invoice Details -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label for="invoiceNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Invoice Number <span class="text-red-500">*</span>
@@ -162,7 +168,7 @@
               type="text"
               required
               placeholder="INV-001"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -176,21 +182,21 @@
               type="date"
               required
               :min="minDate"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
         </div>
 
         <!-- Services -->
         <div>
-          <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center justify-between mb-4">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Services <span class="text-red-500">*</span>
             </label>
             <button
               type="button"
               @click="addService"
-              class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-purple-700 bg-purple-100 border border-transparent rounded-md hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <PlusIcon class="w-4 h-4 mr-1" />
               Add Service
@@ -201,9 +207,9 @@
             <div
               v-for="(service, index) in form.services"
               :key="service.id"
-              class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4"
+              class="p-4 rounded-lg bg-gray-50 dark:bg-gray-900"
             >
-              <div class="flex justify-between items-start mb-4">
+              <div class="flex items-start justify-between mb-4">
                 <h4 class="text-sm font-medium text-gray-900 dark:text-white">Service {{ index + 1 }}</h4>
                 <button
                   type="button"
@@ -214,7 +220,7 @@
                 </button>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Service Name</label>
                   <input
@@ -222,7 +228,7 @@
                     type="text"
                     required
                     placeholder="Enter service name"
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
 
@@ -231,7 +237,7 @@
                   <select
                     v-model="service.department"
                     required
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   >
                     <option value="">Select department</option>
                     <option value="cardiology">Cardiology</option>
@@ -250,7 +256,7 @@
                     type="number"
                     min="1"
                     required
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
 
@@ -262,7 +268,7 @@
                     min="0"
                     step="0.01"
                     required
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
               </div>
@@ -273,7 +279,7 @@
                   v-model="service.description"
                   rows="2"
                   placeholder="Service description..."
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                  class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                 />
               </div>
 
@@ -286,8 +292,8 @@
           </div>
 
           <!-- Total -->
-          <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-            <div class="flex justify-between items-center">
+          <div class="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+            <div class="flex items-center justify-between">
               <span class="text-lg font-medium text-gray-900 dark:text-white">Invoice Total:</span>
               <span class="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 ${{ calculateTotal().toLocaleString() }}
@@ -297,11 +303,11 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex justify-end pt-6 space-x-3 border-t border-gray-200 dark:border-gray-700">
           <button
             type="button"
             @click="$emit('close')"
-            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             Cancel
           </button>

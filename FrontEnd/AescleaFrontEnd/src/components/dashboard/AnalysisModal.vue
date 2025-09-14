@@ -1,14 +1,20 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="fixed inset-0 z-[9999] overflow-y-auto">
     <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <!-- Background overlay with blur effect -->
       <div 
-        class="fixed inset-0 backdrop-blur-sm bg-black/20 transition-opacity" 
+        class="fixed inset-0 transition-opacity backdrop-blur-sm bg-black/20" 
         @click="$emit('close')"
       ></div>
 
       <!-- Modal panel -->
-      <div class="relative inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-10">
+      <div class="relative z-10 inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
         <!-- Header -->
         <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
           <div class="flex items-center justify-between">

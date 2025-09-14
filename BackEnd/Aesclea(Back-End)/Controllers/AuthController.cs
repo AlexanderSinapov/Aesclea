@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 using Aesclea_Back_End_.Models;
 using Aesclea_Back_End_.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -116,5 +122,67 @@ namespace Aesclea_Back_End_.Controllers
 
             return Ok(user);
         }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Token))
+                {
+                    return BadRequest(new { success = false, message = "Token is required" });
+                }
+
+                var result = await _authService.VerifyEmailAsync(request.Token);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying email with token: {Token}", request.Token);
+                return StatusCode(500, new { success = false, message = "An error occurred while verifying email" });
+            }
+        }
+
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerificationRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Email))
+                {
+                    return BadRequest(new { success = false, message = "Email is required" });
+                }
+
+                var result = await _authService.ResendVerificationEmailAsync(request.Email);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resending verification email to: {Email}", request.Email);
+                return StatusCode(500, new { success = false, message = "An error occurred while resending verification email" });
+            }
+        }
+    }
+
+    public class VerifyEmailRequest
+    {
+        public string Token { get; set; } = string.Empty;
+    }
+
+    public class ResendVerificationRequest
+    {
+        public string Email { get; set; } = string.Empty;
     }
 }

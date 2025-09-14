@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
@@ -10,7 +16,7 @@
 
     <!-- Settings Navigation Tabs -->
     <div class="border-b border-gray-200 dark:border-gray-700">
-      <nav class="-mb-px flex space-x-8">
+      <nav class="flex -mb-px space-x-8">
         <button
           v-for="tab in settingsTabs"
           :key="tab.id"
@@ -18,7 +24,7 @@
           :class="activeTab === tab.id 
             ? 'border-purple-500 text-purple-600 dark:text-purple-400' 
             : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'"
-          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+          class="px-1 py-2 text-sm font-medium border-b-2 whitespace-nowrap"
         >
           {{ tab.name }}
         </button>
@@ -27,7 +33,7 @@
 
     <!-- Profile Settings -->
     <div v-if="activeTab === 'profile'" class="space-y-6">
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Profile Information</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">Update your personal information and profile settings.</p>
@@ -37,11 +43,11 @@
           <!-- Profile Photo -->
           <div class="flex items-center space-x-6">
             <div class="shrink-0">
-              <img class="h-16 w-16 object-cover rounded-full" :src="profileForm.avatar || '/api/placeholder/64/64'" alt="Profile photo" />
+              <img class="object-cover w-16 h-16 rounded-full" :src="profileForm.avatar || '/api/placeholder/64/64'" alt="Profile photo" />
             </div>
             <div>
               <label for="photo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Photo</label>
-              <div class="mt-1 flex items-center space-x-4">
+              <div class="flex items-center mt-1 space-x-4">
                 <input
                   type="file"
                   id="photo"
@@ -53,7 +59,7 @@
                 <button
                   type="button"
                   @click="photoInput?.click()"
-                  class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm leading-4 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                  class="px-3 py-2 text-sm font-medium leading-4 text-gray-700 border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                 >
                   Change Photo
                 </button>
@@ -62,7 +68,7 @@
           </div>
 
           <!-- Personal Information -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
               <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
               <input
@@ -70,7 +76,7 @@
                 v-model="profileForm.firstName"
                 type="text"
                 required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
@@ -81,7 +87,7 @@
                 v-model="profileForm.lastName"
                 type="text"
                 required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
@@ -92,7 +98,7 @@
                 v-model="profileForm.email"
                 type="email"
                 required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
@@ -102,7 +108,7 @@
                 id="phone"
                 v-model="profileForm.phone"
                 type="tel"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
@@ -111,7 +117,7 @@
               <select
                 id="department"
                 v-model="profileForm.department"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="">Select Department</option>
                 <option value="administration">Administration</option>
@@ -129,7 +135,7 @@
               <select
                 id="role"
                 v-model="profileForm.role"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="doctor">Doctor</option>
                 <option value="nurse">Nurse</option>
@@ -143,7 +149,7 @@
           <div class="flex justify-end">
             <button
               type="submit"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               Save Changes
             </button>
@@ -155,7 +161,7 @@
     <!-- Security Settings -->
     <div v-else-if="activeTab === 'security'" class="space-y-6">
       <!-- Change Password -->
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Change Password</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">Update your account password.</p>
@@ -169,7 +175,7 @@
               v-model="passwordForm.currentPassword"
               type="password"
               required
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -181,7 +187,7 @@
               type="password"
               required
               minlength="8"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -192,7 +198,7 @@
               v-model="passwordForm.confirmPassword"
               type="password"
               required
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -200,7 +206,7 @@
             <button
               type="submit"
               :disabled="!isPasswordFormValid"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Update Password
             </button>
@@ -209,7 +215,7 @@
       </div>
 
       <!-- Two-Factor Authentication -->
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Two-Factor Authentication</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">Add an extra layer of security to your account.</p>
@@ -230,11 +236,11 @@
               :class="securitySettings.twoFactorEnabled 
                 ? 'bg-purple-600 focus:ring-purple-500' 
                 : 'bg-gray-200 focus:ring-gray-500'"
-              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
+              class="relative inline-flex flex-shrink-0 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer w-11 focus:outline-none focus:ring-2 focus:ring-offset-2"
             >
               <span
                 :class="securitySettings.twoFactorEnabled ? 'translate-x-5' : 'translate-x-0'"
-                class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition duration-200 ease-in-out"
+                class="inline-block w-5 h-5 transition duration-200 ease-in-out transform bg-white rounded-full shadow pointer-events-none ring-0"
               />
             </button>
           </div>
@@ -245,7 +251,7 @@
     <!-- Preferences -->
     <div v-else-if="activeTab === 'preferences'" class="space-y-6">
       <!-- Theme Settings -->
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Appearance</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">Customize how the application looks and feels.</p>
@@ -253,39 +259,39 @@
         
         <div class="px-6 py-6 space-y-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Theme</label>
+            <label class="block mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Theme</label>
             <div class="grid grid-cols-3 gap-3">
-              <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+              <label class="relative flex p-4 bg-white border rounded-lg shadow-sm cursor-pointer focus:outline-none">
                 <input type="radio" v-model="preferences.theme" value="light" class="sr-only" />
                 <span class="flex flex-1">
                   <span class="flex flex-col">
                     <span class="block text-sm font-medium text-gray-900">Light</span>
-                    <span class="mt-1 flex items-center text-sm text-gray-500">Always light theme</span>
+                    <span class="flex items-center mt-1 text-sm text-gray-500">Always light theme</span>
                   </span>
                 </span>
-                <CheckCircleIcon v-if="preferences.theme === 'light'" class="h-5 w-5 text-purple-600" />
+                <CheckCircleIcon v-if="preferences.theme === 'light'" class="w-5 h-5 text-purple-600" />
               </label>
 
-              <label class="relative flex cursor-pointer rounded-lg border bg-gray-900 p-4 text-white shadow-sm focus:outline-none">
+              <label class="relative flex p-4 text-white bg-gray-900 border rounded-lg shadow-sm cursor-pointer focus:outline-none">
                 <input type="radio" v-model="preferences.theme" value="dark" class="sr-only" />
                 <span class="flex flex-1">
                   <span class="flex flex-col">
                     <span class="block text-sm font-medium text-white">Dark</span>
-                    <span class="mt-1 flex items-center text-sm text-gray-300">Always dark theme</span>
+                    <span class="flex items-center mt-1 text-sm text-gray-300">Always dark theme</span>
                   </span>
                 </span>
-                <CheckCircleIcon v-if="preferences.theme === 'dark'" class="h-5 w-5 text-purple-400" />
+                <CheckCircleIcon v-if="preferences.theme === 'dark'" class="w-5 h-5 text-purple-400" />
               </label>
 
-              <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+              <label class="relative flex p-4 bg-white border rounded-lg shadow-sm cursor-pointer focus:outline-none">
                 <input type="radio" v-model="preferences.theme" value="system" class="sr-only" />
                 <span class="flex flex-1">
                   <span class="flex flex-col">
                     <span class="block text-sm font-medium text-gray-900">System</span>
-                    <span class="mt-1 flex items-center text-sm text-gray-500">Follow system setting</span>
+                    <span class="flex items-center mt-1 text-sm text-gray-500">Follow system setting</span>
                   </span>
                 </span>
-                <CheckCircleIcon v-if="preferences.theme === 'system'" class="h-5 w-5 text-purple-600" />
+                <CheckCircleIcon v-if="preferences.theme === 'system'" class="w-5 h-5 text-purple-600" />
               </label>
             </div>
           </div>
@@ -296,7 +302,7 @@
             <select
               id="language"
               v-model="preferences.language"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
             >
               <option value="en">English</option>
               <option value="es">Español</option>
@@ -312,7 +318,7 @@
             <select
               id="timezone"
               v-model="preferences.timezone"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
             >
               <option value="UTC">UTC</option>
               <option value="America/New_York">Eastern Time</option>
@@ -328,7 +334,7 @@
           <div class="flex justify-end">
             <button
               @click="savePreferences"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               Save Preferences
             </button>
@@ -339,7 +345,7 @@
 
     <!-- Notifications -->
     <div v-else-if="activeTab === 'notifications'" class="space-y-6">
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Notification Settings</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">Configure how you receive notifications.</p>
@@ -356,7 +362,7 @@
                 <input
                   v-model="notification.email"
                   type="checkbox"
-                  class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  class="text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                 />
                 <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Email</span>
               </label>
@@ -364,7 +370,7 @@
                 <input
                   v-model="notification.push"
                   type="checkbox"
-                  class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  class="text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                 />
                 <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Push</span>
               </label>
@@ -374,7 +380,7 @@
           <div class="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               @click="saveNotifications"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               Save Notifications
             </button>

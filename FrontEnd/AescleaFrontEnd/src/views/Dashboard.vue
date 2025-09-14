@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Sidebar Backdrop for Mobile -->
@@ -241,7 +247,9 @@
             </div>
 
             <!-- Overview -->
-            <DashboardOverview v-if="activeView === 'overview'" :selected-department="selectedDepartment" />
+            <DashboardOverview v-if="activeView === 'overview'" 
+                               :selected-department="selectedDepartment" 
+                               @navigate="handleNavigation" />
             
             <!-- Patients -->
             <PatientsView v-else-if="activeView === 'patients'" :selected-department="selectedDepartment" />
@@ -377,13 +385,27 @@ const departments = ref([
   { id: 'pediatrics', name: 'Pediatrics', icon: HeartIcon, patientCount: 12 },
 ])
 
-const handleNavigation = (item: any) => {
-  if (item.requiresSubscription && !subscriptionStore.hasActiveSubscription) {
+const handleNavigation = (itemOrView: any) => {
+  // Handle string view names from emit events
+  if (typeof itemOrView === 'string') {
+    const navigationItem = navigationItems.find(item => item.view === itemOrView)
+    if (navigationItem) {
+      if (navigationItem.requiresSubscription && !subscriptionStore.hasActiveSubscription) {
+        navigateToSubscription()
+        return
+      }
+    }
+    activeView.value = itemOrView
+    return
+  }
+  
+  // Handle navigation item objects
+  if (itemOrView.requiresSubscription && !subscriptionStore.hasActiveSubscription) {
     // Show subscription required modal or navigate to subscription page
     navigateToSubscription()
     return
   }
-  activeView.value = item.view
+  activeView.value = itemOrView.view
 }
 
 const navigateToSubscription = () => {

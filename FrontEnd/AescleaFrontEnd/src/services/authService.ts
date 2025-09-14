@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 import api from './api'
 
 export interface LoginRequest {
@@ -32,7 +38,7 @@ export interface User {
   phone: string
   role: string
   hospital: string
-  emailVerified: boolean
+  isEmailVerified: boolean
   createdAt: string
   updatedAt: string
 }
@@ -171,7 +177,7 @@ class AuthService {
       if (data.success) {
         const currentUser = this.getUser()
         if (currentUser) {
-          currentUser.emailVerified = true
+          currentUser.isEmailVerified = true
           localStorage.setItem('user', JSON.stringify(currentUser))
         }
       }

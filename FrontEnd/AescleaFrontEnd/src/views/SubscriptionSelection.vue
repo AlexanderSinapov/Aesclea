@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
     <!-- Header -->
@@ -179,11 +185,17 @@ const userInitials = computed(() => {
 
 const selectPlan = async (plan: SubscriptionPlan) => {
   try {
+    console.log('Starting subscription process for plan:', plan.id)
     await subscriptionStore.subscribeToPlan(plan.id)
+    
+    console.log('Subscription completed! Current state:', {
+      hasActiveSubscription: subscriptionStore.hasActiveSubscription,
+      canAccessAI: subscriptionStore.canAccessAI,
+      userSubscription: subscriptionStore.userSubscription
+    })
+    
     // Redirect to dashboard after successful subscription
     router.push('/dashboard')
-    console.log(plan)
-    console.log(userInitials.value)
   } catch (error) {
     console.error('Subscription failed:', error)
   }
@@ -193,12 +205,14 @@ const skipForNow = () => {
   router.push('/dashboard')
 }
 
+
+
 const handleLogout = async () => {
   await authStore.logout()
   router.push('/login')
 }
 
-onMounted(() => {
+onMounted(async () => {
   // Check if user is authenticated
   if (!authStore.isAuthenticated) {
     router.push('/login')
@@ -208,6 +222,14 @@ onMounted(() => {
   // If user already has a subscription, redirect to dashboard
   if (subscriptionStore.hasActiveSubscription) {
     router.push('/dashboard')
+    return
+  }
+
+  // Load available subscription plans
+  try {
+    await subscriptionStore.loadAvailablePlans()
+  } catch (error) {
+    console.error('Failed to load subscription plans:', error)
   }
 })
 </script>

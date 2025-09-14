@@ -1,19 +1,25 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
-  <div class="p-8 bg-white dark:bg-black text-black dark:text-white transition-all duration-500">
-    <h1 class="text-4xl font-bold mb-4">Theme Test</h1>
+  <div class="p-8 text-black transition-all duration-500 bg-white dark:bg-black dark:text-white">
+    <h1 class="mb-4 text-4xl font-bold">Theme Test</h1>
     <p class="mb-4">This should change colors when you toggle dark mode.</p>
     
     <!-- Direct HTML class manipulation test -->
     <button 
       @click="testDarkClass"
-      class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded mr-4"
+      class="px-4 py-2 mr-4 text-white bg-blue-500 rounded hover:bg-blue-600"
     >
       Force Dark Class
     </button>
     
     <button 
       @click="testLightClass" 
-      class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded mr-4"
+      class="px-4 py-2 mr-4 text-white bg-gray-500 rounded hover:bg-gray-600"
     >
       Force Light Class
     </button>
@@ -21,13 +27,13 @@
     <!-- Theme composable test -->
     <button 
       @click="toggleTheme"
-      class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
+      class="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
     >
       Toggle Theme ({{ isDark ? 'Dark' : 'Light' }})
     </button>
     
-    <div class="mt-8 p-4 border border-gray-300 dark:border-gray-700 rounded">
-      <h3 class="font-bold mb-2">Debug Info:</h3>
+    <div class="p-4 mt-8 border border-gray-300 rounded dark:border-gray-700">
+      <h3 class="mb-2 font-bold">Debug Info:</h3>
       <p>isDark ref: {{ isDark }}</p>
       <p>HTML has dark class: {{ htmlHasDark }}</p>
       <p>HTML classes: {{ htmlClasses }}</p>

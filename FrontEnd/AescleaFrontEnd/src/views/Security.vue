@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="min-h-screen transition-colors duration-300">
     <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -223,56 +229,134 @@
       </section>
 
       <!-- Certifications Section -->
-      <section class="py-20 bg-gradient-to-r from-green-600 to-emerald-600">
+      <section class="py-20 bg-white dark:bg-gray-800">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div class="mb-16 text-center">
-            <h2 class="mb-4 text-3xl font-extrabold text-white">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h2 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white">
               Industry Certifications & Standards
             </h2>
-            <p class="max-w-3xl mx-auto text-xl text-green-100">
+            <p class="max-w-3xl mx-auto text-xl text-gray-600 dark:text-gray-300">
               Our security framework meets or exceeds industry standards and regulatory requirements
             </p>
           </div>
           
           <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <div class="p-6 text-center bg-white bg-opacity-10 backdrop-blur-sm rounded-xl">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-lg bg-opacity-20">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- SOC 2 Type II -->
+            <div class="p-8 transition-all duration-300 ease-out transform cursor-pointer group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
+              <div class="flex items-center justify-center w-16 h-16 mb-6 transition-all duration-300 ease-out bg-green-100 dark:bg-green-900 rounded-xl group-hover:scale-105">
+                <svg class="w-8 h-8 text-green-600 transition-all duration-300 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 class="mb-2 text-xl font-bold text-white">SOC 2 Type II</h3>
-              <p class="text-sm text-green-100">Independently audited security controls and processes</p>
+              <h3 class="mb-4 text-2xl font-bold text-gray-900 transition-colors duration-300 dark:text-white">SOC 2 Type II</h3>
+              <p class="mb-6 text-gray-600 transition-colors duration-300 dark:text-gray-300">Independently audited security controls and processes for data protection.</p>
+              <div class="flex items-center text-sm text-green-600 transition-all duration-300 dark:text-green-400">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-105" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Annual third-party audits
+              </div>
             </div>
             
-            <div class="p-6 text-center bg-white bg-opacity-10 backdrop-blur-sm rounded-xl">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-lg bg-opacity-20">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- HIPAA Compliant -->
+            <div class="p-8 transition-all duration-300 ease-out transform cursor-pointer group bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
+              <div class="flex items-center justify-center w-16 h-16 mb-6 transition-all duration-300 ease-out bg-blue-100 dark:bg-blue-900 rounded-xl group-hover:scale-105">
+                <svg class="w-8 h-8 text-blue-600 transition-all duration-300 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 class="mb-2 text-xl font-bold text-white">HIPAA Compliant</h3>
-              <p class="text-sm text-green-100">Full compliance with healthcare privacy regulations</p>
+              <h3 class="mb-4 text-2xl font-bold text-gray-900 transition-colors duration-300 dark:text-white">HIPAA Compliant</h3>
+              <p class="mb-6 text-gray-600 transition-colors duration-300 dark:text-gray-300">Full compliance with healthcare privacy regulations and patient data protection.</p>
+              <div class="flex items-center text-sm text-blue-600 transition-all duration-300 dark:text-blue-400">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-105" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                PHI protection protocols
+              </div>
             </div>
             
-            <div class="p-6 text-center bg-white bg-opacity-10 backdrop-blur-sm rounded-xl">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-lg bg-opacity-20">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- ISO 27001 -->
+            <div class="p-8 transition-all duration-300 ease-out transform cursor-pointer group bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
+              <div class="flex items-center justify-center w-16 h-16 mb-6 transition-all duration-300 ease-out bg-purple-100 dark:bg-purple-900 rounded-xl group-hover:scale-105">
+                <svg class="w-8 h-8 text-purple-600 transition-all duration-300 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 class="mb-2 text-xl font-bold text-white">ISO 27001</h3>
-              <p class="text-sm text-green-100">International standard for information security management</p>
+              <h3 class="mb-4 text-2xl font-bold text-gray-900 transition-colors duration-300 dark:text-white">ISO 27001</h3>
+              <p class="mb-6 text-gray-600 transition-colors duration-300 dark:text-gray-300">International standard for information security management systems.</p>
+              <div class="flex items-center text-sm text-purple-600 transition-all duration-300 dark:text-purple-400">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-105" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Risk management framework
+              </div>
             </div>
             
-            <div class="p-6 text-center bg-white bg-opacity-10 backdrop-blur-sm rounded-xl">
-              <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-lg bg-opacity-20">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- GDPR Ready -->
+            <div class="p-8 transition-all duration-300 ease-out transform cursor-pointer group bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-700 dark:to-gray-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
+              <div class="flex items-center justify-center w-16 h-16 mb-6 transition-all duration-300 ease-out bg-orange-100 dark:bg-orange-900 rounded-xl group-hover:scale-105">
+                <svg class="w-8 h-8 text-orange-600 transition-all duration-300 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 class="mb-2 text-xl font-bold text-white">GDPR Ready</h3>
-              <p class="text-sm text-green-100">European data protection regulation compliance</p>
+              <h3 class="mb-4 text-2xl font-bold text-gray-900 transition-colors duration-300 dark:text-white">GDPR Ready</h3>
+              <p class="mb-6 text-gray-600 transition-colors duration-300 dark:text-gray-300">European data protection regulation compliance and privacy rights.</p>
+              <div class="flex items-center text-sm text-orange-600 transition-all duration-300 dark:text-orange-400">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-105" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Data subject rights
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical Standards Badge Row -->
+          <div class="mt-16">
+            <h3 class="mb-8 text-xl font-bold text-center text-gray-900 dark:text-white">
+              Technical Standards & Protocols
+            </h3>
+            <div class="flex flex-wrap justify-center gap-4">
+              <div class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 transition-all duration-300 ease-out bg-green-100 rounded-full cursor-pointer group dark:bg-green-900 dark:text-green-300 hover:scale-105 hover:shadow-md hover:bg-green-200 dark:hover:bg-green-800">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 717.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                </svg>
+                <span class="transition-all duration-200">HL7 FHIR R4</span>
+              </div>
+              <div class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 transition-all duration-300 ease-out bg-blue-100 rounded-full cursor-pointer group dark:bg-blue-900 dark:text-blue-300 hover:scale-105 hover:shadow-md hover:bg-blue-200 dark:hover:bg-blue-800">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="transition-all duration-200">DICOM 3.0</span>
+              </div>
+              <div class="inline-flex items-center px-4 py-2 text-sm font-medium text-purple-700 transition-all duration-300 ease-out bg-purple-100 rounded-full cursor-pointer group dark:bg-purple-900 dark:text-purple-300 hover:scale-105 hover:shadow-md hover:bg-purple-200 dark:hover:bg-purple-800">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span class="transition-all duration-200">IHE Profiles</span>
+              </div>
+              <div class="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-700 transition-all duration-300 ease-out bg-indigo-100 rounded-full cursor-pointer group dark:bg-indigo-900 dark:text-indigo-300 hover:scale-105 hover:shadow-md hover:bg-indigo-200 dark:hover:bg-indigo-800">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                <span class="transition-all duration-200">NIST Cybersecurity Framework</span>
+              </div>
+              <div class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-300 ease-out bg-gray-100 rounded-full cursor-pointer group dark:bg-gray-700 dark:text-gray-300 hover:scale-105 hover:shadow-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span class="transition-all duration-200">TLS 1.3</span>
+              </div>
+              <div class="inline-flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 ease-out rounded-full cursor-pointer group text-emerald-700 bg-emerald-100 dark:bg-emerald-900 dark:text-emerald-300 hover:scale-105 hover:shadow-md hover:bg-emerald-200 dark:hover:bg-emerald-800">
+                <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span class="transition-all duration-200">AES-256 Encryption</span>
+              </div>
             </div>
           </div>
         </div>
@@ -449,7 +533,7 @@ import { onMounted } from 'vue'
 import { useTheme } from '../composables/useTheme'
 import AppNavbar from '../components/AppNavbar.vue'
 
-const { isDark, toggleTheme, initializeTheme } = useTheme()
+const { initializeTheme } = useTheme()
 
 onMounted(() => {
   initializeTheme()

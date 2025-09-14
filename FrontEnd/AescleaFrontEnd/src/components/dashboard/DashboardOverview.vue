@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
@@ -12,7 +18,7 @@
         <button
           @click="refreshData"
           :disabled="isRefreshing"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
         >
           <svg 
             class="w-4 h-4 mr-2" 
@@ -30,19 +36,19 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <UsersIcon class="h-6 w-6 text-gray-400" />
+              <UsersIcon class="w-6 h-6 text-gray-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Patients</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total Patients</dt>
                 <dd class="flex items-baseline">
                   <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ patientsStore.totalPatients }}</div>
-                  <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
-                    <ArrowUpIcon class="self-center flex-shrink-0 h-3 w-3 text-green-500" />
+                  <div class="flex items-baseline ml-2 text-sm font-semibold text-green-600">
+                    <ArrowUpIcon class="self-center flex-shrink-0 w-3 h-3 text-green-500" />
                     <span class="sr-only">Increased by</span>
                     12%
                   </div>
@@ -53,18 +59,18 @@
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <CalendarIcon class="h-6 w-6 text-gray-400" />
+              <CalendarIcon class="w-6 h-6 text-gray-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Today's Appointments</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Today's Appointments</dt>
                 <dd class="flex items-baseline">
                   <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ patientsStore.todayAppointments.length }}</div>
-                  <div class="ml-2 flex items-baseline text-sm font-semibold text-blue-600">
+                  <div class="flex items-baseline ml-2 text-sm font-semibold text-blue-600">
                     <span class="text-xs">{{ upcomingAppointments }} upcoming</span>
                   </div>
                 </dd>
@@ -74,18 +80,18 @@
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <ChartBarIcon class="h-6 w-6 text-gray-400" />
+              <ChartBarIcon class="w-6 h-6 text-gray-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Pending Analyses</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Pending Analyses</dt>
                 <dd class="flex items-baseline">
                   <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ analysisStore.pendingAnalyses.length }}</div>
-                  <div class="ml-2 flex items-baseline text-sm font-semibold text-orange-600">
+                  <div class="flex items-baseline ml-2 text-sm font-semibold text-orange-600">
                     <span class="text-xs">{{ completedToday }} completed today</span>
                   </div>
                 </dd>
@@ -95,18 +101,18 @@
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <ExclamationTriangleIcon class="h-6 w-6 text-gray-400" />
+              <ExclamationTriangleIcon class="w-6 h-6 text-gray-400" />
             </div>
-            <div class="ml-5 w-0 flex-1">
+            <div class="flex-1 w-0 ml-5">
               <dl>
-                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Critical Patients</dt>
+                <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Critical Patients</dt>
                 <dd class="flex items-baseline">
                   <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ patientsStore.criticalPatients }}</div>
-                  <div class="ml-2 flex items-baseline text-sm font-semibold text-red-600">
+                  <div class="flex items-baseline ml-2 text-sm font-semibold text-red-600">
                     <span class="text-xs">Requires attention</span>
                   </div>
                 </dd>
@@ -118,9 +124,9 @@
     </div>
 
     <!-- Department Overview -->
-    <div v-if="!selectedDepartment" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div v-if="!selectedDepartment" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <!-- Department Stats -->
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Department Overview</h3>
         </div>
@@ -128,8 +134,8 @@
           <div class="space-y-4">
             <div v-for="(patients, department) in patientsStore.patientsByDepartment" :key="department" class="flex items-center justify-between">
               <div class="flex items-center">
-                <div class="w-3 h-3 rounded-full mr-3" :class="getDepartmentColor(department)"></div>
-                <span class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ department }}</span>
+                <div class="w-3 h-3 mr-3 rounded-full" :class="getDepartmentColor(department)"></div>
+                <span class="text-sm font-medium text-gray-900 capitalize dark:text-white">{{ department }}</span>
               </div>
               <div class="text-sm text-gray-500 dark:text-gray-400">{{ patients.length }} patients</div>
             </div>
@@ -138,7 +144,7 @@
       </div>
 
       <!-- Recent Activity -->
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h3>
         </div>
@@ -150,12 +156,12 @@
                 <div class="relative flex items-start space-x-3">
                   <div>
                     <div class="relative px-1">
-                      <div class="h-8 w-8 bg-gray-100 dark:bg-gray-700 rounded-full ring-8 ring-white dark:ring-gray-800 flex items-center justify-center">
-                        <component :is="getActivityIcon(activity.type)" class="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      <div class="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full dark:bg-gray-700 ring-8 ring-white dark:ring-gray-800">
+                        <component :is="getActivityIcon(activity.type)" class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </div>
                     </div>
                   </div>
-                  <div class="min-w-0 flex-1">
+                  <div class="flex-1 min-w-0">
                     <div>
                       <div class="text-sm">
                         <span class="font-medium text-gray-900 dark:text-white">{{ activity.title }}</span>
@@ -175,41 +181,41 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">Quick Actions</h3>
       </div>
       <div class="p-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <button 
             @click="$emit('navigate', 'patients')"
-            class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="flex items-center p-4 transition-colors border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <PlusIcon class="h-5 w-5 text-purple-600 mr-3" />
+            <PlusIcon class="w-5 h-5 mr-3 text-purple-600" />
             <span class="text-sm font-medium text-gray-900 dark:text-white">Add Patient</span>
           </button>
           
           <button 
             @click="$emit('navigate', 'appointments')"
-            class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="flex items-center p-4 transition-colors border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <CalendarIcon class="h-5 w-5 text-blue-600 mr-3" />
+            <CalendarIcon class="w-5 h-5 mr-3 text-blue-600" />
             <span class="text-sm font-medium text-gray-900 dark:text-white">Schedule Appointment</span>
           </button>
           
           <button 
             @click="$emit('navigate', 'analysis')"
-            class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="flex items-center p-4 transition-colors border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <ChartBarIcon class="h-5 w-5 text-green-600 mr-3" />
+            <ChartBarIcon class="w-5 h-5 mr-3 text-green-600" />
             <span class="text-sm font-medium text-gray-900 dark:text-white">Run AI Analysis</span>
           </button>
           
           <button 
             @click="$emit('navigate', 'billing')"
-            class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="flex items-center p-4 transition-colors border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <CreditCardIcon class="h-5 w-5 text-orange-600 mr-3" />
+            <CreditCardIcon class="w-5 h-5 mr-3 text-orange-600" />
             <span class="text-sm font-medium text-gray-900 dark:text-white">View Billing</span>
           </button>
         </div>
@@ -217,13 +223,13 @@
     </div>
 
     <!-- Today's Schedule -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">Today's Schedule</h3>
       </div>
       <div class="p-6">
-        <div v-if="patientsStore.todayAppointments.length === 0" class="text-center py-8">
-          <CalendarIcon class="mx-auto h-12 w-12 text-gray-400" />
+        <div v-if="patientsStore.todayAppointments.length === 0" class="py-8 text-center">
+          <CalendarIcon class="w-12 h-12 mx-auto text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No appointments today</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Your schedule is clear for today.</p>
         </div>
@@ -232,11 +238,11 @@
           <div 
             v-for="appointment in patientsStore.todayAppointments.slice(0, 5)" 
             :key="appointment.id"
-            class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            class="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-700"
           >
             <div class="flex items-center space-x-4">
               <div class="flex-shrink-0">
-                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                <div class="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full dark:bg-purple-900">
                   <span class="text-sm font-medium text-purple-600 dark:text-purple-300">
                     {{ appointment.patientName.split(' ').map(n => n[0]).join('') }}
                   </span>

@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useSubscriptionStore } from '../stores/subscription'
@@ -133,7 +139,7 @@ router.beforeEach(async (to, _from, next) => {
   
   if (requiresGuest && authStore.isAuthenticated) {
     // If user is authenticated, check if they need email verification
-    if (authStore.user && !authStore.user.emailVerified) {
+    if (authStore.user && !authStore.user.isEmailVerified) {
       next(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
       return
     }
@@ -155,19 +161,19 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   // Check email verification for authenticated users
-  if (authStore.isAuthenticated && authStore.user && !authStore.user.emailVerified && to.path !== '/email-verification') {
+  if (authStore.isAuthenticated && authStore.user && !authStore.user.isEmailVerified && to.path !== '/email-verification' && to.path !== '/verify-email') {
     next(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
     return
   }
 
   // Check email verification requirement
-  if (requiresEmailVerified && authStore.user && !authStore.user.emailVerified) {
+  if (requiresEmailVerified && authStore.user && !authStore.user.isEmailVerified) {
     next(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
     return
   }
 
   // Check subscription requirement
-  if (requiresSubscription && authStore.isAuthenticated && authStore.user?.emailVerified) {
+  if (requiresSubscription && authStore.isAuthenticated && authStore.user?.isEmailVerified) {
     try {
       await subscriptionStore.loadUserSubscription()
       if (!subscriptionStore.hasActiveSubscription) {
@@ -181,7 +187,7 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   // Check no subscription requirement (for subscription selection page)
-  if (requiresNoSubscription && authStore.isAuthenticated && authStore.user?.emailVerified) {
+  if (requiresNoSubscription && authStore.isAuthenticated && authStore.user?.isEmailVerified) {
     try {
       await subscriptionStore.loadUserSubscription()
       if (subscriptionStore.hasActiveSubscription) {

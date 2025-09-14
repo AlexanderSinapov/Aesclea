@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 using System.ComponentModel.DataAnnotations;
 
 namespace Aesclea_Back_End_.Models 
@@ -62,6 +68,11 @@ namespace Aesclea_Back_End_.Models
         public string Role { get; set; } = string.Empty;
         public string MedicalNumber { get; set; } = string.Empty;
         public string Hospital { get; set; } = string.Empty;
+        public bool IsEmailVerified { get; set; } = false;
+        public string? EmailVerificationToken { get; set; }
+        public DateTime? EmailVerificationTokenExpires { get; set; }
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

@@ -1,20 +1,26 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="fixed inset-0 z-[9999] overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <!-- Background overlay with blur effect -->
       <div 
-        class="fixed inset-0 backdrop-blur-sm bg-black/20 transition-opacity" 
+        class="fixed inset-0 transition-opacity backdrop-blur-sm bg-black/20" 
         @click="$emit('close')"
       ></div>
 
       <!-- Modal panel -->
-      <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full z-10">
+      <div class="relative z-10 inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
         <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="px-4 pt-5 pb-4 bg-white border-b border-gray-200 dark:bg-gray-800 sm:p-6 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
-              <div class="flex-shrink-0 h-16 w-16">
-                <div class="h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+              <div class="flex-shrink-0 w-16 h-16">
+                <div class="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full dark:bg-purple-900">
                   <span class="text-xl font-medium text-purple-600 dark:text-purple-300">
                     {{ patient?.firstName.charAt(0) }}{{ patient?.lastName.charAt(0) }}
                   </span>
@@ -24,7 +30,7 @@
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
                   {{ patient?.firstName }} {{ patient?.lastName }}
                 </h3>
-                <div class="flex items-center space-x-4 mt-1">
+                <div class="flex items-center mt-1 space-x-4">
                   <span 
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                     :class="getStatusBadgeClass(patient?.status || 'active')"
@@ -44,7 +50,7 @@
             <div class="flex items-center space-x-2">
               <button
                 @click="$emit('edit', patient)"
-                class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
               >
                 <PencilIcon class="w-4 h-4 mr-2" />
                 Edit
@@ -53,7 +59,7 @@
                 @click="$emit('close')"
                 class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
               >
-                <XMarkIcon class="h-6 w-6" />
+                <XMarkIcon class="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -61,13 +67,13 @@
 
         <!-- Content -->
         <div class="px-4 py-6 sm:px-6">
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <!-- Patient Information -->
-            <div class="lg:col-span-2 space-y-6">
+            <div class="space-y-6 lg:col-span-2">
               <!-- Basic Information -->
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Basic Information</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h4 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Basic Information</h4>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
                     <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ patient?.email }}</dd>
@@ -84,7 +90,7 @@
                   </div>
                   <div>
                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-white capitalize">{{ patient?.gender }}</dd>
+                    <dd class="mt-1 text-sm text-gray-900 capitalize dark:text-white">{{ patient?.gender }}</dd>
                   </div>
                   <div>
                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Patient Since</dt>
@@ -98,15 +104,15 @@
               </div>
 
               <!-- Medical History -->
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Medical History</h4>
+              <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h4 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Medical History</h4>
                 <div class="text-sm text-gray-700 dark:text-gray-300">
                   {{ patient?.medicalHistory || 'No medical history available.' }}
                 </div>
               </div>
 
               <!-- Recent Appointments -->
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+              <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
                 <div class="flex items-center justify-between mb-4">
                   <h4 class="text-lg font-medium text-gray-900 dark:text-white">Recent Appointments</h4>
                   <button
@@ -123,7 +129,7 @@
                   <div 
                     v-for="appointment in patientAppointments.slice(0, 3)" 
                     :key="appointment.id"
-                    class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600"
+                    class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-600"
                   >
                     <div>
                       <p class="text-sm font-medium text-gray-900 dark:text-white">{{ appointment.appointmentType }}</p>
@@ -140,7 +146,7 @@
               </div>
 
               <!-- AI Analysis Results -->
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+              <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
                 <div class="flex items-center justify-between mb-4">
                   <h4 class="text-lg font-medium text-gray-900 dark:text-white">AI Analysis Results</h4>
                   <button
@@ -157,10 +163,10 @@
                   <div 
                     v-for="analysis in patientAnalyses.slice(0, 3)" 
                     :key="analysis.id"
-                    class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600"
+                    class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-600"
                   >
                     <div>
-                      <p class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ analysis.analysisType.replace('-', ' ') }}</p>
+                      <p class="text-sm font-medium text-gray-900 capitalize dark:text-white">{{ analysis.analysisType.replace('-', ' ') }}</p>
                       <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDateTime(analysis.createdAt) }}</p>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -185,33 +191,33 @@
             <!-- Quick Actions Sidebar -->
             <div class="space-y-6">
               <!-- Quick Actions -->
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h4>
+              <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h4 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Quick Actions</h4>
                 <div class="space-y-3">
                   <button
                     @click="scheduleAppointment"
-                    class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <CalendarIcon class="w-4 h-4 mr-2" />
                     Schedule Appointment
                   </button>
                   <button
                     @click="requestAnalysis"
-                    class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <ChartBarIcon class="w-4 h-4 mr-2" />
                     Request AI Analysis
                   </button>
                   <button
                     @click="viewMedicalRecords"
-                    class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <DocumentTextIcon class="w-4 h-4 mr-2" />
                     Medical Records
                   </button>
                   <button
                     @click="sendMessage"
-                    class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <EnvelopeIcon class="w-4 h-4 mr-2" />
                     Send Message
@@ -220,16 +226,16 @@
               </div>
 
               <!-- Emergency Contacts -->
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Emergency Contacts</h4>
+              <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h4 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Emergency Contacts</h4>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   No emergency contacts on file.
                 </div>
               </div>
 
               <!-- Insurance Information -->
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Insurance</h4>
+              <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h4 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Insurance</h4>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   No insurance information available.
                 </div>

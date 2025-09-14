@@ -1,4 +1,10 @@
-﻿using static Aesclea_Back_End_.AIModel.Neuron;
+﻿// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
+using static Aesclea_Back_End_.AIModel.Neuron;
 using System;
 
 namespace Aesclea_Back_End_.AIModel

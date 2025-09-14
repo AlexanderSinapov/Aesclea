@@ -1,0 +1,47 @@
+@baseUrl = https://localhost:7000
+@baseUrlHttp = http://localhost:5000
+
+### Test Authentication
+GET {{baseUrl}}/api/patients/test-auth
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Test Patient Creation (requires authentication)
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "firstName": "John",
+  "lastName": "Doe", 
+  "email": "john.doe@example.com",
+  "phone": "+1000125585",
+  "dateOfBirth": "1990-01-15",
+  "gender": "Male",
+  "medicalHistory": "No known allergies",
+  "department": "Cardiology",
+  "status": "active"
+}
+
+### Get All Patients (requires authentication)
+GET {{baseUrl}}/api/patients
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Register a user first (to get a token)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Password123!",
+  "firstName": "Test",
+  "lastName": "User"
+}
+
+### Login (to get JWT token)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Password123!"
+}

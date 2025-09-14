@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -1273,7 +1279,8 @@ namespace Aesclea_Back_End_
             {
                 Console.WriteLine($"Error saving weights: {ex.Message}");
             }
-        }        private static void AnalyzeImageWithAnnotation(NeuronNetwork network)
+        }
+        private static void AnalyzeImageWithAnnotation(NeuronNetwork network)
         {
             Console.WriteLine("Enter the path to the image file to analyze:");
             string? imagePath = Console.ReadLine();
@@ -1282,7 +1289,8 @@ namespace Aesclea_Back_End_
             {
                 Console.WriteLine($"File not found or invalid path: {imagePath}");
                 return;
-            }            try
+            }
+            try
             {
                 if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
                 {
@@ -1314,17 +1322,17 @@ namespace Aesclea_Back_End_
                                 Console.WriteLine("6. Blue");
                                 Console.WriteLine("7. Purple");
                                 Console.Write("Enter choice (1-7): ");
-                                
+
                                 string? colorChoice = Console.ReadLine();
                                 string outlineColor = GetColorFromChoice(colorChoice ?? "1");
 
                                 // Create annotated image
                                 string annotatedPath = CreateConsoleAnnotatedImage(imagePath, result, outlineColor);
-                                
+
                                 if (!string.IsNullOrEmpty(annotatedPath))
                                 {
                                     Console.WriteLine($"Annotated image saved to: {annotatedPath}");
-                                    
+
                                     // Also save analysis info
                                     string infoPath = Path.ChangeExtension(annotatedPath, ".txt");
                                     File.WriteAllText(infoPath, result.GetSummary());

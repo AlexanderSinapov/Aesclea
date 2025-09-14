@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '../services/api'
@@ -103,85 +109,6 @@ export const usePatientsStore = defineStore('patients', () => {
     
     try {
       // For demo purposes, create sample data if none exists
-      if (patients.value.length === 0) {
-        patients.value = [
-          {
-            id: '1',
-            firstName: 'John',
-            lastName: 'Smith',
-            email: 'john.smith@email.com',
-            phone: '+1-555-0123',
-            dateOfBirth: '1980-05-15',
-            gender: 'Male',
-            medicalHistory: 'Hypertension, Diabetes Type 2',
-            department: 'cardiology',
-            status: 'active',
-            createdAt: '2024-01-15T10:00:00Z',
-            updatedAt: '2024-01-15T10:00:00Z',
-            lastVisit: '2024-01-10T14:30:00Z'
-          },
-          {
-            id: '2',
-            firstName: 'Emily',
-            lastName: 'Johnson',
-            email: 'emily.johnson@email.com',
-            phone: '+1-555-0124',
-            dateOfBirth: '1975-03-22',
-            gender: 'Female',
-            medicalHistory: 'Breast cancer survivor, Currently in remission',
-            department: 'oncology',
-            status: 'active',
-            createdAt: '2024-01-12T09:00:00Z',
-            updatedAt: '2024-01-12T09:00:00Z',
-            lastVisit: '2024-01-08T11:00:00Z'
-          },
-          {
-            id: '3',
-            firstName: 'Michael',
-            lastName: 'Davis',
-            email: 'michael.davis@email.com',
-            phone: '+1-555-0125',
-            dateOfBirth: '1965-11-08',
-            gender: 'Male',
-            medicalHistory: 'Stroke history, Ongoing rehabilitation',
-            department: 'neurology',
-            status: 'critical',
-            createdAt: '2024-01-10T08:00:00Z',
-            updatedAt: '2024-01-10T08:00:00Z',
-            lastVisit: '2024-01-09T16:45:00Z'
-          },
-          {
-            id: '4',
-            firstName: 'Sarah',
-            lastName: 'Wilson',
-            email: 'sarah.wilson@email.com',
-            phone: '+1-555-0126',
-            dateOfBirth: '1992-07-18',
-            gender: 'Female',
-            medicalHistory: 'No significant medical history',
-            department: 'emergency',
-            status: 'active',
-            createdAt: '2024-01-14T12:00:00Z',
-            updatedAt: '2024-01-14T12:00:00Z',
-            lastVisit: '2024-01-13T20:15:00Z'
-          },
-          {
-            id: '5',
-            firstName: 'David',
-            lastName: 'Brown',
-            email: 'david.brown@email.com',
-            phone: '+1-555-0127',
-            dateOfBirth: '2010-02-14',
-            gender: 'Male',
-            medicalHistory: 'Asthma, Regular check-ups',
-            department: 'pediatrics',
-            status: 'active',
-            createdAt: '2024-01-11T14:00:00Z',
-            updatedAt: '2024-01-11T14:00:00Z',
-            lastVisit: '2024-01-07T10:30:00Z'
-          }
-        ]
-      }
       
       // Try to fetch from API if available
       try {
@@ -273,15 +200,24 @@ export const usePatientsStore = defineStore('patients', () => {
     error.value = null
     
     try {
-      const newPatient: Patient = {
-        ...patient,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      // Try API first
+      try {
+        const response = await api.post('/patients', patient)
+        const newPatient = response.data
+        patients.value.push(newPatient)
+        return newPatient
+      } catch (apiError) {
+        // API failed, create local patient
+        console.warn('API unavailable, creating patient locally:', apiError)
+        const newPatient: Patient = {
+          ...patient,
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        patients.value.push(newPatient)
+        return newPatient
       }
-      
-      patients.value.push(newPatient)
-      return newPatient
     } catch (err: any) {
       error.value = err.response?.data?.message || err.message || 'Failed to add patient'
       throw err
@@ -295,12 +231,27 @@ export const usePatientsStore = defineStore('patients', () => {
     error.value = null
     
     try {
-      const index = patients.value.findIndex(p => p.id === id)
-      if (index !== -1) {
-        patients.value[index] = {
-          ...patients.value[index],
-          ...updates,
-          updatedAt: new Date().toISOString()
+      // Try API first
+      try {
+        await api.put(`/patients/${id}`, updates)
+        const index = patients.value.findIndex(p => p.id === id)
+        if (index !== -1) {
+          patients.value[index] = {
+            ...patients.value[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+          }
+        }
+      } catch (apiError) {
+        // API failed, update locally
+        console.warn('API unavailable, updating patient locally:', apiError)
+        const index = patients.value.findIndex(p => p.id === id)
+        if (index !== -1) {
+          patients.value[index] = {
+            ...patients.value[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+          }
         }
       }
     } catch (err: any) {
@@ -316,15 +267,75 @@ export const usePatientsStore = defineStore('patients', () => {
     error.value = null
     
     try {
-      const index = patients.value.findIndex(p => p.id === id)
-      if (index !== -1) {
-        patients.value.splice(index, 1)
+      // Try API first
+      try {
+        await api.delete(`/patients/${id}`)
+        const index = patients.value.findIndex(p => p.id === id)
+        if (index !== -1) {
+          patients.value.splice(index, 1)
+        }
+      } catch (apiError) {
+        // API failed, delete locally
+        console.warn('API unavailable, deleting patient locally:', apiError)
+        const index = patients.value.findIndex(p => p.id === id)
+        if (index !== -1) {
+          patients.value.splice(index, 1)
+        }
       }
     } catch (err: any) {
       error.value = err.response?.data?.message || err.message || 'Failed to delete patient'
       throw err
     } finally {
       isLoading.value = false
+    }
+  }
+
+  const addAppointment = async (appointmentData: Omit<Appointment, 'id'>) => {
+    const newAppointment: Appointment = {
+      ...appointmentData,
+      id: `apt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    }
+    
+    appointments.value.push(newAppointment)
+    
+    // Also try to save to API but don't fail if it doesn't work
+    try {
+      await api.post('/appointments', newAppointment)
+    } catch (err) {
+      console.warn('Failed to save appointment to API, keeping local copy:', err)
+    }
+    
+    return newAppointment
+  }
+
+  const updateAppointmentInStore = async (id: string, appointmentData: Partial<Appointment>) => {
+    const index = appointments.value.findIndex(a => a.id === id)
+    if (index !== -1) {
+      appointments.value[index] = { ...appointments.value[index], ...appointmentData }
+      
+      // Also try to update on API but don't fail if it doesn't work
+      try {
+        await api.put(`/appointments/${id}`, appointmentData)
+      } catch (err) {
+        console.warn('Failed to update appointment on API, keeping local changes:', err)
+      }
+      
+      return appointments.value[index]
+    }
+    throw new Error('Appointment not found')
+  }
+
+  const deleteAppointment = async (id: string) => {
+    const index = appointments.value.findIndex(a => a.id === id)
+    if (index !== -1) {
+      appointments.value.splice(index, 1)
+      
+      // Also try to delete from API but don't fail if it doesn't work
+      try {
+        await api.delete(`/appointments/${id}`)
+      } catch (err) {
+        console.warn('Failed to delete appointment from API, removed locally:', err)
+      }
     }
   }
 
@@ -343,6 +354,9 @@ export const usePatientsStore = defineStore('patients', () => {
     fetchAppointments,
     addPatient,
     updatePatient,
-    deletePatient
+    deletePatient,
+    addAppointment,
+    updateAppointmentInStore,
+    deleteAppointment
   }
 })

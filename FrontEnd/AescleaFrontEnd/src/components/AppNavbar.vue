@@ -1,11 +1,17 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
-  <header class="relative bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-6">
+  <header class="relative transition-colors duration-300 bg-white shadow-sm dark:bg-gray-800">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between py-6">
         <!-- Logo and Title -->
         <div class="flex items-center">
-          <div class="h-10 w-10 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center">
-            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </div>
@@ -13,13 +19,13 @@
         </div>
 
         <!-- Navigation Links -->
-        <nav class="hidden md:flex space-x-8">
-          <router-link to="/features" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Features</router-link>
-          <router-link to="/pricing" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Pricing</router-link>
-          <router-link to="/security" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Security</router-link>
-          <router-link to="/updates" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Updates</router-link>
-          <router-link to="/help" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Help</router-link>
-          <router-link to="/contact" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Contact</router-link>
+        <nav class="hidden space-x-8 md:flex">
+          <router-link to="/features" class="text-gray-700 transition-colors dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Features</router-link>
+          <router-link to="/pricing" class="text-gray-700 transition-colors dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Pricing</router-link>
+          <router-link to="/security" class="text-gray-700 transition-colors dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Security</router-link>
+          <router-link to="/updates" class="text-gray-700 transition-colors dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Updates</router-link>
+          <router-link to="/help" class="text-gray-700 transition-colors dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Help</router-link>
+          <router-link to="/contact" class="text-gray-700 transition-colors dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Contact</router-link>
         </nav>
 
         <!-- Right Side Actions -->
@@ -29,16 +35,16 @@
             <button 
               @click="handleToggleClick"
               @dblclick="handleDoubleClick"
-              class="theme-toggle-button relative flex items-center justify-center w-12 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 hover:shadow-md hover:scale-105"
+              class="relative flex items-center justify-center w-12 h-6 transition-all duration-300 ease-in-out bg-gray-200 rounded-full theme-toggle-button dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 hover:shadow-md hover:scale-105"
               :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
             >
               <!-- Toggle Track -->
-              <div class="absolute inset-0 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500 transition-all duration-300"
+              <div class="absolute inset-0 transition-all duration-300 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500"
               ></div>
               
               <!-- Toggle Circle -->
               <div id = "theme-change-btn"
-                class="relative z-10 flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-800 rounded-full shadow-md transform transition-all duration-500 ease-in-out"
+                class="relative z-10 flex items-center justify-center w-5 h-5 transition-all duration-500 ease-in-out transform bg-white rounded-full shadow-md dark:bg-gray-800"
                 :class="[
                   isDark ? 'translate-x-3 rotate-270' : '-translate-x-3 rotate-0'
                 ]"
@@ -46,7 +52,7 @@
                 <!-- Sun Icon (Light Mode) -->
                 <svg 
                   v-if="!isDark" 
-                  class="h-3 w-3 text-yellow-500 transition-all duration-700 ease-in-out transform" 
+                  class="w-3 h-3 text-yellow-500 transition-all duration-700 ease-in-out transform" 
                   :class="isDark ? 'rotate-180' : 'rotate-0'"
                   fill="currentColor" 
                   viewBox="0 0 20 20"
@@ -57,7 +63,7 @@
                 <!-- Moon Icon (Dark Mode) -->
                 <svg 
                   v-else 
-                  class="h-3 w-3 text-indigo-400 transition-all duration-700 ease-in-out transform" 
+                  class="w-3 h-3 text-indigo-400 transition-all duration-700 ease-in-out transform" 
                   :class="!isDark ? 'rotate-180' : 'rotate-0'"
                   fill="currentColor" 
                   viewBox="0 0 20 20"
@@ -68,7 +74,7 @@
             </button>
             
             <!-- Theme Label -->
-            <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <div class="absolute text-xs text-gray-500 transition-opacity duration-200 transform -translate-x-1/2 opacity-0 pointer-events-none -bottom-8 left-1/2 dark:text-gray-400 whitespace-nowrap group-hover:opacity-100">
               {{ isDark ? 'Dark Mode' : 'Light Mode' }} ({{ isDark ? 'ON' : 'OFF' }})
             </div>
           </div>
@@ -76,13 +82,13 @@
           <!-- Auth Links -->
           <router-link
             to="/login"
-            class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            class="px-3 py-2 text-sm font-medium text-gray-700 transition-colors rounded-md dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
           >
             Login
           </router-link>
           <router-link
             to="/register"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            class="px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-md hover:bg-indigo-700"
           >
             Sign Up
           </router-link>

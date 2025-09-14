@@ -1,6 +1,12 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
-  <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-3xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+  <div class="fixed inset-0 z-50 w-full h-full overflow-y-auto backdrop-blur-sm bg-black/20">
+    <div class="relative w-11/12 max-w-3xl p-5 mx-auto bg-white border rounded-md shadow-lg top-20 dark:bg-gray-800">
       <!-- Header -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
         <div>
@@ -25,13 +31,13 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <span 
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+              class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full"
               :class="getStatusBadgeClass(appointment.status)"
             >
               {{ appointment.status }}
             </span>
             <span 
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+              class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full"
               :class="getPriorityBadgeClass(appointment.priority)"
             >
               {{ appointment.priority }} priority
@@ -41,7 +47,7 @@
             <button
               v-if="appointment.status === 'scheduled'"
               @click="$emit('edit', appointment)"
-              class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <PencilIcon class="w-4 h-4 mr-1" />
               Edit
@@ -49,7 +55,7 @@
             <button
               v-if="appointment.status === 'scheduled'"
               @click="markCompleted"
-              class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
               <CheckIcon class="w-4 h-4 mr-1" />
               Mark Complete
@@ -58,9 +64,9 @@
         </div>
 
         <!-- Patient Information -->
-        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-          <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Patient Information</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
+          <h4 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">Patient Information</h4>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <div class="text-sm text-gray-500 dark:text-gray-400">Patient Name</div>
               <div class="text-sm font-medium text-gray-900 dark:text-white">{{ appointment.patientName }}</div>
@@ -73,12 +79,12 @@
         </div>
 
         <!-- Appointment Information -->
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-          <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Appointment Information</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+          <h4 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">Appointment Information</h4>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <div class="text-sm text-gray-500 dark:text-gray-400">Department</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ appointment.department }}</div>
+              <div class="text-sm font-medium text-gray-900 capitalize dark:text-white">{{ appointment.department }}</div>
             </div>
             <div>
               <div class="text-sm text-gray-500 dark:text-gray-400">Appointment Type</div>
@@ -101,24 +107,24 @@
 
         <!-- Reason and Notes -->
         <div v-if="appointment.reason || appointment.notes" class="space-y-4">
-          <div v-if="appointment.reason" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Reason for Visit</h4>
+          <div v-if="appointment.reason" class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+            <h4 class="mb-2 text-sm font-medium text-gray-900 dark:text-white">Reason for Visit</h4>
             <p class="text-sm text-gray-700 dark:text-gray-300">{{ appointment.reason }}</p>
           </div>
           
-          <div v-if="appointment.notes" class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Additional Notes</h4>
+          <div v-if="appointment.notes" class="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+            <h4 class="mb-2 text-sm font-medium text-gray-900 dark:text-white">Additional Notes</h4>
             <p class="text-sm text-gray-700 dark:text-gray-300">{{ appointment.notes }}</p>
           </div>
         </div>
 
         <!-- Actions Section -->
-        <div v-if="appointment.status === 'scheduled'" class="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Quick Actions</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div v-if="appointment.status === 'scheduled'" class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h4 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">Quick Actions</h4>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <button
               @click="sendReminder"
-              class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               <BellIcon class="w-4 h-4 mr-2" />
               Send Reminder
@@ -126,7 +132,7 @@
             
             <button
               @click="reschedule"
-              class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               <CalendarIcon class="w-4 h-4 mr-2" />
               Reschedule
@@ -134,7 +140,7 @@
             
             <button
               @click="cancel"
-              class="inline-flex items-center justify-center px-4 py-2 border border-red-300 dark:border-red-600 text-sm font-medium rounded-md text-red-700 dark:text-red-300 bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md dark:border-red-600 dark:text-red-300 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               <XCircleIcon class="w-4 h-4 mr-2" />
               Cancel
@@ -143,25 +149,25 @@
         </div>
 
         <!-- Completed Appointment Summary -->
-        <div v-if="appointment.status === 'completed'" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+        <div v-if="appointment.status === 'completed'" class="p-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
           <div class="flex items-center">
-            <CheckCircleIcon class="w-5 h-5 text-green-500 mr-2" />
+            <CheckCircleIcon class="w-5 h-5 mr-2 text-green-500" />
             <h4 class="text-sm font-medium text-green-800 dark:text-green-200">Appointment Completed</h4>
           </div>
-          <p class="text-sm text-green-700 dark:text-green-300 mt-1">
+          <p class="mt-1 text-sm text-green-700 dark:text-green-300">
             This appointment was successfully completed. Check patient records for visit notes and follow-up instructions.
           </p>
         </div>
 
         <!-- Cancelled/Rescheduled Appointment Info -->
-        <div v-if="appointment.status === 'cancelled' || appointment.status === 'rescheduled'" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div v-if="appointment.status === 'cancelled' || appointment.status === 'rescheduled'" class="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
           <div class="flex items-center">
-            <XCircleIcon class="w-5 h-5 text-red-500 mr-2" />
+            <XCircleIcon class="w-5 h-5 mr-2 text-red-500" />
             <h4 class="text-sm font-medium text-red-800 dark:text-red-200">
               {{ appointment.status === 'cancelled' ? 'Appointment Cancelled' : 'Appointment Rescheduled' }}
             </h4>
           </div>
-          <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+          <p class="mt-1 text-sm text-red-700 dark:text-red-300">
             {{ appointment.status === 'cancelled' 
               ? 'This appointment was cancelled.' 
               : 'This appointment was rescheduled.' }}
@@ -170,10 +176,10 @@
       </div>
 
       <!-- Footer Actions -->
-      <div class="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex justify-end pt-6 mt-6 space-x-3 border-t border-gray-200 dark:border-gray-700">
         <button
           @click="$emit('close')"
-          class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
           Close
         </button>

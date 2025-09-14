@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 using Aesclea_Back_End_.Models;
 using Aesclea_Back_End_.Data;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +15,14 @@ namespace Aesclea_Back_End_.Services
     {
         private readonly AescleaDbContext _context;
         private readonly IJwtService _jwtService;
+        private readonly IEmailService _emailService;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(AescleaDbContext context, IJwtService jwtService, ILogger<AuthService> logger)
+        public AuthService(AescleaDbContext context, IJwtService jwtService, IEmailService emailService, ILogger<AuthService> logger)
         {
             _context = context;
             _jwtService = jwtService;
+            _emailService = emailService;
             _logger = logger;
         }
 
@@ -52,6 +60,9 @@ namespace Aesclea_Back_End_.Services
                     Phone = request.Phone,
                     Role = request.Role,
                     Hospital = request.Hospital,
+                    IsEmailVerified = false,
+                    EmailVerificationToken = Guid.NewGuid().ToString(),
+                    EmailVerificationTokenExpires = DateTime.UtcNow.AddHours(24),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -62,7 +73,30 @@ namespace Aesclea_Back_End_.Services
 
                 _logger.LogInformation("User registered successfully: {Email}", request.Email);
 
-                // Generate tokens
+                // Send verification email
+                try
+                {
+                    var emailSent = await _emailService.SendVerificationEmailAsync(
+                        user.Email, 
+                        user.EmailVerificationToken!, 
+                        $"{user.FirstName} {user.LastName}"
+                    );
+                    
+                    if (!emailSent)
+                    {
+                        _logger.LogWarning("Failed to send verification email to {Email}", user.Email);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Verification email sent successfully to {Email}", user.Email);
+                    }
+                }
+                catch (Exception emailEx)
+                {
+                    _logger.LogError(emailEx, "Error sending verification email to {Email}", user.Email);
+                }
+
+                // Generate tokens (user can login but should verify email)
                 var accessToken = _jwtService.GenerateAccessToken(user);
                 var refreshToken = _jwtService.GenerateRefreshToken();
 
@@ -76,6 +110,7 @@ namespace Aesclea_Back_End_.Services
                     Phone = user.Phone,
                     Role = user.Role,
                     Hospital = user.Hospital,
+                    IsEmailVerified = user.IsEmailVerified,
                     CreatedAt = user.CreatedAt,
                     UpdatedAt = user.UpdatedAt
                 };
@@ -151,6 +186,7 @@ namespace Aesclea_Back_End_.Services
                     Phone = user.Phone,
                     Role = user.Role,
                     Hospital = user.Hospital,
+                    IsEmailVerified = user.IsEmailVerified,
                     CreatedAt = user.CreatedAt,
                     UpdatedAt = user.UpdatedAt
                 };
@@ -219,6 +255,7 @@ namespace Aesclea_Back_End_.Services
                     Phone = user.Phone,
                     Role = user.Role,
                     Hospital = user.Hospital,
+                    IsEmailVerified = user.IsEmailVerified,
                     CreatedAt = user.CreatedAt,
                     UpdatedAt = user.UpdatedAt
                 };
@@ -227,6 +264,122 @@ namespace Aesclea_Back_End_.Services
             {
                 _logger.LogError(ex, "Error retrieving user with ID: {UserId}", userId);
                 return null;
+            }
+        }
+
+        public async Task<AuthResponse> VerifyEmailAsync(string token)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.EmailVerificationToken == token && 
+                                            u.EmailVerificationTokenExpires > DateTime.UtcNow);
+
+                if (user == null)
+                {
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "Invalid or expired verification token."
+                    };
+                }
+
+                user.IsEmailVerified = true;
+                user.EmailVerificationToken = null;
+                user.EmailVerificationTokenExpires = null;
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                // Send welcome email
+                try
+                {
+                    await _emailService.SendWelcomeEmailAsync(user.Email, $"{user.FirstName} {user.LastName}");
+                }
+                catch (Exception emailEx)
+                {
+                    _logger.LogError(emailEx, "Error sending welcome email to {Email}", user.Email);
+                }
+
+                return new AuthResponse
+                {
+                    Success = true,
+                    Message = "Email verified successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying email for token: {Token}", token);
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = "Email verification failed."
+                };
+            }
+        }
+
+        public async Task<AuthResponse> ResendVerificationEmailAsync(string email)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+
+                if (user == null)
+                {
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                if (user.IsEmailVerified)
+                {
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "Email is already verified."
+                    };
+                }
+
+                // Generate new verification token
+                user.EmailVerificationToken = Guid.NewGuid().ToString();
+                user.EmailVerificationTokenExpires = DateTime.UtcNow.AddHours(24);
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                // Send verification email
+                var emailSent = await _emailService.SendVerificationEmailAsync(
+                    user.Email, 
+                    user.EmailVerificationToken!, 
+                    $"{user.FirstName} {user.LastName}"
+                );
+
+                if (!emailSent)
+                {
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "Failed to send verification email."
+                    };
+                }
+
+                return new AuthResponse
+                {
+                    Success = true,
+                    Message = "Verification email sent successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resending verification email for {Email}", email);
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = "Failed to resend verification email."
+                };
             }
         }
     }

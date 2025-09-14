@@ -1,6 +1,12 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
-  <div v-if="isOpen" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+  <div v-if="isOpen" class="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div class="relative w-11/12 max-w-4xl p-5 mx-auto bg-white border rounded-md shadow-lg top-20 dark:bg-gray-800">
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -17,19 +23,19 @@
 
       <!-- Plans Grid -->
       <div class="py-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div
             v-for="plan in subscriptionStore.availablePlans"
             :key="plan.id"
-            class="relative border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+            class="relative p-6 transition-shadow border rounded-lg shadow-sm hover:shadow-md"
             :class="[
               plan.recommended 
                 ? 'border-purple-500 ring-2 ring-purple-500 ring-opacity-50' 
                 : 'border-gray-200 dark:border-gray-700'
             ]"
           >
-            <div v-if="plan.recommended" class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <span class="bg-purple-500 text-white px-3 py-1 text-sm font-medium rounded-full">
+            <div v-if="plan.recommended" class="absolute transform -translate-x-1/2 -top-3 left-1/2">
+              <span class="px-3 py-1 text-sm font-medium text-white bg-purple-500 rounded-full">
                 Recommended
               </span>
             </div>
@@ -71,7 +77,7 @@
               <button
                 @click="selectPlan(plan)"
                 :disabled="loading"
-                class="w-full py-3 px-4 rounded-md text-sm font-medium transition-colors"
+                class="w-full px-4 py-3 text-sm font-medium transition-colors rounded-md"
                 :class="[
                   plan.recommended
                     ? 'bg-purple-600 hover:bg-purple-700 text-white'
@@ -89,7 +95,7 @@
 
       <!-- Footer -->
       <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-        <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+        <p class="text-sm text-center text-gray-500 dark:text-gray-400">
           All plans include a 14-day free trial. Cancel anytime.
         </p>
       </div>
@@ -106,11 +112,11 @@
     />
 
     <!-- Success Modal -->
-    <div v-if="showSuccessModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-1/2 transform -translate-y-1/2 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white dark:bg-gray-800">
+    <div v-if="showSuccessModal" class="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+      <div class="relative w-11/12 max-w-md p-5 mx-auto transform -translate-y-1/2 bg-white border rounded-md shadow-lg top-1/2 dark:bg-gray-800">
         <div class="text-center">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900">
-            <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full dark:bg-green-900">
+            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
           </div>
@@ -121,7 +127,7 @@
           <div class="mt-6">
             <button
               @click="closeSuccessModal"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               Get Started
             </button>

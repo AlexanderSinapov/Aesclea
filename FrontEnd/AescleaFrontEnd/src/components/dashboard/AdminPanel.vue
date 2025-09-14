@@ -1,3 +1,9 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
@@ -8,10 +14,10 @@
           System administration and management tools
         </p>
       </div>
-      <div class="mt-4 sm:mt-0 flex space-x-3">
+      <div class="flex mt-4 space-x-3 sm:mt-0">
         <button
           @click="showCreateUserModal = true"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
           <PlusIcon class="w-4 h-4 mr-2" />
           Add User
@@ -21,7 +27,7 @@
 
     <!-- Admin Navigation Tabs -->
     <div class="border-b border-gray-200 dark:border-gray-700">
-      <nav class="-mb-px flex space-x-8">
+      <nav class="flex -mb-px space-x-8">
         <button
           v-for="tab in adminTabs"
           :key="tab.id"
@@ -29,7 +35,7 @@
           :class="activeTab === tab.id 
             ? 'border-purple-500 text-purple-600 dark:text-purple-400' 
             : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'"
-          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+          class="px-1 py-2 text-sm font-medium border-b-2 whitespace-nowrap"
         >
           {{ tab.name }}
         </button>
@@ -39,16 +45,16 @@
     <!-- System Overview -->
     <div v-if="activeTab === 'overview'" class="space-y-6">
       <!-- System Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+        <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <UsersIcon class="h-6 w-6 text-blue-400" />
+                <UsersIcon class="w-6 h-6 text-blue-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="flex-1 w-0 ml-5">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Users</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total Users</dt>
                   <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ adminStore.systemStats?.totalUsers || 0 }}</dd>
                 </dl>
               </div>
@@ -56,15 +62,15 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <UserGroupIcon class="h-6 w-6 text-green-400" />
+                <UserGroupIcon class="w-6 h-6 text-green-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="flex-1 w-0 ml-5">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Sessions</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Active Sessions</dt>
                   <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ adminStore.systemStats?.activeSessions || 0 }}</dd>
                 </dl>
               </div>
@@ -72,15 +78,15 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <ServerIcon class="h-6 w-6 text-yellow-400" />
+                <ServerIcon class="w-6 h-6 text-yellow-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="flex-1 w-0 ml-5">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">System Load</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">System Load</dt>
                   <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ adminStore.systemStats?.systemLoad || 0 }}%</dd>
                 </dl>
               </div>
@@ -88,15 +94,15 @@
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <CircleStackIcon class="h-6 w-6 text-purple-400" />
+                <CircleStackIcon class="w-6 h-6 text-purple-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="flex-1 w-0 ml-5">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Database Size</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Database Size</dt>
                   <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ adminStore.systemStats?.databaseSize || 0 }}GB</dd>
                 </dl>
               </div>
@@ -106,15 +112,15 @@
       </div>
 
       <!-- Quick Actions -->
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Quick Actions</h3>
         </div>
         <div class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             <button
               @click="runSystemBackup"
-              class="flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="flex items-center justify-center px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <CircleStackIcon class="w-5 h-5 mr-2" />
               Run Backup
@@ -122,7 +128,7 @@
             
             <button
               @click="clearSystemCache"
-              class="flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="flex items-center justify-center px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <TrashIcon class="w-5 h-5 mr-2" />
               Clear Cache
@@ -130,7 +136,7 @@
             
             <button
               @click="generateReport"
-              class="flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              class="flex items-center justify-center px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <DocumentTextIcon class="w-5 h-5 mr-2" />
               Generate Report
@@ -143,20 +149,20 @@
     <!-- User Management -->
     <div v-else-if="activeTab === 'users'" class="space-y-6">
       <!-- Users Table -->
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex justify-between items-center">
+          <div class="flex items-center justify-between">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">Users ({{ adminStore.adminUsers.length }})</h3>
             <div class="flex items-center space-x-4">
               <input
                 v-model="userSearchQuery"
                 type="text"
                 placeholder="Search users..."
-                class="block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               />
               <select
                 v-model="userRoleFilter"
-                class="block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
                 <option value="">All Roles</option>
                 <option value="admin">Admin</option>
@@ -172,20 +178,20 @@
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Login</th>
+                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">User</th>
+                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Role</th>
+                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Department</th>
+                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Status</th>
+                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">Last Login</th>
                 <th class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
               <tr v-for="user in filteredUsers" :key="user.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="h-10 w-10 flex-shrink-0">
-                      <div class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                    <div class="flex-shrink-0 w-10 h-10">
+                      <div class="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full dark:bg-purple-900">
                         <span class="text-sm font-medium text-purple-600 dark:text-purple-300">
                           {{ user.firstName[0] }}{{ user.lastName[0] }}
                         </span>
@@ -199,8 +205,8 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white capitalize">{{ user.role }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white capitalize">{{ user.department }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900 capitalize whitespace-nowrap dark:text-white">{{ user.role }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900 capitalize whitespace-nowrap dark:text-white">{{ user.department }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span 
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
@@ -211,10 +217,10 @@
                     {{ user.isActive ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
                   {{ user.lastLogin ? formatDate(user.lastLogin) : 'Never' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                   <div class="flex items-center space-x-2">
                     <button
                       @click="editUser(user)"
@@ -239,14 +245,14 @@
 
     <!-- System Logs -->
     <div v-else-if="activeTab === 'logs'" class="space-y-6">
-      <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex justify-between items-center">
+          <div class="flex items-center justify-between">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">System Audit Logs</h3>
             <div class="flex items-center space-x-4">
               <select
                 v-model="logLevelFilter"
-                class="block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
                 <option value="">All Levels</option>
                 <option value="info">Info</option>
@@ -256,7 +262,7 @@
               </select>
               <button
                 @click="refreshLogs"
-                class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
               >
                 <ArrowPathIcon class="w-4 h-4 mr-1" />
                 Refresh
@@ -265,7 +271,7 @@
           </div>
         </div>
         
-        <div class="max-h-96 overflow-y-auto">
+        <div class="overflow-y-auto max-h-96">
           <div class="divide-y divide-gray-200 dark:divide-gray-700">
             <div v-for="log in filteredLogs" :key="log.id" class="px-6 py-4">
               <div class="flex items-start justify-between">

@@ -1,6 +1,12 @@
+<!-- Copyright (c) 2025 Alexander Sinapov | Simeon Petkov -->
+
+<!-- All rights reserved. -->
+<!-- This code is proprietary and confidential.   -->
+<!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
+
 <template>
-  <div v-if="isOpen" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-3xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+  <div v-if="isOpen" class="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div class="relative w-11/12 max-w-3xl p-5 mx-auto bg-white border rounded-md shadow-lg top-20 dark:bg-gray-800">
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -14,10 +20,10 @@
 
       <!-- Invoice Form -->
       <form @submit.prevent="handleSave" class="py-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <!-- Patient Information -->
           <div>
-            <label for="patientName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label for="patientName" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
               Patient Name *
             </label>
             <input
@@ -25,14 +31,14 @@
               v-model="invoiceForm.patientName"
               type="text"
               required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+              class="w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
               placeholder="Enter patient name"
             />
           </div>
 
           <!-- Due Date -->
           <div>
-            <label for="dueDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label for="dueDate" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
               Due Date *
             </label>
             <input
@@ -40,7 +46,7 @@
               v-model="invoiceForm.dueDate"
               type="date"
               required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
         </div>
@@ -52,7 +58,7 @@
             <button
               type="button"
               @click="addService"
-              class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-purple-600 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-purple-600 bg-purple-100 border border-transparent rounded-md hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800"
             >
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -65,10 +71,10 @@
             <div 
               v-for="(service, index) in invoiceForm.services" 
               :key="index"
-              class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg"
+              class="grid grid-cols-1 gap-4 p-4 border border-gray-200 rounded-lg md:grid-cols-5 dark:border-gray-600"
             >
               <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                   Service Name *
                 </label>
                 <input
@@ -76,17 +82,17 @@
                   type="text"
                   required
                   placeholder="Service name"
-                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
               <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                   Department
                 </label>
                 <select
                   v-model="service.department"
-                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                 >
                   <option value="">Select Department</option>
                   <option value="General Medicine">General Medicine</option>
@@ -99,7 +105,7 @@
               </div>
               
               <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                   Quantity *
                 </label>
                 <input
@@ -107,12 +113,12 @@
                   type="number"
                   min="1"
                   required
-                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
               <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                   Unit Price ($) *
                 </label>
                 <input
@@ -121,7 +127,7 @@
                   step="0.01"
                   min="0"
                   required
-                  class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
@@ -140,8 +146,8 @@
         </div>
 
         <!-- Total Section -->
-        <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div class="flex justify-between items-center">
+        <div class="p-4 mt-6 rounded-lg bg-gray-50 dark:bg-gray-700">
+          <div class="flex items-center justify-between">
             <span class="text-lg font-medium text-gray-900 dark:text-white">Total Amount:</span>
             <span class="text-2xl font-bold text-purple-600 dark:text-purple-400">
               ${{ totalAmount.toFixed(2) }}
@@ -150,18 +156,18 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex justify-end pt-4 mt-6 space-x-3 border-t border-gray-200 dark:border-gray-700">
           <button
             type="button"
             @click="$emit('close')"
-            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             Cancel
           </button>
           <button
             type="submit"
             :disabled="!isFormValid || isLoading"
-            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span v-if="isLoading">Creating...</span>
             <span v-else>Create Invoice</span>

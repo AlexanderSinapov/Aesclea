@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 using Aesclea_Back_End_.Configuration;
 using Aesclea_Back_End_.Services;
 using Aesclea_Back_End_.AIModel;
@@ -7,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Aesclea_Back_End_.Server
 {
@@ -59,7 +66,15 @@ namespace Aesclea_Back_End_.Server
         private void ConfigureServices(WebApplicationBuilder builder)
         {
             // Add services to the container
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    // Configure JSON serialization to handle circular references
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.WriteIndented = true;
+                    // Use camelCase for property names
+                    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -90,6 +105,13 @@ namespace Aesclea_Back_End_.Server
 
             // Add custom services in correct dependency order with explicit registrations
             builder.Services.AddScoped<IJwtService, JwtService>();
+            
+            // Register EmailService
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            
+            // Register SubscriptionService
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            
             builder.Services.AddScoped<IAuthService, AuthService>();
               // Register base services with no custom dependencies
             builder.Services.AddScoped<Aesclea_Back_End_.Services.FileService>(provider => 
@@ -105,10 +127,12 @@ namespace Aesclea_Back_End_.Server
                 return new ImageProcessingService(logger);
             });
             
-            // Configure TumorClassifier (no dependencies on other custom services)
+            
+            // Configure TumorClassifier with base network
             builder.Services.AddScoped<TumorClassifier>(provider =>
             {
-                var baseNetwork = new NeuronNetwork(new int[] { 16384, 1024, 512, 256, 1 });
+                // Create a base network for tumor detection
+                var baseNetwork = new NeuronNetwork(new int[] { 16384, 512, 256, 128, 64, 1 });
                 var classifier = new TumorClassifier(baseNetwork);
                 
                 // Auto-load existing weights if available
@@ -116,17 +140,53 @@ namespace Aesclea_Back_End_.Server
                 {
                     var fileHelper = new FileHelper();
                     fileHelper.OpenFolder();
-                    classifier.LoadWeights(fileHelper, "tgl");
-                    Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classifier weights");
+                    classifier.LoadWeights(fileHelper, "tumor_classification");
+                    global::System.Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classification weights");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"⚠️  API: Could not load existing weights: {ex.Message}");
-                    Console.WriteLine("   You may need to train the classifier first via console application.");
+                    global::System.Console.WriteLine($"⚠️  API: Could not load tumor classification weights: {ex.Message}");
+                    global::System.Console.WriteLine("   You may need to train the classification models first via console application.");
                 }
                 
                 return classifier;
             });
+
+            // Configure MedicalDiagnosisClassifier with auto-loading
+            builder.Services.AddScoped<MedicalDiagnosisClassifier>(provider =>
+            {
+                var classifier = new MedicalDiagnosisClassifier();
+                
+                // Auto-load existing diagnosis weights if available
+                try
+                {
+                    var fileHelper = new FileHelper();
+                    fileHelper.OpenFolder();
+                    
+                    // Check if any medical diagnosis files exist
+                    var availableFiles = fileHelper.GetAvailableWeightFiles();
+                    var hasMedicalDiagnosisFiles = availableFiles.Any(f => f.Contains("medical_diagnosis_"));
+                    
+                    if (hasMedicalDiagnosisFiles)
+                    {
+                        classifier.LoadWeights(fileHelper, "medical_diagnosis");
+                        global::System.Console.WriteLine("✓ API: Successfully loaded pre-trained medical diagnosis classifier weights");
+                    }
+                    else
+                    {
+                        global::System.Console.WriteLine("ℹ️  API: No medical diagnosis weights found, using default initialization");
+                        global::System.Console.WriteLine("   To train the medical diagnosis classifier, use the console application or training endpoints");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    global::System.Console.WriteLine($"⚠️  API: Could not load medical diagnosis weights: {ex.Message}");
+                    global::System.Console.WriteLine("   Medical diagnosis classifier will use default initialization.");
+                }
+                
+                return classifier;
+            });
+
               // Register TumorAnalysisService with explicit dependencies
             builder.Services.AddScoped<TumorAnalysisService>(provider =>
             {
@@ -145,7 +205,7 @@ namespace Aesclea_Back_End_.Server
                 {
                     corsBuilder.WithOrigins(
                         "http://localhost:5173", 
-                        "http://localhost:3000",
+                        "http://localhost:7000",
                         "http://localhost:8080",
                         "http://127.0.0.1:5173"
                     )
@@ -234,10 +294,16 @@ namespace Aesclea_Back_End_.Server
             {
                 using var scope = app.Services.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AescleaDbContext>();
+                var subscriptionService = scope.ServiceProvider.GetRequiredService<ISubscriptionService>();
                 
                 _logger.LogInformation("Ensuring database is created...");
                 context.Database.EnsureCreated();
                 _logger.LogInformation("Database initialization completed successfully.");
+
+                // Seed subscription plans
+                _logger.LogInformation("Seeding subscription plans...");
+                subscriptionService.SeedSubscriptionPlansAsync().Wait();
+                _logger.LogInformation("Subscription plans seeded successfully.");
             }
             catch (Exception ex)
             {

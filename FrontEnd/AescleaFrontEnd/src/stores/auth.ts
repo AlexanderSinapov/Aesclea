@@ -1,3 +1,9 @@
+// Copyright (c) 2025 Alexander Sinapov | Simeon Petkov
+
+// All rights reserved.
+// This code is proprietary and confidential.  
+// Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import authService, { type User, type LoginRequest, type RegisterRequest } from '../services/authService'
@@ -17,6 +23,9 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = storedUser
     }
   }
+
+  // Initialize auth when store is created
+  initializeAuth()
 
   const login = async (credentials: LoginRequest) => {
     isLoading.value = true
@@ -114,7 +123,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       // Update user verification status in store
       if (response.success && user.value) {
-        user.value.emailVerified = true
+        user.value.isEmailVerified = true
       }
       
       return response
