@@ -174,6 +174,180 @@ namespace Aesclea_Back_End_.Controllers
                 return StatusCode(500, new { success = false, message = "An error occurred while resending verification email" });
             }
         }
+
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _authService.UpdateProfileAsync(userId, request);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating profile for user: {UserId}", HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                return StatusCode(500, new { success = false, message = "An error occurred while updating profile" });
+            }
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _authService.ChangePasswordAsync(userId, request);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for user: {UserId}", HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                return StatusCode(500, new { success = false, message = "An error occurred while changing password" });
+            }
+        }
+
+        [HttpPut("preferences")]
+        [Authorize]
+        public async Task<IActionResult> UpdatePreferences([FromBody] UpdatePreferencesRequest request)
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _authService.UpdatePreferencesAsync(userId, request);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating preferences for user: {UserId}", HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                return StatusCode(500, new { success = false, message = "An error occurred while updating preferences" });
+            }
+        }
+
+        [HttpPut("notifications")]
+        [Authorize]
+        public async Task<IActionResult> UpdateNotificationSettings([FromBody] UpdateNotificationSettingsRequest request)
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _authService.UpdateNotificationSettingsAsync(userId, request);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating notification settings for user: {UserId}", HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                return StatusCode(500, new { success = false, message = "An error occurred while updating notification settings" });
+            }
+        }
+
+        [HttpPost("avatar")]
+        [Authorize]
+        public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _authService.UpdateAvatarAsync(userId, request);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating avatar for user: {UserId}", HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                return StatusCode(500, new { success = false, message = "An error occurred while updating avatar" });
+            }
+        }
+
+        [HttpPost("toggle-2fa")]
+        [Authorize]
+        public async Task<IActionResult> ToggleTwoFactor()
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _authService.ToggleTwoFactorAsync(userId);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling two-factor authentication for user: {UserId}", HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                return StatusCode(500, new { success = false, message = "An error occurred while toggling two-factor authentication" });
+            }
+        }
     }
 
     public class VerifyEmailRequest

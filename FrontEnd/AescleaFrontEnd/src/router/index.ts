@@ -22,6 +22,9 @@ import Help from '../views/Help.vue'
 import Contact from '../views/Contact.vue'
 import Privacy from '../views/Privacy.vue'
 import Terms from '../views/Terms.vue'
+import Support from '../views/Support.vue'
+import SupportAgent from '../views/dashboard/SupportAgent.vue'
+import Products from '../views/Products.vue'
 
 const routes = [
   {
@@ -66,6 +69,18 @@ const routes = [
     meta: { requiresAuth: true, requiresEmailVerified: true }
   },
   {
+    path: '/support',
+    name: 'Support',
+    component: Support,
+    meta: { requiresAuth: true, requiresEmailVerified: true }
+  },
+  {
+    path: '/dashboard/support-agent',
+    name: 'SupportAgent',
+    component: SupportAgent,
+    meta: { requiresAuth: true, requiresEmailVerified: true, requiresSupportRole: true }
+  },
+  {
     path: '/home',
     redirect: '/dashboard'
   },
@@ -73,6 +88,11 @@ const routes = [
     path: '/features',
     name: 'Features',
     component: Features
+  },
+  {
+    path: '/products',
+    name: 'Products',
+    component: Products
   },
   {
     path: '/pricing',
@@ -130,6 +150,7 @@ router.beforeEach(async (to, _from, next) => {
   const requiresEmailVerified = to.matched.some(record => record.meta.requiresEmailVerified)
   const requiresSubscription = to.matched.some(record => record.meta.requiresSubscription)
   const requiresNoSubscription = to.matched.some(record => record.meta.requiresNoSubscription)
+  const requiresSupportRole = to.matched.some(record => record.meta.requiresSupportRole)
 
   // Check authentication
   if (requiresAuth && !authStore.isAuthenticated) {
@@ -170,6 +191,15 @@ router.beforeEach(async (to, _from, next) => {
   if (requiresEmailVerified && authStore.user && !authStore.user.isEmailVerified) {
     next(`/email-verification?email=${encodeURIComponent(authStore.user.email)}`)
     return
+  }
+
+  // Check support role requirement
+  if (requiresSupportRole && authStore.user) {
+    const userRole = authStore.user.role?.toLowerCase()
+    if (userRole !== 'supportagent' && userRole !== 'admin') {
+      next('/dashboard') // Redirect to regular dashboard if not support agent
+      return
+    }
   }
 
   // Check subscription requirement

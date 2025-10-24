@@ -33,22 +33,57 @@ export interface UserSubscription {
 export const useSubscriptionStore = defineStore('subscription', () => {
   const userSubscription = ref<UserSubscription | null>(null)
   const availablePlans = ref<SubscriptionPlan[]>([])
-  const isLoading = ref(false)
+  const isLoading = ref(false) // General loading state
+  const isLoadingUserSubscription = ref(false) // Specific to user subscription
+  const isLoadingAvailablePlans = ref(false) // Specific to available plans
   const error = ref<string | null>(null)
   
   // Circuit breaker to prevent infinite API loops
+  const sessionId = Date.now() // Unique session identifier
   const apiCallCounts = ref({
     loadUserSubscription: 0,
     loadAvailablePlans: 0
   })
-  const maxApiCalls = 5 // Maximum calls per page load
+  const maxApiCalls = 2 // Very restrictive to prevent loops
+  const lastResetTime = ref(Date.now())
+  const lastApiCallTimes = ref({
+    loadUserSubscription: 0,
+    loadAvailablePlans: 0
+  })
+  const minTimeBetweenCalls = 1000 // Minimum 1 second between calls
+  
+  const resetCircuitBreaker = () => {
+    apiCallCounts.value.loadUserSubscription = 0
+    apiCallCounts.value.loadAvailablePlans = 0
+    lastApiCallTimes.value.loadUserSubscription = 0
+    lastApiCallTimes.value.loadAvailablePlans = 0
+    lastResetTime.value = Date.now()
+    console.log('Subscription store: Circuit breaker reset')
+  }
   
   const canMakeApiCall = (apiName: keyof typeof apiCallCounts.value) => {
-    const count = apiCallCounts.value[apiName]
-    if (count >= maxApiCalls) {
-      console.warn(`Subscription store: ${apiName} blocked - too many calls (${count})`)
+    const now = Date.now()
+    
+    // Auto-reset circuit breaker after 30 seconds
+    if (now - lastResetTime.value > 30000) {
+      resetCircuitBreaker()
+    }
+    
+    // Check if we're calling too frequently (prevents rapid-fire loops)
+    const lastCallTime = lastApiCallTimes.value[apiName]
+    if (lastCallTime && (now - lastCallTime) < minTimeBetweenCalls) {
+      console.warn(`Subscription store: ${apiName} blocked - called too recently (${now - lastCallTime}ms ago). Session: ${sessionId}`)
       return false
     }
+    
+    const count = apiCallCounts.value[apiName]
+    if (count >= maxApiCalls) {
+      console.warn(`Subscription store: ${apiName} blocked - too many calls (${count}). Session: ${sessionId}`)
+      return false
+    }
+    
+    // Record this call time
+    lastApiCallTimes.value[apiName] = now
     return true
   }
 
@@ -98,10 +133,8 @@ export const useSubscriptionStore = defineStore('subscription', () => {
         paymentMethodId
       })
       
+      // Directly set the subscription data from response
       userSubscription.value = response.data
-      
-      // Also reload user subscription to ensure we have the latest data
-      await loadUserSubscription()
       
       console.log('Subscription successful:', userSubscription.value)
       
@@ -139,18 +172,19 @@ export const useSubscriptionStore = defineStore('subscription', () => {
   const loadUserSubscription = async () => {
     // Circuit breaker protection
     if (!canMakeApiCall('loadUserSubscription')) {
-      console.error('Subscription store: loadUserSubscription blocked by circuit breaker')
+      console.error(`Subscription store: loadUserSubscription blocked by circuit breaker (session: ${sessionId})`)
       return
     }
     
-    // Prevent multiple concurrent calls
-    if (isLoading.value) {
-      console.log('Subscription store: loadUserSubscription already in progress, skipping...')
+    // Prevent multiple concurrent calls of this specific method
+    if (isLoadingUserSubscription.value) {
+      console.log(`Subscription store: loadUserSubscription already in progress, skipping... (session: ${sessionId})`)
       return
     }
     
-    console.log('Subscription store: Loading user subscription... (attempt #' + (apiCallCounts.value.loadUserSubscription + 1) + ')')
+    console.log(`Subscription store: Loading user subscription... (attempt #${apiCallCounts.value.loadUserSubscription + 1}, session: ${sessionId})`)
     apiCallCounts.value.loadUserSubscription++
+    isLoadingUserSubscription.value = true
     isLoading.value = true
     error.value = null
 
@@ -162,14 +196,21 @@ export const useSubscriptionStore = defineStore('subscription', () => {
       } else {
         userSubscription.value = null
       }
-      console.log('Subscription store: User subscription loaded successfully:', userSubscription.value)
+      console.log(`Subscription store: User subscription loaded successfully (session: ${sessionId}):`, userSubscription.value)
+      
+      // Reset circuit breaker on successful load
+      if (apiCallCounts.value.loadUserSubscription > 1) {
+        console.log('Subscription store: Resetting loadUserSubscription counter after success')
+        apiCallCounts.value.loadUserSubscription = 0
+      }
     } catch (err: any) {
-      console.error('Subscription store: Error loading user subscription:', err)
+      console.error(`Subscription store: Error loading user subscription (session: ${sessionId}):`, err)
       error.value = err.response?.data?.message || err.message || 'Failed to load subscription'
       userSubscription.value = null
       
       // Don't throw error to prevent potential retry loops
     } finally {
+      isLoadingUserSubscription.value = false
       isLoading.value = false
     }
   }
@@ -181,35 +222,43 @@ export const useSubscriptionStore = defineStore('subscription', () => {
   const loadAvailablePlans = async () => {
     // Circuit breaker protection
     if (!canMakeApiCall('loadAvailablePlans')) {
-      console.error('Subscription store: loadAvailablePlans blocked by circuit breaker')
+      console.error(`Subscription store: loadAvailablePlans blocked by circuit breaker (session: ${sessionId})`)
       return
     }
     
-    // Prevent multiple concurrent calls
-    if (isLoading.value) {
-      console.log('Subscription store: loadAvailablePlans already in progress, skipping...')
+    // Prevent multiple concurrent calls of this specific method
+    if (isLoadingAvailablePlans.value) {
+      console.log(`Subscription store: loadAvailablePlans already in progress, skipping... (session: ${sessionId})`)
       return
     }
     
-    console.log('Subscription store: Loading available plans... (attempt #' + (apiCallCounts.value.loadAvailablePlans + 1) + ')')
+    console.log(`Subscription store: Loading available plans... (attempt #${apiCallCounts.value.loadAvailablePlans + 1}, session: ${sessionId})`)
     apiCallCounts.value.loadAvailablePlans++
+    isLoadingAvailablePlans.value = true
     isLoading.value = true
     error.value = null
 
     try {
       const response = await api.get('/subscriptions/plans')
       availablePlans.value = response.data
-      console.log('Subscription store: Available plans loaded successfully:', availablePlans.value.length, 'plans')
+      console.log(`Subscription store: Available plans loaded successfully (session: ${sessionId}):`, availablePlans.value.length, 'plans')
       
-      // Reset circuit breaker on success
-      apiCallCounts.value.loadAvailablePlans = 0
+      // Reset circuit breaker on successful load
+      if (apiCallCounts.value.loadAvailablePlans > 1) {
+        console.log('Subscription store: Resetting loadAvailablePlans counter after success')
+        apiCallCounts.value.loadAvailablePlans = 0
+      }
     } catch (err: any) {
-      console.error('Subscription store: Error loading available plans:', err)
+      console.error(`Subscription store: Error loading available plans (session: ${sessionId}):`, err)
       error.value = err.response?.data?.message || err.message || 'Failed to load plans'
       
       // Don't throw error to prevent potential retry loops
     } finally {
-      isLoading.value = false
+      isLoadingAvailablePlans.value = false
+      // Only set general loading to false if both specific loading states are false
+      if (!isLoadingUserSubscription.value && !isLoadingAvailablePlans.value) {
+        isLoading.value = false
+      }
     }
   }
 
@@ -259,6 +308,8 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     userSubscription,
     availablePlans,
     isLoading,
+    isLoadingUserSubscription,
+    isLoadingAvailablePlans,
     error,
     hasActiveSubscription,
     canAccessAI,
@@ -270,6 +321,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     loadAvailablePlans,
     reactivateSubscription,
     changePlan,
-    clearError
+    clearError,
+    resetCircuitBreaker
   }
 })

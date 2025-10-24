@@ -262,22 +262,75 @@ namespace Aesclea_Back_End_.AIModel
         }
 
         /// <summary>
-        /// Load all classifier network weights
+        /// Load specialized classifier network weights (type, grade, location) and attempt to load base network
         /// </summary>
         public void LoadWeights(FileHelper fileHelper, string baseName)
         {
-            // Load each specialized network
+            Console.WriteLine($"🔄 TumorClassifier: Loading weights with base name: '{baseName}'");
+            
+            // First, try to load the base detection network with various naming patterns
+            bool baseLoaded = false;
+            
+            // Try 1: baseName_NeuralData.wbn (e.g., tgl_NeuralData.wbn)
+            var baseData = fileHelper.GetNeuralData(baseName + "_NeuralData.wbn");
+            if (baseData != null)
+            {
+                baseNetwork.SetNeuralNetworkData(baseData);
+                Console.WriteLine($"✅ Loaded base tumor detection weights from {baseName}_NeuralData.wbn");
+                baseLoaded = true;
+            }
+            
+            // Try 2: V2_NeuralData.wbn (fallback)
+            if (!baseLoaded)
+            {
+                baseData = fileHelper.GetNeuralData("V2_NeuralData.wbn");
+                if (baseData != null)
+                {
+                    baseNetwork.SetNeuralNetworkData(baseData);
+                    Console.WriteLine($"✅ Loaded base tumor detection weights from V2_NeuralData.wbn");
+                    baseLoaded = true;
+                }
+            }
+            
+            if (!baseLoaded)
+            {
+                Console.WriteLine($"⚠️  Could not find base detection weights for '{baseName}' or 'V2'");
+                Console.WriteLine($"   Base network will use default/untrained weights - detection may not work properly!");
+            }
+
+            // Now load specialized classification networks
             var typeData = fileHelper.GetNeuralData(baseName + "_type_NeuralData.wbn");
             if (typeData != null)
+            {
                 typeNetwork.SetNeuralNetworkData(typeData);
+                Console.WriteLine($"✅ Loaded tumor type classification weights");
+            }
+            else
+            {
+                Console.WriteLine($"⚠️  Could not find type classification weights: {baseName}_type_NeuralData.wbn");
+            }
 
             var gradeData = fileHelper.GetNeuralData(baseName + "_grade_NeuralData.wbn");
             if (gradeData != null)
+            {
                 gradeNetwork.SetNeuralNetworkData(gradeData);
+                Console.WriteLine($"✅ Loaded tumor grade classification weights");
+            }
+            else
+            {
+                Console.WriteLine($"⚠️  Could not find grade classification weights: {baseName}_grade_NeuralData.wbn");
+            }
 
             var locationData = fileHelper.GetNeuralData(baseName + "_location_NeuralData.wbn");
             if (locationData != null)
+            {
                 locationNetwork.SetNeuralNetworkData(locationData);
+                Console.WriteLine($"✅ Loaded tumor location classification weights");
+            }
+            else
+            {
+                Console.WriteLine($"⚠️  Could not find location classification weights: {baseName}_location_NeuralData.wbn");
+            }
         }
 
         /// <summary>

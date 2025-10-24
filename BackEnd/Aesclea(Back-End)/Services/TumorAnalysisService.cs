@@ -42,15 +42,29 @@ namespace Aesclea_Back_End_.Services
                 // Process image for AI analysis
                 var imageData = await _imageProcessingService.ProcessImageForAnalysisAsync(originalImagePath);
                 
+                // Debug: Log image data information
+                _logger.LogInformation($"🔍 Processing image: {imageFile.FileName}");
+                _logger.LogInformation($"📊 Image data size: {imageData.Count} pixels");
+                _logger.LogInformation($"📈 Sample pixel values: [{string.Join(", ", imageData.Take(5).Select(x => $"{x:F3}"))}...]");
+                
                 // Perform tumor analysis
+                _logger.LogInformation($"🧠 Running tumor analysis...");
                 var analysisResult = _tumorClassifier.AnalyzeImage(imageData);
+                
+                // Debug: Log analysis results
+                _logger.LogInformation($"🎯 Analysis complete - HasTumor: {analysisResult.HasTumor}, Probability: {analysisResult.TumorProbability:F4}");
+                _logger.LogInformation($"🏷️  Tumor Type: {analysisResult.TumorType ?? "N/A"}, Grade: {analysisResult.TumorGrade}, Location: {analysisResult.TumorLocation ?? "N/A"}");
                 
                 // Create annotated image if tumor is detected and user wants to save it
                 string? annotatedImagePath = null;
                 if (analysisResult.HasTumor && saveAnnotated)
                 {
                     annotatedImagePath = await CreateAnnotatedImageAsync(originalImagePath, analysisResult);
-                }                // Create response
+                }                // Debug: Log exact values being used in response
+                _logger.LogInformation($"🔧 DEBUG - Before creating response: analysisResult.HasTumor = {analysisResult.HasTumor}");
+                _logger.LogInformation($"🔧 DEBUG - Conditional check: Will populate details = {analysisResult.HasTumor}");
+
+                // Create response
                 var response = new TumorAnalysisResponse
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -63,18 +77,30 @@ namespace Aesclea_Back_End_.Services
                     
                     // Analysis results
                     HasTumor = analysisResult.HasTumor,
-                    TumorProbability = analysisResult.TumorProbability,
-                    TumorType = analysisResult.TumorType,
-                    TypeConfidence = analysisResult.TypeConfidence,
-                    TumorGrade = analysisResult.TumorGrade,
-                    GradeDescription = analysisResult.GradeDescription,
-                    GradeConfidence = analysisResult.GradeConfidence,
-                    TumorLocation = analysisResult.TumorLocation,
-                    LocationConfidence = analysisResult.LocationConfidence,
-                    EstimatedStage = analysisResult.EstimatedStage,
-                    StageDescription = analysisResult.StageDescription,
-                    Summary = analysisResult.GetSummary()
+                    // For confidence: if tumor detected, use probability; if no tumor, use inverse probability
+                    TumorProbability = analysisResult.HasTumor ? analysisResult.TumorProbability : (1.0 - analysisResult.TumorProbability),
+                    Summary = analysisResult.GetSummary(),
+                    
+                    // Only populate tumor details if tumor is actually detected
+                    TumorType = analysisResult.HasTumor ? analysisResult.TumorType : null,
+                    TypeConfidence = analysisResult.HasTumor ? analysisResult.TypeConfidence : 0,
+                    TumorGrade = analysisResult.HasTumor ? analysisResult.TumorGrade : 0,
+                    GradeDescription = analysisResult.HasTumor ? analysisResult.GradeDescription : null,
+                    GradeConfidence = analysisResult.HasTumor ? analysisResult.GradeConfidence : 0,
+                    TumorLocation = analysisResult.HasTumor ? analysisResult.TumorLocation : null,
+                    LocationConfidence = analysisResult.HasTumor ? analysisResult.LocationConfidence : 0,
+                    EstimatedStage = analysisResult.HasTumor ? analysisResult.EstimatedStage : 0,
+                    StageDescription = analysisResult.HasTumor ? analysisResult.StageDescription : null
                 };
+
+                // Debug: Log the response object values
+                _logger.LogInformation($"🔧 DEBUG - Response created with:");
+                _logger.LogInformation($"  - HasTumor: {response.HasTumor}");
+                _logger.LogInformation($"  - TumorProbability (confidence): {response.TumorProbability:F4}");
+                _logger.LogInformation($"  - TumorType: {response.TumorType ?? "NULL"}");
+                _logger.LogInformation($"  - TumorGrade: {response.TumorGrade}");
+                _logger.LogInformation($"  - GradeDescription: {response.GradeDescription ?? "NULL"}");
+                _logger.LogInformation($"  - TumorLocation: {response.TumorLocation ?? "NULL"}");
 
                 // Add to history
                 _analysisHistory.Add(response);
@@ -580,6 +606,14 @@ namespace Aesclea_Back_End_.Services
                 return Color.Yellow; // Low-grade tumors - yellow
             }
         }
+
+        /// <summary>
+        /// Test method for debugging classifier behavior
+        /// </summary>
+        public TumorAnalysisResult TestClassifierWithData(List<double> imageData)
+        {
+            return _tumorClassifier.AnalyzeImage(imageData);
+        }
     }    public class TumorAnalysisResponse
     {
         public string Id { get; set; } = string.Empty;
@@ -591,17 +625,38 @@ namespace Aesclea_Back_End_.Services
         public bool CanCreateAnnotatedImage { get; set; } // Indicates if an annotated image can be created/saved
         
         // Analysis results
+        [System.Text.Json.Serialization.JsonPropertyName("tumorDetected")]
         public bool HasTumor { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("confidence")]
         public double TumorProbability { get; set; }
-        public string TumorType { get; set; } = string.Empty;
+        
+        [System.Text.Json.Serialization.JsonPropertyName("tumorType")]
+        public string? TumorType { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("typeConfidence")]
         public double TypeConfidence { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("grade")]
+        public string? GradeDescription { get; set; }
+        
         public int TumorGrade { get; set; }
-        public string GradeDescription { get; set; } = string.Empty;
+        
+        [System.Text.Json.Serialization.JsonPropertyName("gradeConfidence")]
         public double GradeConfidence { get; set; }
-        public string TumorLocation { get; set; } = string.Empty;
+        
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string? TumorLocation { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("locationConfidence")]
         public double LocationConfidence { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("stage")]
         public int EstimatedStage { get; set; }
-        public string StageDescription { get; set; } = string.Empty;
+        
+        [System.Text.Json.Serialization.JsonPropertyName("stageDescription")]
+        public string? StageDescription { get; set; }
+        
         public string Summary { get; set; } = string.Empty;
     }
 

@@ -7,6 +7,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import authService, { type User, type LoginRequest, type RegisterRequest } from '../services/authService'
+import settingsService, { 
+  type UpdateProfileRequest, 
+  type ChangePasswordRequest, 
+  type UpdatePreferencesRequest,
+  type UpdateNotificationSettingsRequest,
+  type UpdateAvatarRequest 
+} from '../services/settingsService'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -135,6 +142,136 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const updateProfile = async (data: UpdateProfileRequest) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await settingsService.updateProfile(data)
+      
+      if (response.success && response.user) {
+        // Update the user in the store with the new data
+        user.value = { ...user.value, ...response.user }
+        return response
+      } else {
+        throw new Error(response.message || 'Failed to update profile')
+      }
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const changePassword = async (data: ChangePasswordRequest) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await settingsService.changePassword(data)
+      
+      if (response.success) {
+        return response
+      } else {
+        throw new Error(response.message || 'Failed to change password')
+      }
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const updatePreferences = async (data: UpdatePreferencesRequest) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await settingsService.updatePreferences(data)
+      
+      if (response.success && response.user) {
+        // Update the user in the store with the new preferences
+        user.value = { ...user.value, ...response.user }
+        return response
+      } else {
+        throw new Error(response.message || 'Failed to update preferences')
+      }
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const updateNotificationSettings = async (data: UpdateNotificationSettingsRequest) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await settingsService.updateNotificationSettings(data)
+      
+      if (response.success && response.user) {
+        // Update the user in the store with the new notification settings
+        user.value = { ...user.value, ...response.user }
+        return response
+      } else {
+        throw new Error(response.message || 'Failed to update notification settings')
+      }
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const updateAvatar = async (data: UpdateAvatarRequest) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await settingsService.updateAvatar(data)
+      
+      if (response.success && response.user) {
+        // Update the user in the store with the new avatar
+        user.value = { ...user.value, ...response.user }
+        return response
+      } else {
+        throw new Error(response.message || 'Failed to update avatar')
+      }
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const toggleTwoFactor = async () => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await settingsService.toggleTwoFactor()
+      
+      if (response.success && response.user) {
+        // Update the user in the store with the new 2FA status
+        user.value = { ...user.value, ...response.user }
+        return response
+      } else {
+        throw new Error(response.message || 'Failed to toggle two-factor authentication')
+      }
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -147,6 +284,12 @@ export const useAuthStore = defineStore('auth', () => {
     clearError,
     clearAllData,
     sendVerificationEmail,
-    verifyEmail
+    verifyEmail,
+    updateProfile,
+    changePassword,
+    updatePreferences,
+    updateNotificationSettings,
+    updateAvatar,
+    toggleTwoFactor
   }
 })

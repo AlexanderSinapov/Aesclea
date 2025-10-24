@@ -6,7 +6,7 @@
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-    <AppNavbar />
+    <SiteNavbar />
     <div class="flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div class="w-full max-w-md p-8 space-y-8 bg-white shadow-lg dark:bg-gray-800 rounded-xl">
         <div>
@@ -115,8 +115,11 @@
           </span>
         </div>
       </form>
+      </div>
     </div>
-    </div>
+
+    <!-- Footer -->
+    <SiteFooter />
   </div>
 </template>
 
@@ -124,7 +127,8 @@
 import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import AppNavbar from '../components/AppNavbar.vue'
+import SiteNavbar from '../components/SiteNavbar.vue'
+import SiteFooter from '../components/SiteFooter.vue'
 
 const router = useRouter()
 const isLoading = ref(false)

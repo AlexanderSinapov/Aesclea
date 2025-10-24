@@ -5,148 +5,164 @@
 <!-- Unauthorized copying, modification, distribution, or use is strictly prohibited. -->
 
 <template>
-  <div class="py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-    <!-- Header Section -->
-    <div class="mb-8 md:flex md:items-center md:justify-between">
-      <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
-          Billing & Subscriptions
-        </h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Manage your subscription, view invoices, and track payments
-        </p>
-      </div>
-      <div class="flex mt-4 space-x-3 md:mt-0 md:ml-4">
-        <button
-          @click="handleCreateInvoice"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700"
-        >
-          Create Invoice
-        </button>
-        <button
-          @click="handleExportData"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
-        >
-          Export Data
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-      <!-- Left Column: Subscription Management -->
-      <div class="space-y-6 lg:col-span-2">
-        <!-- Subscription Management Section -->
-        <div v-if="hasActiveSubscription" class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Current Subscription</h3>
-            <span class="inline-flex items-center px-3 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">
-              Active
-            </span>
-          </div>
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <!-- Header Section -->
+      <div class="mb-12 md:flex md:items-center md:justify-between">
+        <div class="flex-1 min-w-0">
+          <h1 class="text-3xl font-bold leading-tight text-gray-900 dark:text-white sm:text-4xl">
+            Billing & Subscriptions
+          </h1>
+          <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+            Manage your subscription, view invoices, and track payments
+          </p>
         </div>
-        <div class="p-6">
-          <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-4">
-                <div class="flex-shrink-0">
-                  <div class="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg dark:bg-purple-900">
-                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                    </svg>
+        <div class="flex mt-6 space-x-4 md:mt-0 md:ml-6">
+          <button
+            @click="handleCreateInvoice"
+            class="inline-flex items-center px-6 py-3 text-sm font-medium text-white transition-all duration-200 bg-purple-600 border border-transparent rounded-lg shadow-sm hover:bg-purple-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create Invoice
+          </button>
+          <button
+            @click="handleExportData"
+            class="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-700 transition-all duration-200 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:shadow-md dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Export Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
+        <!-- Left Column: Subscription Management -->
+        <div class="space-y-8 lg:col-span-2">
+          <!-- Subscription Management Section -->
+          <div v-if="hasActiveSubscription" class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-gray-800 dark:border-gray-700">
+            <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Current Subscription</h3>
+                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">
+                  <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 8 8">
+                    <circle cx="4" cy="4" r="3"/>
+                  </svg>
+                  Active
+                </span>
+              </div>
+            </div>
+            <div class="p-8">
+              <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex-1">
+                  <div class="flex items-start gap-6">
+                    <div class="flex-shrink-0">
+                      <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl dark:from-purple-900 dark:to-purple-800">
+                        <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ currentPlanName }} Plan
+                      </h4>
+                      <p class="mt-1 text-xl font-semibold text-purple-600 dark:text-purple-400">
+                        ${{ currentPlanPrice }}/{{ currentPlanInterval }}
+                      </p>
+                      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        Next billing: {{ formatDate(nextBillingDate) }}
+                      </p>
+                      <span 
+                        v-if="isCancellingAtPeriodEnd"
+                        class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 mt-3"
+                      >
+                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                        </svg>
+                        Cancelling at period end
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <!-- Plan Features -->
+                  <div class="grid grid-cols-1 gap-4 mt-8 sm:grid-cols-2">
+                    <div class="flex items-center p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <svg class="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ maxPatientsText }} patients</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Patient capacity</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <svg class="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ aiAnalysisLimitText }} AI analyses</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Monthly AI usage</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <h4 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    {{ currentPlanName }} Plan
-                  </h4>
-                  <p class="text-lg font-medium text-purple-600 dark:text-purple-400">
-                    ${{ currentPlanPrice }}/{{ currentPlanInterval }}
-                  </p>
-                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Next billing: {{ formatDate(nextBillingDate) }}
-                  </p>
-                  <span 
-                    v-if="isCancellingAtPeriodEnd"
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 mt-2"
+                
+                <div class="flex flex-col gap-4 lg:flex-col lg:w-48">
+                  <button
+                    v-if="!isCancellingAtPeriodEnd"
+                    @click="showChangePlan = true"
+                    class="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-purple-700 transition-all duration-200 border border-purple-200 rounded-lg bg-purple-50 hover:bg-purple-100 hover:shadow-md dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 dark:hover:bg-purple-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                   >
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
                     </svg>
-                    Cancelling at period end
-                  </span>
+                    Change Plan
+                  </button>
+                  <button
+                    v-if="!isCancellingAtPeriodEnd"
+                    @click="handleCancelSubscription"
+                    class="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-red-700 transition-all duration-200 border border-red-200 rounded-lg bg-red-50 hover:bg-red-100 hover:shadow-md dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Cancel Subscription
+                  </button>
+                  <button
+                    v-else
+                    @click="handleReactivateSubscription"
+                    class="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-green-700 transition-all duration-200 border border-green-200 rounded-lg bg-green-50 hover:bg-green-100 hover:shadow-md dark:bg-green-900/20 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Reactivate
+                  </button>
                 </div>
-              </div>
-              
-              <!-- Plan Features -->
-              <div class="grid grid-cols-1 gap-3 mt-4 sm:grid-cols-2">
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                  <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                  </svg>
-                  {{ maxPatientsText }} patients
-                </div>
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                  <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                  </svg>
-                  {{ aiAnalysisLimitText }} AI analyses
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex flex-col gap-3 sm:flex-row">
-              <button
-                v-if="!isCancellingAtPeriodEnd"
-                @click="showChangePlan = true"
-                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-700 transition-colors border border-purple-200 rounded-md bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 dark:hover:bg-purple-900/40"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
-                </svg>
-                Change Plan
-              </button>
-              <button
-                v-if="!isCancellingAtPeriodEnd"
-                @click="handleCancelSubscription"
-                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-red-700 transition-colors border border-red-200 rounded-md bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-900/40"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                Cancel Subscription
-              </button>
-              <button
-                v-else
-                @click="handleReactivateSubscription"
-                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-green-700 transition-colors border border-green-200 rounded-md bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/40"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Reactivate
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
-        <!-- No Subscription State -->
-        <div v-else class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-        <div class="p-8 text-center">
-          <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full dark:bg-purple-900/30">
-            <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-            </svg>
-          </div>
-          <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">No Active Subscription</h3>
-          <p class="max-w-md mx-auto mb-6 text-gray-500 dark:text-gray-400">
-            Subscribe to unlock all features and get unlimited access to AI-powered medical analysis, patient management, and advanced reporting.
-          </p>
-          <div class="flex flex-col justify-center gap-3 sm:flex-row">
-            <button
-              @click="showSubscriptionPlans = true"
+          <!-- No Subscription State -->
+          <div v-else class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-gray-800 dark:border-gray-700">
+            <div class="p-12 text-center">
+              <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30">
+                <svg class="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                </svg>
+              </div>
+              <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">No Active Subscription</h3>
+              <p class="max-w-lg mx-auto mb-8 text-lg text-gray-600 dark:text-gray-400">
+                Subscribe to unlock all features and get unlimited access to AI-powered medical analysis, patient management, and advanced reporting.
+              </p>
+              <div class="flex flex-col justify-center gap-4 sm:flex-row">
+                <button
+                  @click="showSubscriptionPlans = true"
               class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white transition-colors bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700"
             >
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,104 +180,113 @@
       </div>
       </div>
 
-      <!-- Right Column: Financial Overview -->
-      <div class="space-y-6 lg:col-span-1">
-        <!-- Quick Stats -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Financial Overview</h3>
-          
-          <!-- Total Revenue -->
-          <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-            <div class="p-4">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <DollarIcon class="w-6 h-6 text-green-500" />
-                </div>
-                <div class="flex-1 w-0 ml-3">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
-                      Total Revenue
-                    </dt>
-                    <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                      ${{ totalRevenue.toLocaleString() }}
-                    </dd>
-                  </dl>
+        <!-- Right Column: Financial Overview -->
+        <div class="space-y-8 lg:col-span-1">
+          <!-- Quick Stats -->
+          <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Financial Overview</h3>
+            
+            <!-- Total Revenue -->
+            <div class="overflow-hidden transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-6">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg dark:bg-green-900/30">
+                      <DollarIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+                    </div>
+                  </div>
+                  <div class="flex-1 w-0 ml-4">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                        Total Revenue
+                      </dt>
+                      <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+                        ${{ totalRevenue.toLocaleString() }}
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Pending Invoices -->
-          <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-            <div class="p-4">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <ClockIcon class="w-6 h-6 text-yellow-500" />
-                </div>
-                <div class="flex-1 w-0 ml-3">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
-                      Pending Invoices
-                    </dt>
-                    <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                      {{ pendingInvoicesCount }}
-                    </dd>
-                  </dl>
+            <!-- Pending Invoices -->
+            <div class="overflow-hidden transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-6">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-lg dark:bg-yellow-900/30">
+                      <ClockIcon class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                  </div>
+                  <div class="flex-1 w-0 ml-4">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                        Pending Invoices
+                      </dt>
+                      <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ pendingInvoicesCount }}
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Monthly Revenue -->
-          <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-            <div class="p-4">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <CheckIcon class="w-6 h-6 text-green-500" />
-                </div>
-                <div class="flex-1 w-0 ml-3">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
-                      This Month
-                    </dt>
-                    <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                      ${{ monthlyRevenue.toLocaleString() }}
-                    </dd>
-                  </dl>
+            <!-- Monthly Revenue -->
+            <div class="overflow-hidden transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-6">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg dark:bg-blue-900/30">
+                      <CheckIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                  <div class="flex-1 w-0 ml-4">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                        This Month
+                      </dt>
+                      <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+                        ${{ monthlyRevenue.toLocaleString() }}
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Outstanding Balance -->
-          <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-            <div class="p-4">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <ExclamationIcon class="w-6 h-6 text-red-500" />
-                </div>
-                <div class="flex-1 w-0 ml-3">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
-                      Outstanding
-                    </dt>
-                    <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                      ${{ outstandingBalance.toLocaleString() }}
-                    </dd>
-                  </dl>
+            <!-- Outstanding Balance -->
+            <div class="overflow-hidden transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-6">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-lg dark:bg-red-900/30">
+                      <ExclamationIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                  </div>
+                  <div class="flex-1 w-0 ml-4">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                        Outstanding Balance
+                      </dt>
+                      <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+                        ${{ outstandingBalance.toLocaleString() }}
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- Billing Management Section (Full Width) -->
-    <!-- Filters and View Options -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-      <div class="p-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+      <!-- Billing Management Section (Full Width) -->
+      <div class="mt-12 space-y-8">
+        <!-- Filters and View Options -->
+        <div class="bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-gray-800 dark:border-gray-700">
+          <div class="p-8">
+            <div class="flex flex-wrap items-center justify-between gap-6">
           <!-- View Toggle -->
           <div class="flex items-center space-x-2">
             <button
@@ -300,7 +325,7 @@
           <div class="flex items-center space-x-4">
             <select
               v-model="statusFilter"
-              class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              class="block px-4 py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 sm:text-sm transition-all duration-200"
             >
               <option value="">All Statuses</option>
               <option value="paid">Paid</option>
@@ -309,24 +334,29 @@
               <option value="cancelled">Cancelled</option>
             </select>
 
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search patients..."
-              class="block px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-            />
+            <div class="relative">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search patients..."
+                class="block w-64 px-4 py-2.5 pl-10 text-gray-900 bg-white border border-gray-300 rounded-lg shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 sm:text-sm transition-all duration-200"
+              />
+              <svg class="absolute w-4 h-4 text-gray-400 left-3 top-3 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Invoices View -->
-    <div v-if="currentView === 'invoices'" class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-          Invoices ({{ filteredInvoices.length }})
-        </h3>
-      </div>
+        <!-- Invoices View -->
+        <div v-if="currentView === 'invoices'" class="bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-gray-800 dark:border-gray-700">
+          <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+              Invoices ({{ filteredInvoices.length }})
+            </h3>
+          </div>
       
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -521,12 +551,13 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
-
+  </div>
   </div>
 
-    <!-- Create Invoice Modal -->
+  <!-- Create Invoice Modal -->
     <CreateInvoiceModal
       :is-open="showCreateInvoiceModal"
       @close="closeInvoiceModal"
@@ -639,25 +670,6 @@ const outstandingBalance = computed(() => {
     .reduce((sum, inv) => sum + inv.amount, 0)
 })
 
-const pendingInvoices = computed(() => 
-  paymentStore.invoices.filter(inv => inv.status === 'pending')
-)
-
-const overdueAmount = computed(() => {
-  const now = new Date()
-  return paymentStore.invoices
-    .filter(inv => inv.status === 'overdue' || (
-      inv.status === 'pending' && new Date(inv.dueDate) < now
-    ))
-    .reduce((sum, inv) => sum + inv.totalAmount, 0)
-})
-
-const todayPayments = computed(() => {
-  const today = new Date().toDateString()
-  return paymentStore.transactions
-    .filter(t => new Date(t.date).toDateString() === today && t.status === 'completed')
-    .reduce((sum, t) => sum + t.amount, 0)
-})
 
 const departmentRevenue = computed(() => {
   const deptData: Record<string, { revenue: number, invoices: number, patients: Set<string> }> = {}
@@ -695,9 +707,6 @@ const ExclamationIcon = {
   template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>`
 }
 
-const CurrencyDollarIcon = {
-  template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.467-.22-2.121-.659-1.172-.879-1.172-2.303 0-3.182C10.464 7.69 11.232 7.5 12 7.5c.768 0 1.536.22 2.121.659l.879-.659m-4.242 0V6m0 12v1.5m6-6.5h1.5m-7.5 0h-1.5" /></svg>`
-}
 
 const DocumentTextIcon = {
   template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-4.5A1.125 1.125 0 0010.5 9h-4.5a3.375 3.375 0 00-3.375 3.375v8.25a3.375 3.375 0 003.375 3.375h9a3.375 3.375 0 003.375-3.375V14.25zM9.75 9.75l-1.5-1.5m0 0l1.5-1.5m-1.5 1.5h12" /></svg>`
@@ -715,46 +724,39 @@ const ChartBarIcon = {
   template: `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>`
 }
 
-// EMERGENCY: Static mock data to prevent infinite loop
-// TODO: Replace with subscription store once loop is fixed
+// Computed properties based on actual subscription store data
 const hasActiveSubscription = computed(() => {
-  console.log('BillingView: Using mock hasActiveSubscription = true')
-  return true // Mock active subscription
+  return subscriptionStore.hasActiveSubscription
 })
 
 const currentPlanName = computed(() => {
-  console.log('BillingView: Using mock plan name = Professional')
-  return 'Professional'
+  return subscriptionStore.currentPlan?.name || 'No Plan'
 })
 
 const currentPlanPrice = computed(() => {
-  console.log('BillingView: Using mock price = 29')
-  return 29
+  return subscriptionStore.currentPlan?.price || 0
 })
 
 const currentPlanInterval = computed(() => {
-  console.log('BillingView: Using mock interval = month')
-  return 'month'
+  return subscriptionStore.currentPlan?.interval || 'month'
 })
 
 const nextBillingDate = computed(() => {
-  console.log('BillingView: Using mock billing date')
-  return '2025-10-14'
+  return subscriptionStore.userSubscription?.currentPeriodEnd || ''
 })
 
 const isCancellingAtPeriodEnd = computed(() => {
-  console.log('BillingView: Using mock cancellation status = false')
-  return false
+  return subscriptionStore.userSubscription?.cancelAtPeriodEnd || false
 })
 
 const maxPatientsText = computed(() => {
-  console.log('BillingView: Using mock max patients = 100')
-  return '100'
+  const limit = subscriptionStore.currentPlan?.maxPatients
+  return limit === -1 ? 'Unlimited' : limit?.toString() || '0'
 })
 
 const aiAnalysisLimitText = computed(() => {
-  console.log('BillingView: Using mock AI limit = Unlimited')
-  return 'Unlimited'
+  const limit = subscriptionStore.currentPlan?.aiAnalysisLimit
+  return limit === -1 ? 'Unlimited' : limit?.toString() || '0'
 })
 
 // Methods
@@ -888,14 +890,9 @@ const handleSaveInvoice = async (invoiceData: Omit<Invoice, 'id'>) => {
 }
 
 const handlePlanChanged = async () => {
-  try {
-    console.log('BillingView: Plan changed, reloading subscription data...')
-    // Reload subscription data after plan change
-    await subscriptionStore.loadUserSubscription()
-    console.log('BillingView: Subscription data reloaded successfully after plan change')
-  } catch (error) {
-    console.error('BillingView: Error reloading subscription after plan change:', error)
-  }
+  console.log('BillingView: Plan changed event received - subscription data should already be updated by the plan change action')
+  // Note: No need to reload subscription data here as the changePlan action in the store
+  // should already update the userSubscription.value directly
 }
 
 // Initialize data on component mount
@@ -909,49 +906,31 @@ onMounted(async () => {
   initializationInProgress.value = true
   
   try {
-    console.log('BillingView: Starting initialization...')
+    console.log('BillingView: Starting initialization (session: ' + Date.now() + ')...')
     
     // Initialize sample data for demo purposes
     paymentStore.initializeSampleData()
     console.log('BillingView: Sample data initialized')
     
-    // TESTING: Re-enabling loadAvailablePlans only (with circuit breaker protection)
-    console.log('BillingView: Testing loadAvailablePlans with circuit breaker protection')
-    
-    // Test loadAvailablePlans first
-    try {
+    // Check if data is already loaded to avoid unnecessary calls
+    if (subscriptionStore.availablePlans.length === 0) {
       console.log('BillingView: Loading available plans...')
-      // Add timeout to prevent hanging
-      const plansPromise = subscriptionStore.loadAvailablePlans()
-      const plansTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Plans loading timeout')), 5000)
-      )
-      await Promise.race([plansPromise, plansTimeout])
-      console.log('BillingView: Available plans loaded successfully - NO LOOP DETECTED')
-    } catch (error) {
-      console.error('BillingView: Failed to load available plans:', error)
-      // Continue execution even if plans fail to load
+      await subscriptionStore.loadAvailablePlans()
+    } else {
+      console.log('BillingView: Available plans already loaded, skipping...')
     }
     
-    // TESTING: Now re-enabling loadUserSubscription with circuit breaker protection
-    console.log('BillingView: Testing loadUserSubscription with circuit breaker protection')
-    try {
-      console.log('BillingView: Loading user subscription...')
-      // Add timeout to prevent hanging
-      const subscriptionPromise = subscriptionStore.loadUserSubscription()
-      const subscriptionTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Subscription loading timeout')), 5000)
-      )
-      await Promise.race([subscriptionPromise, subscriptionTimeout])
-      console.log('BillingView: User subscription loaded successfully - NO LOOP DETECTED')
-    } catch (error) {
-      console.error('BillingView: Failed to load user subscription:', error)
-      // Continue execution even if subscription fails to load
+    if (!subscriptionStore.userSubscription) {
+      console.log('BillingView: Loading user subscription...')  
+      await subscriptionStore.loadUserSubscription()
+    } else {
+      console.log('BillingView: User subscription already loaded, skipping...')
     }
     
-    console.log('BillingView: Initialization complete')
+    console.log('BillingView: Initialization completed successfully')
+    
   } catch (error) {
-    console.error('BillingView: Critical error during initialization:', error)
+    console.error('BillingView: Error during initialization:', error)
   } finally {
     initializationInProgress.value = false
   }

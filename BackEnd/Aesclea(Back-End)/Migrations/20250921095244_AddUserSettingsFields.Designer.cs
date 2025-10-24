@@ -3,6 +3,7 @@ using System;
 using Aesclea_Back_End_.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Aesclea_Back_End_.Migrations
 {
     [DbContext(typeof(AescleaDbContext))]
-    partial class AescleaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250921095244_AddUserSettingsFields")]
+    partial class AddUserSettingsFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -379,174 +382,6 @@ namespace Aesclea_Back_End_.Migrations
                     b.ToTable("SubscriptionUsages", (string)null);
                 });
 
-            modelBuilder.Entity("Aesclea_Back_End_.Models.SupportTicket", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
-                        .HasColumnName("Id");
-
-                    b.Property<string>("AssignedAgentId")
-                        .HasColumnType("text")
-                        .HasColumnName("AssignedAgentId");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Category");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("CreatedAt");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("Description");
-
-                    b.Property<string>("Priority")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Priority");
-
-                    b.Property<string>("ResolutionNote")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("ResolutionNote");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("ResolvedAt");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Status");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("Subject");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("UpdatedAt");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignedAgentId");
-
-                    b.HasIndex("Category");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("Priority");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SupportTickets", (string)null);
-                });
-
-            modelBuilder.Entity("Aesclea_Back_End_.Models.TicketAttachment", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
-                        .HasColumnName("Id");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("FileName");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("FilePath");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint")
-                        .HasColumnName("FileSize");
-
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("FileType");
-
-                    b.Property<string>("MessageId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("MessageId");
-
-                    b.Property<string>("TicketId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("TicketId");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("UploadedAt");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
-
-                    b.HasIndex("TicketId");
-
-                    b.ToTable("TicketAttachments", (string)null);
-                });
-
-            modelBuilder.Entity("Aesclea_Back_End_.Models.TicketMessage", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
-                        .HasColumnName("Id");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("Content");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("CreatedAt");
-
-                    b.Property<bool>("IsFromAgent")
-                        .HasColumnType("boolean")
-                        .HasColumnName("IsFromAgent");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("SenderId");
-
-                    b.Property<string>("TicketId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("TicketId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("SenderId");
-
-                    b.HasIndex("TicketId");
-
-                    b.ToTable("TicketMessages", (string)null);
-                });
-
             modelBuilder.Entity("Aesclea_Back_End_.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -788,62 +623,6 @@ namespace Aesclea_Back_End_.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Aesclea_Back_End_.Models.SupportTicket", b =>
-                {
-                    b.HasOne("Aesclea_Back_End_.Models.User", "AssignedAgent")
-                        .WithMany()
-                        .HasForeignKey("AssignedAgentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Aesclea_Back_End_.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AssignedAgent");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Aesclea_Back_End_.Models.TicketAttachment", b =>
-                {
-                    b.HasOne("Aesclea_Back_End_.Models.TicketMessage", "Message")
-                        .WithMany()
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Aesclea_Back_End_.Models.SupportTicket", "Ticket")
-                        .WithMany("Attachments")
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-
-                    b.Navigation("Ticket");
-                });
-
-            modelBuilder.Entity("Aesclea_Back_End_.Models.TicketMessage", b =>
-                {
-                    b.HasOne("Aesclea_Back_End_.Models.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Aesclea_Back_End_.Models.SupportTicket", "Ticket")
-                        .WithMany("Messages")
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Sender");
-
-                    b.Navigation("Ticket");
-                });
-
             modelBuilder.Entity("Aesclea_Back_End_.Models.UserSubscription", b =>
                 {
                     b.HasOne("Aesclea_Back_End_.Models.SubscriptionPlan", "Plan")
@@ -861,13 +640,6 @@ namespace Aesclea_Back_End_.Migrations
                     b.Navigation("Plan");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Aesclea_Back_End_.Models.SupportTicket", b =>
-                {
-                    b.Navigation("Attachments");
-
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

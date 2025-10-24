@@ -22,6 +22,9 @@ namespace Aesclea_Back_End_.Data
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
         public DbSet<SubscriptionUsage> SubscriptionUsages { get; set; }
         public DbSet<AnalysisRecord> AnalysisRecords { get; set; }
+        public DbSet<SupportTicket> SupportTickets { get; set; }
+        public DbSet<TicketMessage> TicketMessages { get; set; }
+        public DbSet<TicketAttachment> TicketAttachments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -221,6 +224,103 @@ namespace Aesclea_Back_End_.Data
                 entity.HasIndex(e => e.DateTime);
                 entity.HasIndex(e => e.Department);
                 entity.HasIndex(e => e.Status);
+            });
+
+            // Configure SupportTicket entity
+            modelBuilder.Entity<SupportTicket>(entity =>
+            {
+                entity.ToTable("SupportTickets");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.UserId).HasColumnName("UserId").IsRequired();
+                entity.Property(e => e.AssignedAgentId).HasColumnName("AssignedAgentId");
+                entity.Property(e => e.Subject).HasColumnName("Subject").IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasColumnName("Description").IsRequired().HasMaxLength(2000);
+                entity.Property(e => e.Status).HasColumnName("Status").IsRequired().HasConversion<string>();
+                entity.Property(e => e.Priority).HasColumnName("Priority").IsRequired().HasConversion<string>();
+                entity.Property(e => e.Category).HasColumnName("Category").IsRequired().HasConversion<string>();
+                entity.Property(e => e.CreatedAt).HasColumnName("CreatedAt");
+                entity.Property(e => e.UpdatedAt).HasColumnName("UpdatedAt");
+                entity.Property(e => e.ResolvedAt).HasColumnName("ResolvedAt");
+                entity.Property(e => e.ResolutionNote).HasColumnName("ResolutionNote").HasMaxLength(2000);
+
+                // Configure relationships
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.AssignedAgent)
+                    .WithMany()
+                    .HasForeignKey(e => e.AssignedAgentId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Create indexes
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.AssignedAgentId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.Priority);
+                entity.HasIndex(e => e.Category);
+                entity.HasIndex(e => e.CreatedAt);
+            });
+
+            // Configure TicketMessage entity
+            modelBuilder.Entity<TicketMessage>(entity =>
+            {
+                entity.ToTable("TicketMessages");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.TicketId).HasColumnName("TicketId").IsRequired();
+                entity.Property(e => e.SenderId).HasColumnName("SenderId").IsRequired();
+                entity.Property(e => e.Content).HasColumnName("Content").IsRequired().HasMaxLength(2000);
+                entity.Property(e => e.IsFromAgent).HasColumnName("IsFromAgent").IsRequired();
+                entity.Property(e => e.CreatedAt).HasColumnName("CreatedAt");
+
+                // Configure relationships
+                entity.HasOne(e => e.Ticket)
+                    .WithMany(t => t.Messages)
+                    .HasForeignKey(e => e.TicketId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Sender)
+                    .WithMany()
+                    .HasForeignKey(e => e.SenderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Create indexes
+                entity.HasIndex(e => e.TicketId);
+                entity.HasIndex(e => e.SenderId);
+                entity.HasIndex(e => e.CreatedAt);
+            });
+
+            // Configure TicketAttachment entity
+            modelBuilder.Entity<TicketAttachment>(entity =>
+            {
+                entity.ToTable("TicketAttachments");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.TicketId).HasColumnName("TicketId").IsRequired();
+                entity.Property(e => e.MessageId).HasColumnName("MessageId").IsRequired();
+                entity.Property(e => e.FileName).HasColumnName("FileName").IsRequired().HasMaxLength(255);
+                entity.Property(e => e.FilePath).HasColumnName("FilePath").IsRequired().HasMaxLength(500);
+                entity.Property(e => e.FileType).HasColumnName("FileType").IsRequired().HasMaxLength(100);
+                entity.Property(e => e.FileSize).HasColumnName("FileSize").IsRequired();
+                entity.Property(e => e.UploadedAt).HasColumnName("UploadedAt");
+
+                // Configure relationships
+                entity.HasOne(e => e.Ticket)
+                    .WithMany(t => t.Attachments)
+                    .HasForeignKey(e => e.TicketId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Message)
+                    .WithMany()
+                    .HasForeignKey(e => e.MessageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Create indexes
+                entity.HasIndex(e => e.TicketId);
+                entity.HasIndex(e => e.MessageId);
             });
         }
     }

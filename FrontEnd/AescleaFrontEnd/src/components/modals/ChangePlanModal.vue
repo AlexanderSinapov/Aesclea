@@ -332,11 +332,6 @@ const closeSuccessModal = () => {
 }
 
 onMounted(async () => {
-  // EMERGENCY: Temporarily disabled to prevent infinite loop
-  console.log('ChangePlanModal: onMounted disabled for debugging infinite loop')
-  
-  // TODO: Re-enable once root cause is identified
-  /*
   try {
     console.log('ChangePlanModal: Checking if plans need to be loaded...')
     // Load available plans if not already loaded and not currently loading
@@ -350,6 +345,5 @@ onMounted(async () => {
   } catch (error) {
     console.error('ChangePlanModal: Error loading plans:', error)
   }
-  */
 })
 </script>

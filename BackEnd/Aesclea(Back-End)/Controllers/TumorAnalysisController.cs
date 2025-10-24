@@ -152,5 +152,63 @@ namespace Aesclea_Back_End_.Controllers
 
             return Ok(colors);
         }
+
+        [HttpGet("test-classifier")]
+        public IActionResult TestClassifier()
+        {
+            try
+            {
+                _logger.LogInformation("🧪 Testing tumor classifier with synthetic data...");
+                
+                // Create test data: all zeros (should represent no tumor)
+                var zeroData = new List<double>(new double[16384]); // All zeros
+                
+                // Create test data: all ones (should represent strong tumor signal)
+                var oneData = Enumerable.Repeat(1.0, 16384).ToList();
+                
+                // Create test data: random pattern
+                var random = new Random();
+                var randomData = Enumerable.Range(0, 16384).Select(_ => random.NextDouble()).ToList();
+                
+                // Test the classifier with different inputs
+                var result1 = _tumorAnalysisService.TestClassifierWithData(zeroData);
+                var result2 = _tumorAnalysisService.TestClassifierWithData(oneData);
+                var result3 = _tumorAnalysisService.TestClassifierWithData(randomData);
+                
+                var diagnostics = new
+                {
+                    Test1_AllZeros = new { 
+                        HasTumor = result1.HasTumor, 
+                        Probability = result1.TumorProbability,
+                        Type = result1.TumorType,
+                        Grade = result1.TumorGrade 
+                    },
+                    Test2_AllOnes = new { 
+                        HasTumor = result2.HasTumor, 
+                        Probability = result2.TumorProbability,
+                        Type = result2.TumorType,
+                        Grade = result2.TumorGrade 
+                    },
+                    Test3_Random = new { 
+                        HasTumor = result3.HasTumor, 
+                        Probability = result3.TumorProbability,
+                        Type = result3.TumorType,
+                        Grade = result3.TumorGrade 
+                    },
+                    Analysis = new
+                    {
+                        NetworkSeemsTrained = result1.TumorProbability != result2.TumorProbability || result2.TumorProbability != result3.TumorProbability,
+                        Note = "If all probabilities are the same, the network may not be trained properly"
+                    }
+                };
+                
+                return Ok(diagnostics);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error testing classifier");
+                return StatusCode(500, new { Error = "Error testing classifier", Details = ex.Message });
+            }
+        }
     }
 }

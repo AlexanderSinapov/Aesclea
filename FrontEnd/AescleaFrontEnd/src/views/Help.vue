@@ -7,8 +7,8 @@
 <template>
   <div class="min-h-screen transition-colors duration-300">
     <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <!-- Header -->
-      <AppNavbar />
+      <!-- Navigation -->
+      <SiteNavbar />
       <!-- Hero Section -->
       <section class="relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -354,49 +354,7 @@
       </section>
 
       <!-- Footer -->
-      <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="col-span-1 md:col-span-2">
-              <div class="flex items-center mb-4">
-                <div class="h-8 w-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center">
-                  <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </div>
-                <h3 class="ml-2 text-xl font-bold">Aesclea</h3>
-              </div>
-              <p class="text-gray-400 mb-4 max-w-md">
-                Empowering healthcare professionals with modern, efficient, and secure practice management solutions.
-              </p>
-            </div>
-            
-            <div>
-              <h4 class="text-lg font-semibold mb-4">Product</h4>
-              <ul class="space-y-2 text-gray-400">
-                <li><router-link to="/features" class="hover:text-white transition-colors">Features</router-link></li>
-                <li><router-link to="/pricing" class="hover:text-white transition-colors">Pricing</router-link></li>
-                <li><router-link to="/security" class="hover:text-white transition-colors">Security</router-link></li>
-                <li><router-link to="/updates" class="hover:text-white transition-colors">Updates</router-link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 class="text-lg font-semibold mb-4">Support</h4>
-              <ul class="space-y-2 text-gray-400">
-                <li><router-link to="/help" class="hover:text-white transition-colors">Help Center</router-link></li>
-                <li><router-link to="/contact" class="hover:text-white transition-colors">Contact Us</router-link></li>
-                <li><router-link to="/privacy" class="hover:text-white transition-colors">Privacy Policy</router-link></li>
-                <li><router-link to="/terms" class="hover:text-white transition-colors">Terms of Service</router-link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Aesclea Medical Management System. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   </div>
 </template>
@@ -404,9 +362,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useTheme } from '../composables/useTheme'
-import AppNavbar from '../components/AppNavbar.vue'
+import SiteNavbar from '../components/SiteNavbar.vue'
+import SiteFooter from '../components/SiteFooter.vue'
 
-const { isDark, toggleTheme, initializeTheme } = useTheme()
+const { initializeTheme } = useTheme()
 
 // Search functionality
 const searchQuery = ref('')

@@ -243,6 +243,115 @@
       </div>
     </div>
 
+    <!-- Support Management -->
+    <div v-else-if="activeTab === 'support'" class="space-y-6">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Support System Management</h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage support tickets, agents, and customer service operations.
+          </p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <!-- Support Agent Dashboard Link -->
+          <div class="p-6 border border-gray-200 rounded-lg dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-lg font-medium text-gray-900 dark:text-white">Support Agent Dashboard</h4>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Access the dedicated support agent interface for ticket management, customer communication, and performance tracking.
+                </p>
+              </div>
+              <div class="ml-4">
+                <router-link
+                  to="/dashboard/support-agent"
+                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"></path>
+                  </svg>
+                  Open Support Dashboard
+                </router-link>
+              </div>
+            </div>
+          </div>
+
+          <!-- Support System Stats -->
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div class="p-6 border border-gray-200 rounded-lg dark:border-gray-700">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Tickets</p>
+                  <p class="text-2xl font-semibold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 border border-gray-200 rounded-lg dark:border-gray-700">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Open Tickets</p>
+                  <p class="text-2xl font-semibold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 border border-gray-200 rounded-lg dark:border-gray-700">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Support Agents</p>
+                  <p class="text-2xl font-semibold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Role Management -->
+          <div class="p-6 border border-gray-200 rounded-lg dark:border-gray-700">
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Support Role Management</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Support agent roles must be assigned directly in the database. Users with the "supportagent" or "admin" role can access the support agent dashboard.
+            </p>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">Database Role Assignment Required</h3>
+                  <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                    <p>To grant support agent access, update the user's role in the database:</p>
+                    <ul class="mt-2 list-disc list-inside">
+                      <li>Set role to "supportagent" for support agents</li>
+                      <li>Set role to "admin" for administrators (includes support access)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- System Logs -->
     <div v-else-if="activeTab === 'logs'" class="space-y-6">
       <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
@@ -324,6 +433,7 @@ const logLevelFilter = ref('')
 const adminTabs = [
   { id: 'overview', name: 'Overview' },
   { id: 'users', name: 'Users' },
+  { id: 'support', name: 'Support Management' },
   { id: 'logs', name: 'System Logs' }
 ]
 

@@ -490,26 +490,41 @@ const CheckCircleIcon = {
 }
 
 // Methods
-const handlePhotoChange = (event: Event) => {
+const handlePhotoChange = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      profileForm.value.avatar = e.target?.result as string
+    try {
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        const base64Avatar = e.target?.result as string
+        profileForm.value.avatar = base64Avatar
+        
+        // Automatically upload the new avatar
+        try {
+          await authStore.updateAvatar({ avatar: base64Avatar })
+          alert('Profile photo updated successfully!')
+        } catch (error) {
+          console.error('Error updating avatar:', error)
+          alert('Failed to update profile photo. Please try again.')
+        }
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Error reading file:', error)
+      alert('Failed to read the selected file.')
     }
-    reader.readAsDataURL(file)
   }
 }
 
 const saveProfile = async () => {
   try {
-    // API call to update profile
-    console.log('Saving profile:', profileForm.value)
-    
-    // Update auth store with new profile data
-    if (authStore.user) {
-      Object.assign(authStore.user, profileForm.value)
-    }
+    await authStore.updateProfile({
+      firstName: profileForm.value.firstName,
+      lastName: profileForm.value.lastName,
+      phone: profileForm.value.phone,
+      department: profileForm.value.department,
+      role: profileForm.value.role
+    })
     
     alert('Profile updated successfully!')
   } catch (error) {
@@ -525,8 +540,10 @@ const changePassword = async () => {
       return
     }
 
-    // API call to change password
-    console.log('Changing password')
+    await authStore.changePassword({
+      currentPassword: passwordForm.value.currentPassword,
+      newPassword: passwordForm.value.newPassword
+    })
     
     // Reset form
     passwordForm.value = {
@@ -542,32 +559,130 @@ const changePassword = async () => {
   }
 }
 
-const toggleTwoFactor = () => {
-  securitySettings.value.twoFactorEnabled = !securitySettings.value.twoFactorEnabled
-  console.log('Two-factor authentication:', securitySettings.value.twoFactorEnabled ? 'enabled' : 'disabled')
-  alert(`Two-factor authentication ${securitySettings.value.twoFactorEnabled ? 'enabled' : 'disabled'}`)
+const toggleTwoFactor = async () => {
+  try {
+    const response = await authStore.toggleTwoFactor()
+    securitySettings.value.twoFactorEnabled = !securitySettings.value.twoFactorEnabled
+    alert(response.message || `Two-factor authentication ${securitySettings.value.twoFactorEnabled ? 'enabled' : 'disabled'}`)
+  } catch (error) {
+    console.error('Error toggling two-factor authentication:', error)
+    alert('Failed to toggle two-factor authentication. Please try again.')
+  }
 }
 
-const savePreferences = () => {
-  // Save preferences to localStorage or API
-  localStorage.setItem('preferences', JSON.stringify(preferences.value))
-  console.log('Preferences saved:', preferences.value)
-  alert('Preferences saved successfully!')
+const savePreferences = async () => {
+  try {
+    await authStore.updatePreferences({
+      theme: preferences.value.theme,
+      language: preferences.value.language,
+      timezone: preferences.value.timezone
+    })
+    
+    // Also save to localStorage for immediate UI updates
+    localStorage.setItem('preferences', JSON.stringify(preferences.value))
+    alert('Preferences saved successfully!')
+  } catch (error) {
+    console.error('Error saving preferences:', error)
+    alert('Failed to save preferences. Please try again.')
+  }
 }
 
-const saveNotifications = () => {
-  // Save notification settings to API
-  console.log('Notification settings saved:', notificationSettings.value)
-  alert('Notification settings saved successfully!')
+const saveNotifications = async () => {
+  try {
+    // Convert notification settings array to the format expected by the API
+    const notificationData = {
+      notifyAppointments: notificationSettings.value.find(n => n.id === 'appointments')?.email || false,
+      notifyPatientUpdates: notificationSettings.value.find(n => n.id === 'patient-updates')?.email || false,
+      notifyAnalysisResults: notificationSettings.value.find(n => n.id === 'analysis-results')?.email || false,
+      notifyBilling: notificationSettings.value.find(n => n.id === 'billing')?.email || false,
+      notifySystem: notificationSettings.value.find(n => n.id === 'system')?.email || false,
+      notifyAppointmentsPush: notificationSettings.value.find(n => n.id === 'appointments')?.push || false,
+      notifyPatientUpdatesPush: notificationSettings.value.find(n => n.id === 'patient-updates')?.push || false,
+      notifyAnalysisResultsPush: notificationSettings.value.find(n => n.id === 'analysis-results')?.push || false,
+      notifyBillingPush: notificationSettings.value.find(n => n.id === 'billing')?.push || false,
+      notifySystemPush: notificationSettings.value.find(n => n.id === 'system')?.push || false
+    }
+    
+    await authStore.updateNotificationSettings(notificationData)
+    alert('Notification settings saved successfully!')
+  } catch (error) {
+    console.error('Error saving notification settings:', error)
+    alert('Failed to save notification settings. Please try again.')
+  }
 }
 
-// Load saved preferences on mount
-const loadPreferences = () => {
+// Load user data and preferences on mount
+const loadUserData = () => {
+  if (authStore.user) {
+    const user = authStore.user as any
+    
+    // Update profile form
+    profileForm.value = {
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      phone: user.phone || '',
+      department: user.department || '',
+      role: user.role || 'doctor',
+      avatar: user.avatar || ''
+    }
+    
+    // Update preferences
+    preferences.value = {
+      theme: user.theme || 'system',
+      language: user.language || 'en',
+      timezone: user.timezone || 'UTC'
+    }
+    
+    // Update security settings
+    securitySettings.value.twoFactorEnabled = user.twoFactorEnabled || false
+    
+    // Update notification settings from user data
+    notificationSettings.value = [
+      {
+        id: 'appointments',
+        title: 'Appointment Reminders',
+        description: 'Get notified about upcoming appointments',
+        email: user.notifyAppointments !== undefined ? user.notifyAppointments : true,
+        push: user.notifyAppointmentsPush !== undefined ? user.notifyAppointmentsPush : true
+      },
+      {
+        id: 'patient-updates',
+        title: 'Patient Updates',
+        description: 'Notifications when patient information changes',
+        email: user.notifyPatientUpdates !== undefined ? user.notifyPatientUpdates : true,
+        push: user.notifyPatientUpdatesPush !== undefined ? user.notifyPatientUpdatesPush : false
+      },
+      {
+        id: 'analysis-results',
+        title: 'Analysis Results',
+        description: 'Get notified when AI analysis results are ready',
+        email: user.notifyAnalysisResults !== undefined ? user.notifyAnalysisResults : true,
+        push: user.notifyAnalysisResultsPush !== undefined ? user.notifyAnalysisResultsPush : true
+      },
+      {
+        id: 'billing',
+        title: 'Billing Notifications',
+        description: 'Updates about payments and invoices',
+        email: user.notifyBilling !== undefined ? user.notifyBilling : false,
+        push: user.notifyBillingPush !== undefined ? user.notifyBillingPush : false
+      },
+      {
+        id: 'system',
+        title: 'System Updates',
+        description: 'Maintenance and system update notifications',
+        email: user.notifySystem !== undefined ? user.notifySystem : true,
+        push: user.notifySystemPush !== undefined ? user.notifySystemPush : false
+      }
+    ]
+  }
+  
+  // Also load saved preferences from localStorage as fallback
   const saved = localStorage.getItem('preferences')
-  if (saved) {
+  if (saved && (!authStore.user || !authStore.user.theme)) {
     preferences.value = { ...preferences.value, ...JSON.parse(saved) }
   }
 }
 
-loadPreferences()
+loadUserData()
 </script>

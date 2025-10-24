@@ -112,6 +112,9 @@ namespace Aesclea_Back_End_.Server
             // Register SubscriptionService
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             
+            // Register SupportService
+            builder.Services.AddScoped<ISupportService, SupportService>();
+            
             builder.Services.AddScoped<IAuthService, AuthService>();
               // Register base services with no custom dependencies
             builder.Services.AddScoped<Aesclea_Back_End_.Services.FileService>(provider => 
@@ -128,64 +131,17 @@ namespace Aesclea_Back_End_.Server
             });
             
             
-            // Configure TumorClassifier with base network
-            builder.Services.AddScoped<TumorClassifier>(provider =>
+            // Configure TumorClassifier as singleton (will be initialized at startup)
+            builder.Services.AddSingleton<TumorClassifier>(provider =>
             {
-                // Create a base network for tumor detection
-                var baseNetwork = new NeuronNetwork(new int[] { 16384, 512, 256, 128, 64, 1 });
+                // Create a base network for tumor detection - match console version configuration
+                var baseNetwork = new NeuronNetwork(new int[] { 16384, 256, 64, 16, 1 });
                 var classifier = new TumorClassifier(baseNetwork);
-                
-                // Auto-load existing weights if available
-                try
-                {
-                    var fileHelper = new FileHelper();
-                    fileHelper.OpenFolder();
-                    classifier.LoadWeights(fileHelper, "tumor_classification");
-                    global::System.Console.WriteLine("✓ API: Successfully loaded pre-trained tumor classification weights");
-                }
-                catch (Exception ex)
-                {
-                    global::System.Console.WriteLine($"⚠️  API: Could not load tumor classification weights: {ex.Message}");
-                    global::System.Console.WriteLine("   You may need to train the classification models first via console application.");
-                }
-                
                 return classifier;
             });
 
-            // Configure MedicalDiagnosisClassifier with auto-loading
-            builder.Services.AddScoped<MedicalDiagnosisClassifier>(provider =>
-            {
-                var classifier = new MedicalDiagnosisClassifier();
-                
-                // Auto-load existing diagnosis weights if available
-                try
-                {
-                    var fileHelper = new FileHelper();
-                    fileHelper.OpenFolder();
-                    
-                    // Check if any medical diagnosis files exist
-                    var availableFiles = fileHelper.GetAvailableWeightFiles();
-                    var hasMedicalDiagnosisFiles = availableFiles.Any(f => f.Contains("medical_diagnosis_"));
-                    
-                    if (hasMedicalDiagnosisFiles)
-                    {
-                        classifier.LoadWeights(fileHelper, "medical_diagnosis");
-                        global::System.Console.WriteLine("✓ API: Successfully loaded pre-trained medical diagnosis classifier weights");
-                    }
-                    else
-                    {
-                        global::System.Console.WriteLine("ℹ️  API: No medical diagnosis weights found, using default initialization");
-                        global::System.Console.WriteLine("   To train the medical diagnosis classifier, use the console application or training endpoints");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    global::System.Console.WriteLine($"⚠️  API: Could not load medical diagnosis weights: {ex.Message}");
-                    global::System.Console.WriteLine("   Medical diagnosis classifier will use default initialization.");
-                }
-                
-                return classifier;
-            });
+            // Configure MedicalDiagnosisClassifier as singleton (will be initialized at startup)
+            builder.Services.AddSingleton<MedicalDiagnosisClassifier>();
 
               // Register TumorAnalysisService with explicit dependencies
             builder.Services.AddScoped<TumorAnalysisService>(provider =>
@@ -250,6 +206,9 @@ namespace Aesclea_Back_End_.Server
             // Initialize database
             InitializeDatabase(app);
 
+            // Initialize AI models AFTER database but BEFORE web requests
+            InitializeAIModels(app);
+
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
@@ -308,6 +267,57 @@ namespace Aesclea_Back_End_.Server
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Database initialization failed");
+                throw;
+            }
+        }
+
+        private void InitializeAIModels(WebApplication app)
+        {
+            try
+            {
+                _logger.LogInformation("🤖 Initializing AI models...");
+                
+                using var scope = app.Services.CreateScope();
+                
+                // Initialize TumorClassifier
+                var tumorClassifier = scope.ServiceProvider.GetRequiredService<TumorClassifier>();
+                _logger.LogInformation("🧠 Loading tumor classifier weights...");
+                
+                var fileHelper = new FileHelper();
+                fileHelper.OpenFolder();
+                
+                // Check available weight files
+                var availableFiles = fileHelper.GetAvailableWeightFiles();
+                _logger.LogInformation($"📁 Available weight files: {string.Join(", ", availableFiles)}");
+                
+                // Load tumor classifier weights (includes base network + specialized networks)
+                // Use "tgl" as base name to match tgl_type, tgl_grade, tgl_location files
+                tumorClassifier.LoadWeights(fileHelper, "tgl");
+                _logger.LogInformation("✅ Tumor classifier weights loaded successfully");
+                
+                // Initialize MedicalDiagnosisClassifier
+                var medicalClassifier = scope.ServiceProvider.GetRequiredService<MedicalDiagnosisClassifier>();
+                _logger.LogInformation("🩺 Loading medical diagnosis classifier weights...");
+                
+                // Check if any medical diagnosis files exist
+                var hasMedicalDiagnosisFiles = availableFiles.Any(f => f.Contains("medical_diagnosis_"));
+                
+                if (hasMedicalDiagnosisFiles)
+                {
+                    medicalClassifier.LoadWeights(fileHelper, "medical_diagnosis");
+                    _logger.LogInformation("✅ Medical diagnosis classifier weights loaded successfully");
+                }
+                else
+                {
+                    _logger.LogInformation("ℹ️  No medical diagnosis weights found, using default initialization");
+                    _logger.LogInformation("   To train the medical diagnosis classifier, use the console application or training endpoints");
+                }
+                
+                _logger.LogInformation("🎉 AI model initialization completed successfully!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AI model initialization failed");
                 throw;
             }
         }

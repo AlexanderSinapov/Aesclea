@@ -382,5 +382,295 @@ namespace Aesclea_Back_End_.Services
                 };
             }
         }
+
+        public async Task<SettingsResponse> UpdateProfileAsync(string userId, UpdateProfileRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    return new SettingsResponse
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                // Update fields if provided
+                if (!string.IsNullOrEmpty(request.FirstName))
+                    user.FirstName = request.FirstName;
+                
+                if (!string.IsNullOrEmpty(request.LastName))
+                    user.LastName = request.LastName;
+                
+                if (!string.IsNullOrEmpty(request.Phone))
+                    user.Phone = request.Phone;
+                
+                if (!string.IsNullOrEmpty(request.Department))
+                    user.Department = request.Department;
+                
+                if (!string.IsNullOrEmpty(request.Role))
+                    user.Role = request.Role;
+
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return new SettingsResponse
+                {
+                    Success = true,
+                    Message = "Profile updated successfully.",
+                    User = user
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating profile for user: {UserId}", userId);
+                return new SettingsResponse
+                {
+                    Success = false,
+                    Message = "Failed to update profile."
+                };
+            }
+        }
+
+        public async Task<SettingsResponse> ChangePasswordAsync(string userId, ChangePasswordRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    return new SettingsResponse
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                // Verify current password
+                if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+                {
+                    return new SettingsResponse
+                    {
+                        Success = false,
+                        Message = "Current password is incorrect."
+                    };
+                }
+
+                // Hash and set new password
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                user.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+
+                return new SettingsResponse
+                {
+                    Success = true,
+                    Message = "Password changed successfully.",
+                    User = user
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for user: {UserId}", userId);
+                return new SettingsResponse
+                {
+                    Success = false,
+                    Message = "Failed to change password."
+                };
+            }
+        }
+
+        public async Task<SettingsResponse> UpdatePreferencesAsync(string userId, UpdatePreferencesRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    return new SettingsResponse
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                // Update preferences if provided
+                if (!string.IsNullOrEmpty(request.Theme))
+                    user.Theme = request.Theme;
+                
+                if (!string.IsNullOrEmpty(request.Language))
+                    user.Language = request.Language;
+                
+                if (!string.IsNullOrEmpty(request.Timezone))
+                    user.Timezone = request.Timezone;
+
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return new SettingsResponse
+                {
+                    Success = true,
+                    Message = "Preferences updated successfully.",
+                    User = user
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating preferences for user: {UserId}", userId);
+                return new SettingsResponse
+                {
+                    Success = false,
+                    Message = "Failed to update preferences."
+                };
+            }
+        }
+
+        public async Task<SettingsResponse> UpdateNotificationSettingsAsync(string userId, UpdateNotificationSettingsRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    return new SettingsResponse
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                // Update notification settings if provided
+                if (request.NotifyAppointments.HasValue)
+                    user.NotifyAppointments = request.NotifyAppointments.Value;
+                
+                if (request.NotifyPatientUpdates.HasValue)
+                    user.NotifyPatientUpdates = request.NotifyPatientUpdates.Value;
+                
+                if (request.NotifyAnalysisResults.HasValue)
+                    user.NotifyAnalysisResults = request.NotifyAnalysisResults.Value;
+                
+                if (request.NotifyBilling.HasValue)
+                    user.NotifyBilling = request.NotifyBilling.Value;
+                
+                if (request.NotifySystem.HasValue)
+                    user.NotifySystem = request.NotifySystem.Value;
+                
+                if (request.NotifyAppointmentsPush.HasValue)
+                    user.NotifyAppointmentsPush = request.NotifyAppointmentsPush.Value;
+                
+                if (request.NotifyPatientUpdatesPush.HasValue)
+                    user.NotifyPatientUpdatesPush = request.NotifyPatientUpdatesPush.Value;
+                
+                if (request.NotifyAnalysisResultsPush.HasValue)
+                    user.NotifyAnalysisResultsPush = request.NotifyAnalysisResultsPush.Value;
+                
+                if (request.NotifyBillingPush.HasValue)
+                    user.NotifyBillingPush = request.NotifyBillingPush.Value;
+                
+                if (request.NotifySystemPush.HasValue)
+                    user.NotifySystemPush = request.NotifySystemPush.Value;
+
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return new SettingsResponse
+                {
+                    Success = true,
+                    Message = "Notification settings updated successfully.",
+                    User = user
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating notification settings for user: {UserId}", userId);
+                return new SettingsResponse
+                {
+                    Success = false,
+                    Message = "Failed to update notification settings."
+                };
+            }
+        }
+
+        public async Task<SettingsResponse> UpdateAvatarAsync(string userId, UpdateAvatarRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    return new SettingsResponse
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                user.Avatar = request.Avatar;
+                user.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+
+                return new SettingsResponse
+                {
+                    Success = true,
+                    Message = "Avatar updated successfully.",
+                    User = user
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating avatar for user: {UserId}", userId);
+                return new SettingsResponse
+                {
+                    Success = false,
+                    Message = "Failed to update avatar."
+                };
+            }
+        }
+
+        public async Task<SettingsResponse> ToggleTwoFactorAsync(string userId)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    return new SettingsResponse
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                user.TwoFactorEnabled = !user.TwoFactorEnabled;
+                user.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+
+                return new SettingsResponse
+                {
+                    Success = true,
+                    Message = $"Two-factor authentication {(user.TwoFactorEnabled ? "enabled" : "disabled")} successfully.",
+                    User = user
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling two-factor authentication for user: {UserId}", userId);
+                return new SettingsResponse
+                {
+                    Success = false,
+                    Message = "Failed to toggle two-factor authentication."
+                };
+            }
+        }
     }
 }

@@ -41,6 +41,26 @@ export interface User {
   isEmailVerified: boolean
   createdAt: string
   updatedAt: string
+  
+  // Settings-related fields
+  department?: string
+  avatar?: string
+  theme?: string
+  language?: string
+  timezone?: string
+  twoFactorEnabled?: boolean
+  
+  // Notification preferences
+  notifyAppointments?: boolean
+  notifyPatientUpdates?: boolean
+  notifyAnalysisResults?: boolean
+  notifyBilling?: boolean
+  notifySystem?: boolean
+  notifyAppointmentsPush?: boolean
+  notifyPatientUpdatesPush?: boolean
+  notifyAnalysisResultsPush?: boolean
+  notifyBillingPush?: boolean
+  notifySystemPush?: boolean
 }
 
 class AuthService {
