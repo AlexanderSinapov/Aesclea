@@ -55,20 +55,77 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         /// <returns>List of numerical features</returns>
         public static List<double> ProcessMedicalText(string text, int maxFeatures = 512)
         {
-            if (string.IsNullOrEmpty(text))
-                return new List<double>(new double[maxFeatures]);
+            try
+            {
+                if (string.IsNullOrEmpty(text))
+                {
+                    // Return exact size list filled with zeros
+                    return Enumerable.Repeat(0.0, maxFeatures).ToList();
+                }
 
-            // Enhanced preprocessing with medical context
-            text = PreprocessMedicalText(text);
-            
-            // Clean and tokenize text
-            var tokens = TokenizeText(text);
-            
-            // Extract enhanced medical features
-            var features = ExtractEnhancedMedicalFeatures(tokens, maxFeatures);
-            
-            // Normalize features
-            return NormalizeFeatures(features, maxFeatures);
+                // Enhanced preprocessing with medical context
+                text = PreprocessMedicalText(text);
+                
+                // Clean and tokenize text
+                var tokens = TokenizeText(text);
+                
+                // Extract enhanced medical features - this should return exactly maxFeatures
+                var features = ExtractEnhancedMedicalFeatures(tokens, maxFeatures);
+                
+                // CRITICAL VALIDATION: Verify exact size before any processing
+                if (features.Count != maxFeatures)
+                {
+                    if (features.Count > maxFeatures)
+                    {
+                        features = features.Take(maxFeatures).ToList();
+                    }
+                    else
+                    {
+                        // Pad with zeros
+                        features.AddRange(Enumerable.Repeat(0.0, maxFeatures - features.Count));
+                    }
+                }
+                
+                // Normalize features (this should maintain size)
+                var result = NormalizeFeatures(features, maxFeatures);
+                
+                // PARANOID FINAL VALIDATION: Ensure exact size and no invalid values
+                if (result.Count != maxFeatures)
+                {
+                    if (result.Count > maxFeatures)
+                    {
+                        result = result.Take(maxFeatures).ToList();
+                    }
+                    else
+                    {
+                        result.AddRange(Enumerable.Repeat(0.0, maxFeatures - result.Count));
+                    }
+                }
+                
+                // PARANOID CHECK: Ensure no NaN or Infinity
+                for (int i = 0; i < result.Count; i++)
+                {
+                    if (double.IsNaN(result[i]) || double.IsInfinity(result[i]))
+                    {
+                        result[i] = 0.0;
+                    }
+                }
+                
+                // Final sanity check
+                if (result.Count != maxFeatures)
+                {
+                    throw new InvalidOperationException($"CRITICAL ERROR: Result size {result.Count} does not match required size {maxFeatures}");
+                }
+                
+                // Return a brand new array copy to prevent any external modification
+                return result.ToArray().ToList();
+            }
+            catch (Exception ex)
+            {
+                // If anything fails, return a zero-filled list of correct size
+                Console.WriteLine($"ERROR in ProcessMedicalText: {ex.Message}");
+                return Enumerable.Repeat(0.0, maxFeatures).ToList();
+            }
         }
 
         /// <summary>
@@ -128,24 +185,56 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         {
             var features = new List<double>();
             
+            // Calculate how many features each component should contribute
+            int featuresPerComponent = maxFeatures / 6;
+            
             // 1. Enhanced term frequency features with medical weighting
             var termFrequency = CalculateTermFrequency(tokens);
-            features.AddRange(GetEnhancedTermFeatures(termFrequency, maxFeatures / 6));
+            var termFeatures = GetEnhancedTermFeatures(termFrequency, featuresPerComponent);
+            // CRITICAL: Ensure exact size
+            if (termFeatures.Count > featuresPerComponent) termFeatures = termFeatures.Take(featuresPerComponent).ToList();
+            while (termFeatures.Count < featuresPerComponent) termFeatures.Add(0.0);
+            features.AddRange(termFeatures);
             
             // 2. Medical context features (symptom clustering, body systems)
-            features.AddRange(GetMedicalContextFeatures(tokens, maxFeatures / 6));
+            var contextFeatures = GetMedicalContextFeatures(tokens, featuresPerComponent);
+            if (contextFeatures.Count > featuresPerComponent) contextFeatures = contextFeatures.Take(featuresPerComponent).ToList();
+            while (contextFeatures.Count < featuresPerComponent) contextFeatures.Add(0.0);
+            features.AddRange(contextFeatures);
             
             // 3. Enhanced medical term weight features
-            features.AddRange(GetMedicalTermFeatures(tokens, maxFeatures / 6));
+            var medicalFeatures = GetMedicalTermFeatures(tokens, featuresPerComponent);
+            if (medicalFeatures.Count > featuresPerComponent) medicalFeatures = medicalFeatures.Take(featuresPerComponent).ToList();
+            while (medicalFeatures.Count < featuresPerComponent) medicalFeatures.Add(0.0);
+            features.AddRange(medicalFeatures);
             
             // 4. Clinical urgency and severity indicators
-            features.AddRange(GetClinicalUrgencyFeatures(tokens, maxFeatures / 6));
+            var urgencyFeatures = GetClinicalUrgencyFeatures(tokens, featuresPerComponent);
+            if (urgencyFeatures.Count > featuresPerComponent) urgencyFeatures = urgencyFeatures.Take(featuresPerComponent).ToList();
+            while (urgencyFeatures.Count < featuresPerComponent) urgencyFeatures.Add(0.0);
+            features.AddRange(urgencyFeatures);
             
             // 5. Sentiment and severity features
-            features.AddRange(GetSentimentFeatures(tokens, maxFeatures / 6));
+            var sentimentFeatures = GetSentimentFeatures(tokens, featuresPerComponent);
+            if (sentimentFeatures.Count > featuresPerComponent) sentimentFeatures = sentimentFeatures.Take(featuresPerComponent).ToList();
+            while (sentimentFeatures.Count < featuresPerComponent) sentimentFeatures.Add(0.0);
+            features.AddRange(sentimentFeatures);
             
             // 6. Enhanced statistical features
-            features.AddRange(GetStatisticalFeatures(tokens, maxFeatures / 6));
+            var statisticalFeatures = GetStatisticalFeatures(tokens, featuresPerComponent);
+            if (statisticalFeatures.Count > featuresPerComponent) statisticalFeatures = statisticalFeatures.Take(featuresPerComponent).ToList();
+            while (statisticalFeatures.Count < featuresPerComponent) statisticalFeatures.Add(0.0);
+            features.AddRange(statisticalFeatures);
+            
+            // CRITICAL: Ensure exact maxFeatures size
+            if (features.Count > maxFeatures)
+            {
+                features = features.Take(maxFeatures).ToList();
+            }
+            while (features.Count < maxFeatures)
+            {
+                features.Add(0.0);
+            }
             
             return features;
         }
@@ -157,7 +246,8 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         {
             var features = new List<double>();
             
-            // Define medical context categories
+            // For each token, calculate its relevance to each medical category
+            // This creates a much richer feature space
             var contextCategories = new Dictionary<string, List<string>>
             {
                 ["cardiovascular"] = new List<string> { "chest", "heart", "cardiac", "blood", "pressure", "circulation", "pulse", "rhythm" },
@@ -172,42 +262,16 @@ namespace Aesclea_Back_End_.AIModel.Helpers
                 ["psychiatric"] = new List<string> { "mental", "mood", "depression", "anxiety", "psychiatric", "psychological", "behavior", "cognitive" }
             };
             
-            // Calculate context scores
-            foreach (var category in contextCategories)
+            // Create a vector for EACH token's category relevance (much richer representation)
+            int tokensToProcess = Math.Min(tokens.Count, count / contextCategories.Count);
+            for (int i = 0; i < tokensToProcess; i++)
             {
-                double score = 0;
-                foreach (var token in tokens)
+                var token = i < tokens.Count ? tokens[i] : "";
+                foreach (var category in contextCategories)
                 {
-                    if (category.Value.Any(term => token.Contains(term) || term.Contains(token)))
-                    {
-                        score += 1.0;
-                    }
+                    double score = category.Value.Any(term => token.Contains(term) || term.Contains(token)) ? 1.0 : 0.0;
+                    features.Add(score);
                 }
-                features.Add(score / Math.Max(1, tokens.Count));
-            }
-            
-            // Symptom clustering features
-            var symptomClusters = new Dictionary<string, List<string>>
-            {
-                ["pain_cluster"] = new List<string> { "pain", "ache", "hurt", "tender", "sore", "cramp", "burning", "sharp", "dull" },
-                ["fever_cluster"] = new List<string> { "fever", "temperature", "hot", "chills", "sweats", "hyperthermia", "pyrexia" },
-                ["respiratory_cluster"] = new List<string> { "cough", "wheeze", "shortness", "dyspnea", "breathing", "sputum", "phlegm" },
-                ["gastrointestinal_cluster"] = new List<string> { "nausea", "vomiting", "diarrhea", "constipation", "bloating", "cramping" },
-                ["neurological_cluster"] = new List<string> { "headache", "dizziness", "confusion", "weakness", "numbness", "tingling" },
-                ["fatigue_cluster"] = new List<string> { "fatigue", "tired", "exhausted", "weakness", "lethargy", "energy", "rest" }
-            };
-            
-            foreach (var cluster in symptomClusters)
-            {
-                double clusterScore = 0;
-                foreach (var token in tokens)
-                {
-                    if (cluster.Value.Any(symptom => token.Contains(symptom) || symptom.Contains(token)))
-                    {
-                        clusterScore += 1.0;
-                    }
-                }
-                features.Add(clusterScore / Math.Max(1, tokens.Count));
             }
             
             // Pad to target count
@@ -224,7 +288,9 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         {
             var features = new List<double>();
             
-            // Emergency indicators
+            // Create binary features for each token against urgency indicators
+            int tokensToProcess = Math.Min(tokens.Count, count / 3);
+            
             var emergencyTerms = new List<string> 
             { 
                 "emergency", "urgent", "critical", "severe", "acute", "immediate", "stat", "code", "arrest", 
@@ -241,32 +307,13 @@ namespace Aesclea_Back_End_.AIModel.Helpers
                 "mild", "minor", "slight", "minimal", "small", "trace", "stable", "improved"
             };
             
-            // Calculate urgency scores
-            double emergencyScore = tokens.Count(t => emergencyTerms.Any(e => t.Contains(e) || e.Contains(t)));
-            double moderateScore = tokens.Count(t => moderateTerms.Any(m => t.Contains(m) || m.Contains(t)));
-            double mildScore = tokens.Count(t => mildTerms.Any(m => t.Contains(m) || m.Contains(t)));
-            
-            features.Add(emergencyScore / Math.Max(1, tokens.Count));
-            features.Add(moderateScore / Math.Max(1, tokens.Count));
-            features.Add(mildScore / Math.Max(1, tokens.Count));
-            
-            // Time-based urgency indicators
-            var timeIndicators = new List<string>
+            for (int i = 0; i < tokensToProcess; i++)
             {
-                "sudden", "sudden_onset", "rapid", "progressive", "chronic", "acute", "subacute"
-            };
-            
-            double timeUrgency = tokens.Count(t => timeIndicators.Any(ti => t.Contains(ti) || ti.Contains(t)));
-            features.Add(timeUrgency / Math.Max(1, tokens.Count));
-            
-            // Functional impact indicators
-            var functionalImpact = new List<string>
-            {
-                "unable", "difficulty", "impaired", "reduced", "limited", "restricted", "compromised"
-            };
-            
-            double functionalScore = tokens.Count(t => functionalImpact.Any(fi => t.Contains(fi) || fi.Contains(t)));
-            features.Add(functionalScore / Math.Max(1, tokens.Count));
+                var token = i < tokens.Count ? tokens[i] : "";
+                features.Add(emergencyTerms.Any(e => token.Contains(e) || e.Contains(token)) ? 1.0 : 0.0);
+                features.Add(moderateTerms.Any(m => token.Contains(m) || m.Contains(token)) ? 1.0 : 0.0);
+                features.Add(mildTerms.Any(m => token.Contains(m) || m.Contains(token)) ? 1.0 : 0.0);
+            }
             
             // Pad to target count
             while (features.Count < count)
@@ -282,32 +329,25 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         {
             var features = new List<double>();
             
-            // Prioritize medical terms in frequency analysis
-            var medicalTermFreq = termFreq.Where(kv => MedicalTermWeights.ContainsKey(kv.Key))
-                                         .OrderByDescending(kv => kv.Value * MedicalTermWeights[kv.Key])
-                                         .Take(count / 2);
+            // Create a rich frequency-based feature vector
+            var allTerms = termFreq.OrderByDescending(kv => kv.Value).ToList();
             
-            var generalTermFreq = termFreq.Where(kv => !MedicalTermWeights.ContainsKey(kv.Key))
-                                         .OrderByDescending(kv => kv.Value)
-                                         .Take(count / 2);
-            
-            // Add medical term features
-            foreach (var term in medicalTermFreq)
+            // For each position in our feature vector, use the corresponding term's frequency
+            for (int i = 0; i < count; i++)
             {
-                features.Add(Math.Log(1 + term.Value * MedicalTermWeights[term.Key]));
+                if (i < allTerms.Count)
+                {
+                    // Use log transform to normalize extreme frequencies
+                    double weight = MedicalTermWeights.ContainsKey(allTerms[i].Key) ? MedicalTermWeights[allTerms[i].Key] : 1.0;
+                    features.Add(Math.Log(1 + allTerms[i].Value * weight));
+                }
+                else
+                {
+                    features.Add(0.0);
+                }
             }
             
-            // Add general term features
-            foreach (var term in generalTermFreq)
-            {
-                features.Add(Math.Log(1 + term.Value));
-            }
-            
-            // Pad with zeros if needed
-            while (features.Count < count)
-                features.Add(0.0);
-            
-            return features.Take(count).ToList();
+            return features;
         }
 
         /// <summary>
@@ -447,37 +487,38 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         private static List<double> GetMedicalTermFeatures(List<string> tokens, int count)
         {
             var features = new List<double>();
-            var medicalScores = new List<double>();
             
-            foreach (var token in tokens)
+            // Create a feature for each position based on medical term presence
+            for (int i = 0; i < count; i++)
             {
-                if (MedicalTermWeights.ContainsKey(token))
+                if (i < tokens.Count)
                 {
-                    medicalScores.Add(MedicalTermWeights[token]);
+                    var token = tokens[i];
+                    if (MedicalTermWeights.ContainsKey(token))
+                    {
+                        features.Add(MedicalTermWeights[token]);
+                    }
+                    else
+                    {
+                        // Check partial matches
+                        double maxWeight = 0.0;
+                        foreach (var medTerm in MedicalTermWeights)
+                        {
+                            if (token.Contains(medTerm.Key) || medTerm.Key.Contains(token))
+                            {
+                                maxWeight = Math.Max(maxWeight, medTerm.Value);
+                            }
+                        }
+                        features.Add(maxWeight);
+                    }
+                }
+                else
+                {
+                    features.Add(0.0);
                 }
             }
             
-            if (medicalScores.Count > 0)
-            {
-                features.Add(medicalScores.Average()); // Average medical term weight
-                features.Add(medicalScores.Max()); // Maximum medical term weight
-                features.Add(medicalScores.Min()); // Minimum medical term weight
-                features.Add(medicalScores.Count); // Count of medical terms
-            }
-            else
-            {
-                features.AddRange(new double[] { 0, 0, 0, 0 });
-            }
-            
-            // Pad with additional medical category features
-            var categoryScores = CalculateCategoryScores(tokens);
-            features.AddRange(categoryScores);
-            
-            // Pad with zeros if needed
-            while (features.Count < count)
-                features.Add(0.0);
-            
-            return features.Take(count).ToList();
+            return features;
         }
 
         /// <summary>
@@ -518,32 +559,31 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         {
             var features = new List<double>();
             
-            // Severity indicators
             var severityTerms = new[] { "severe", "critical", "emergency", "acute", "urgent" };
             var mildTerms = new[] { "mild", "slight", "minor", "stable" };
-            
-            double severityScore = tokens.Count(t => severityTerms.Any(s => t.Contains(s)));
-            double mildnessScore = tokens.Count(t => mildTerms.Any(m => t.Contains(m)));
-            
-            features.Add(severityScore / Math.Max(1, tokens.Count));
-            features.Add(mildnessScore / Math.Max(1, tokens.Count));
-            
-            // Positive/negative indicators
             var positiveTerms = new[] { "positive", "abnormal", "elevated", "high", "increased" };
             var negativeTerms = new[] { "negative", "normal", "stable", "improved", "decreased" };
-            
-            double positiveScore = tokens.Count(t => positiveTerms.Any(p => t.Contains(p)));
-            double negativeScore = tokens.Count(t => negativeTerms.Any(n => t.Contains(n)));
-            
-            features.Add(positiveScore / Math.Max(1, tokens.Count));
-            features.Add(negativeScore / Math.Max(1, tokens.Count));
-            
-            // Pain and discomfort indicators
             var painTerms = new[] { "pain", "ache", "hurt", "discomfort", "tender", "sore" };
-            double painScore = tokens.Count(t => painTerms.Any(p => t.Contains(p)));
-            features.Add(painScore / Math.Max(1, tokens.Count));
             
-            // Pad with zeros if needed
+            // Create features for each token
+            for (int i = 0; i < count / 5; i++)
+            {
+                if (i < tokens.Count)
+                {
+                    var token = tokens[i];
+                    features.Add(severityTerms.Any(s => token.Contains(s)) ? 1.0 : 0.0);
+                    features.Add(mildTerms.Any(m => token.Contains(m)) ? 1.0 : 0.0);
+                    features.Add(positiveTerms.Any(p => token.Contains(p)) ? 1.0 : 0.0);
+                    features.Add(negativeTerms.Any(n => token.Contains(n)) ? 1.0 : 0.0);
+                    features.Add(painTerms.Any(p => token.Contains(p)) ? 1.0 : 0.0);
+                }
+                else
+                {
+                    features.AddRange(new double[] { 0, 0, 0, 0, 0 });
+                }
+            }
+            
+            // Pad to target count
             while (features.Count < count)
                 features.Add(0.0);
             
@@ -559,40 +599,25 @@ namespace Aesclea_Back_End_.AIModel.Helpers
             
             if (tokens.Count == 0)
             {
-                return new List<double>(new double[count]);
+                return Enumerable.Repeat(0.0, count).ToList();
             }
             
-            // Text length features
-            features.Add(Math.Log(1 + tokens.Count)); // Log of token count
-            features.Add(tokens.Average(t => t.Length)); // Average token length
-            
-            // Lexical diversity
-            var uniqueTokens = tokens.Distinct().Count();
-            features.Add((double)uniqueTokens / tokens.Count); // Type-token ratio
-            
-            // Medical term density
-            var medicalTermCount = tokens.Count(t => MedicalTermWeights.ContainsKey(t));
-            features.Add((double)medicalTermCount / tokens.Count);
-            
-            // Number extraction (for vital signs, lab values, etc.)
-            var numbers = ExtractNumbers(tokens);
-            if (numbers.Count > 0)
+            // Create statistical features for each token position
+            for (int i = 0; i < count; i++)
             {
-                features.Add(numbers.Average());
-                features.Add(numbers.Max());
-                features.Add(numbers.Min());
-                features.Add(numbers.Count);
-            }
-            else
-            {
-                features.AddRange(new double[] { 0, 0, 0, 0 });
+                if (i < tokens.Count)
+                {
+                    var token = tokens[i];
+                    // Token length normalized
+                    features.Add(token.Length / 20.0); // Normalize by typical max word length
+                }
+                else
+                {
+                    features.Add(0.0);
+                }
             }
             
-            // Pad with zeros if needed
-            while (features.Count < count)
-                features.Add(0.0);
-            
-            return features.Take(count).ToList();
+            return features;
         }
 
         /// <summary>
@@ -623,12 +648,24 @@ namespace Aesclea_Back_End_.AIModel.Helpers
         /// </summary>
         private static List<double> NormalizeFeatures(List<double> features, int targetSize)
         {
-            // Ensure we have the target size
-            while (features.Count < targetSize)
-                features.Add(0.0);
-            
+            // CRITICAL: Ensure input has exact target size before normalization
             if (features.Count > targetSize)
+            {
                 features = features.Take(targetSize).ToList();
+            }
+            else if (features.Count < targetSize)
+            {
+                features.AddRange(Enumerable.Repeat(0.0, targetSize - features.Count));
+            }
+            
+            // Clean any NaN or infinity values first (prevents training crashes)
+            for (int i = 0; i < features.Count; i++)
+            {
+                if (double.IsNaN(features[i]) || double.IsInfinity(features[i]))
+                {
+                    features[i] = 0.0;
+                }
+            }
             
             // Z-score normalization with robust statistics
             var nonZeroFeatures = features.Where(f => Math.Abs(f) > 1e-10).ToList();
@@ -645,10 +682,29 @@ namespace Aesclea_Back_End_.AIModel.Helpers
                         if (Math.Abs(features[i]) > 1e-10)
                         {
                             features[i] = (features[i] - mean) / stdDev;
-                            // Clip extreme values
-                            features[i] = Math.Max(-3, Math.Min(3, features[i]));
+                            // Clip extreme values to prevent overflow
+                            features[i] = Math.Max(-5, Math.Min(5, features[i]));
+                            
+                            // Double-check for NaN after normalization
+                            if (double.IsNaN(features[i]) || double.IsInfinity(features[i]))
+                            {
+                                features[i] = 0.0;
+                            }
                         }
                     }
+                }
+            }
+            
+            // FINAL GUARANTEE: Return exactly targetSize elements
+            if (features.Count != targetSize)
+            {
+                if (features.Count > targetSize)
+                {
+                    return features.Take(targetSize).ToList();
+                }
+                else
+                {
+                    features.AddRange(Enumerable.Repeat(0.0, targetSize - features.Count));
                 }
             }
             

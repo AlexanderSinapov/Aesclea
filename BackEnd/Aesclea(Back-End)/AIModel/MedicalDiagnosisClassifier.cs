@@ -23,15 +23,18 @@ namespace Aesclea_Back_End_.AIModel
         {
             this.diagnosisHelper = new MedicalDiagnosisHelper();
 
-            // Initialize networks
+            // Initialize networks with INCREASED DIMENSIONS for maximum accuracy
             // Diagnostic network - classifies into major diagnostic categories
-            this.diagnosticNetwork = new NeuronNetwork(new int[] { 512, 256, 128, 64, diagnosisHelper.DiagnosticCategories.Length });
+            // Architecture: 2048 → 1024 → 512 → 256 → 128 → 64 → categories
+            this.diagnosticNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 128, 64, diagnosisHelper.DiagnosticCategories.Length });
 
             // Severity network - assesses severity level (1-5 scale)
-            this.severityNetwork = new NeuronNetwork(new int[] { 512, 128, 32, 8, 5 });
+            // Architecture: 2048 → 1024 → 512 → 256 → 64 → 5
+            this.severityNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 64, 5 });
 
             // Urgency network - determines urgency level (immediate, urgent, routine)
-            this.urgencyNetwork = new NeuronNetwork(new int[] { 512, 128, 32, 8, 3 });
+            // Architecture: 2048 → 1024 → 512 → 256 → 64 → 3
+            this.urgencyNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 64, 3 });
         }        /// <summary>
         /// Analyzes medical text and provides enhanced diagnostic insights
         /// </summary>
@@ -39,8 +42,8 @@ namespace Aesclea_Back_End_.AIModel
         /// <returns>Comprehensive diagnostic analysis with enhanced features</returns>
         public MedicalDiagnosisResult AnalyzeMedicalText(string medicalText)
         {
-            // Process text into numerical features with enhanced processing
-            var textFeatures = TextHelper.ProcessMedicalText(medicalText, 512);
+            // Process text into numerical features with enhanced 2048-dimensional processing
+            var textFeatures = TextHelper.ProcessMedicalText(medicalText, 2048);
 
             // Get predictions from all networks
             var diagnosticOutput = diagnosticNetwork.FeedForward(textFeatures);
@@ -446,28 +449,110 @@ namespace Aesclea_Back_End_.AIModel
             double learningRate)
         {
             Console.WriteLine("Processing medical texts for training...");
+            Console.WriteLine($"⚡ Using optimized sequential training - maximum speed!");
+            Console.WriteLine($"🧠 Network architecture: 2048 → 1024 → 512 → 256 → 128 → 64 → outputs");
+            Console.WriteLine($"💪 Maximum accuracy configuration enabled!");
+            Console.WriteLine($"� Optimized for fast processing - minimal memory overhead");
             
-            // Convert texts to features
+            Console.WriteLine($"Converting {medicalTexts.Count} texts to 2048-dimensional feature vectors...");
+            
+            // Build ALL lists in a single pass to ensure perfect alignment
             var inputs = new List<List<double>>();
-            foreach (var text in medicalTexts)
+            var validCategories = new List<string>();
+            var validSeverityLevels = new List<int>();
+            var validUrgencyLevels = new List<int>();
+            
+            int skippedSamples = 0;
+            for (int i = 0; i < medicalTexts.Count; i++)
             {
-                var features = TextHelper.ProcessMedicalText(text, 512);
-                inputs.Add(features);
+                try
+                {
+                    // Process the text into features
+                    var features = TextHelper.ProcessMedicalText(medicalTexts[i], 2048);
+                    
+                    // CRITICAL VALIDATION: Ensure EXACT size
+                    if (features == null || features.Count != 2048)
+                    {
+                        Console.WriteLine($"\n⚠️  WARNING: Sample {i} has incorrect size ({features?.Count ?? 0}), expected 2048. Skipping...");
+                        skippedSamples++;
+                        continue;
+                    }
+                    
+                    // PARANOID CHECK: Verify size one more time before adding
+                    if (features.Count != 2048)
+                    {
+                        Console.WriteLine($"\n❌ CRITICAL: Feature size changed between check and add! Size: {features.Count}");
+                        skippedSamples++;
+                        continue;
+                    }
+                    
+                    // ONLY if validation passes, add to ALL lists simultaneously
+                    // This guarantees perfect alignment
+                    inputs.Add(features.ToList()); // Make a defensive copy when adding
+                    validCategories.Add(diagnosticCategories[i]);
+                    validSeverityLevels.Add(severityLevels[i]);
+                    validUrgencyLevels.Add(urgencyLevels[i]);
+                    
+                    // Progress indicator
+                    if (i % 100 == 0 || i == medicalTexts.Count - 1)
+                    {
+                        double progress = (i + 1) * 100.0 / medicalTexts.Count;
+                        Console.Write($"\rProcessed: {i + 1}/{medicalTexts.Count} samples ({progress:F1}%) | Valid: {inputs.Count} | Skipped: {skippedSamples}   ");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\n❌ ERROR processing sample {i}: {ex.Message}");
+                    skippedSamples++;
+                }
             }
+            
+            Console.WriteLine($"\n✓ Processed {inputs.Count} valid medical texts into 2048-dimensional feature vectors.");
+            if (skippedSamples > 0)
+            {
+                Console.WriteLine($"⚠️  Skipped {skippedSamples} samples due to validation errors");
+            }
+            Console.WriteLine($"💾 Total features: {inputs.Count * 2048:N0} ({inputs.Count * 2048 * 8.0 / 1024.0 / 1024.0:F2} MB)");
+            
+            if (inputs.Count == 0)
+            {
+                Console.WriteLine("❌ ERROR: No valid training samples! Cannot proceed with training.");
+                return;
+            }
+            
+            // Final sanity check - lists should be perfectly aligned now
+            if (validCategories.Count != inputs.Count || 
+                validSeverityLevels.Count != inputs.Count || 
+                validUrgencyLevels.Count != inputs.Count)
+            {
+                Console.WriteLine($"❌ CRITICAL ERROR: Data alignment mismatch despite single-pass processing!");
+                Console.WriteLine($"   Inputs: {inputs.Count}, Categories: {validCategories.Count}, Severity: {validSeverityLevels.Count}, Urgency: {validUrgencyLevels.Count}");
+                Console.WriteLine($"   This should never happen! Aborting training.");
+                return;
+            }
+            
+            Console.WriteLine($"✓ All data lists perfectly aligned with {inputs.Count} samples each");
+            Console.WriteLine();
 
-            Console.WriteLine($"Processed {inputs.Count} medical texts into feature vectors.");
+            // PARANOID DEBUG: Check actual sizes of first few inputs
+            Console.WriteLine("🔍 DEBUGGING: Checking actual input sizes before training...");
+            for (int i = 0; i < Math.Min(10, inputs.Count); i++)
+            {
+                Console.WriteLine($"   Input[{i}] size: {inputs[i].Count}");
+            }
+            Console.WriteLine();
 
             // Train diagnostic network
             Console.WriteLine("Training diagnostic classification network...");
-            TrainDiagnosticNetwork(inputs, diagnosticCategories, epochs, learningRate);
+            TrainDiagnosticNetwork(inputs, validCategories, epochs, learningRate);
 
             // Train severity network
             Console.WriteLine("Training severity assessment network...");
-            TrainSeverityNetwork(inputs, severityLevels, epochs, learningRate);
+            TrainSeverityNetwork(inputs, validSeverityLevels, epochs, learningRate);
 
             // Train urgency network
             Console.WriteLine("Training urgency classification network...");
-            TrainUrgencyNetwork(inputs, urgencyLevels, epochs, learningRate);
+            TrainUrgencyNetwork(inputs, validUrgencyLevels, epochs, learningRate);
 
             Console.WriteLine("Medical diagnosis network training complete!");
         }

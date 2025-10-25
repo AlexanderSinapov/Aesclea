@@ -30,16 +30,22 @@ namespace Aesclea_Back_End_.Controllers
                     {
                         _classifier = new MedicalDiagnosisClassifier();
                         
-                        // Try to load pre-trained weights
+                        // Try to load pre-trained weights from NeuronData folder
                         try
                         {
                             var fileHelper = new FileHelper();
+                            fileHelper.OpenFolder(); // Opens default NeuronData folder
                             _classifier.LoadWeights(fileHelper, "medical_diagnosis");
-                            Console.WriteLine("Loaded pre-trained medical diagnosis model");
+                            Console.WriteLine("✓ Successfully loaded trained medical diagnosis model from NeuronData/");
+                            Console.WriteLine("  - Using: medical_diagnosis_diagnostic_NeuralData.wbn");
+                            Console.WriteLine("  - Using: medical_diagnosis_severity_NeuralData.wbn");
+                            Console.WriteLine("  - Using: medical_diagnosis_urgency_NeuralData.wbn");
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"No pre-trained weights found, using untrained model: {ex.Message}");
+                            Console.WriteLine($"⚠️  No trained weights found in NeuronData/, using untrained model");
+                            Console.WriteLine($"   Run training command (Console option #16) to train the model");
+                            Console.WriteLine($"   Details: {ex.Message}");
                         }
                     }
                 }

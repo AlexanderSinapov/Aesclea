@@ -25,6 +25,7 @@ import Terms from '../views/Terms.vue'
 import Support from '../views/Support.vue'
 import SupportAgent from '../views/dashboard/SupportAgent.vue'
 import Products from '../views/Products.vue'
+import PublicChat from '../views/PublicChat.vue'
 
 const routes = [
   {
@@ -128,6 +129,11 @@ const routes = [
     path: '/terms',
     name: 'Terms',
     component: Terms
+  },
+  {
+    path: '/chat',
+    name: 'PublicChat',
+    component: PublicChat
   }
 ]
 

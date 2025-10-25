@@ -15,6 +15,8 @@ using System.Linq;
 using Aesclea_Back_End_.AIModel;
 using Aesclea_Back_End_.AIModel.Helpers;
 using Aesclea_Back_End_.DDOs;
+using Aesclea_Back_End_.Commands;
+using Console = System.Console;
 
 namespace Aesclea_Back_End_
 {
@@ -54,7 +56,8 @@ namespace Aesclea_Back_End_
 
             while (true)
             {                // Display menu options
-                Console.Clear();                Console.WriteLine("========================================");
+                Console.Clear();                
+                Console.WriteLine("========================================");
                 Console.WriteLine("         AESCLEA MEDICAL AI SYSTEM");
                 Console.WriteLine("========================================");
                 Console.WriteLine("Select an option:");
@@ -78,18 +81,30 @@ namespace Aesclea_Back_End_
                 Console.WriteLine("");
                 Console.WriteLine("MEDICAL TEXT ANALYSIS:");
                 Console.WriteLine("12. Analyze Medical Text");
-                Console.WriteLine("13. Train Medical Text Classifier");
+                Console.WriteLine("13. Train Medical Text Classifier (Legacy)");
                 Console.WriteLine("14. Test Medical Text Classifier");
                 Console.WriteLine("15. Batch Analyze Medical Records");
+                Console.WriteLine("16. Train with LLM Datasets (NEW!)");
                 Console.WriteLine("");
                 Console.WriteLine("SYSTEM MANAGEMENT:");
-                Console.WriteLine("16. Load Weights");
-                Console.WriteLine("17. Save Weights");
-                Console.WriteLine("18. Configure Analysis Settings");
-                Console.WriteLine("19. Export Analysis Results");
-                Console.WriteLine("20. Exit");
+                Console.WriteLine("17. Load Weights");
+                Console.WriteLine("18. Save Weights");
+                Console.WriteLine("19. Configure Analysis Settings");
+                Console.WriteLine("20. Export Analysis Results");
+                Console.WriteLine("21. Exit");
                 Console.WriteLine("========================================");
-                Console.Write("Enter your choice: ");                var choice = Console.ReadLine();                switch (choice)
+                Console.Write("Enter your choice: ");
+                var choice = Console.ReadLine();
+                
+                // Safety check - prevent infinite loop if ReadLine returns null
+                if (choice == null)
+                {
+                    Console.WriteLine("\n[ERROR] Console input not available. Exiting...");
+                    Console.WriteLine("Please run this application in a proper terminal/console window.");
+                    return;
+                }
+                
+                switch (choice)
                 {
                     case "1":
                         EnhancedAnalyzeImage(network);
@@ -137,18 +152,21 @@ namespace Aesclea_Back_End_
                         BatchAnalyzeMedicalRecords();
                         break;
                     case "16":
-                        LoadAllWeights(network);
+                        TrainModelCommand.Execute();
                         break;
                     case "17":
-                        SaveAllWeights(network);
+                        LoadAllWeights(network);
                         break;
                     case "18":
-                        ConfigureAnalysisSettings();
+                        SaveAllWeights(network);
                         break;
                     case "19":
-                        ExportAnalysisResults();
+                        ConfigureAnalysisSettings();
                         break;
                     case "20":
+                        ExportAnalysisResults();
+                        break;
+                    case "21":
                         return; // Exit the program
                     default:
                         Console.WriteLine("Invalid choice, please try again.");
