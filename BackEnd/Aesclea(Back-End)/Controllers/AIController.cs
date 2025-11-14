@@ -140,12 +140,10 @@ namespace Aesclea_Back_End_.Controllers
                 // Analyze the medical text
                 var analysis = _classifier!.AnalyzeMedicalText(request.Message);
                 
-                // Generate a conversational response based on the analysis
-                var response = GenerateChatResponse(request.Message, analysis, request.Context);
-                
+                // Return ONLY the structured analysis (no duplicate text message)
                 return Ok(new ChatResponse
                 {
-                    Message = response,
+                    Message = string.Empty, // No old-format text response
                     Analysis = new MedicalAnalysisResponse
                     {
                         PrimaryCategory = analysis.PrimaryDiagnosticCategory,

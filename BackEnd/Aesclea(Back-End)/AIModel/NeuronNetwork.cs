@@ -8,6 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Aesclea_Back_End_.DDOs;
 
@@ -18,6 +21,15 @@ namespace Aesclea_Back_End_.AIModel
         public List<NeuronLayer> Layers { get; private set; }
         private int TotalNumberOfLayers;
         private readonly object _trainingLock = new object(); // Thread-safe weight updates
+    public int TrainingParallelism { get; set; } = Environment.ProcessorCount;
+        // Characters (symbols) processed per second reported from preprocessing phase
+        // This value is set by the caller (e.g. MedicalDiagnosisClassifier) and displayed
+        // in the training progress UI so the user can see throughput alongside iteration/time.
+        public double TrainingSymbolsPerSecond { get; set; } = 0.0;
+        
+        // Network identifier for multi-network parallel training display
+        public string NetworkName { get; set; } = "Network";
+        public int ConsoleLineOffset { get; set; } = 0; // Which line to print progress on
 
         // ═══════════════════════════════════════════════════════════════════════════════
         // HYBRID CPU/GPU PROCESSING ARCHITECTURE
@@ -211,18 +223,13 @@ namespace Aesclea_Back_End_.AIModel
             double lastPercentageReported = -1.0;
             DateTime startTime = DateTime.Now;
 
-            Console.WriteLine($"Starting training with {inputs.Count} samples for {epochs} epochs ({totalIterations} total iterations)");
-            Console.WriteLine($"Using batch size: {batchSize}");
-            Console.WriteLine($"⚡ HYBRID CPU/GPU PARALLEL PROCESSING ENABLED");
-            Console.WriteLine($"🖥️  CPU Cores: {Environment.ProcessorCount} (All cores will be utilized)");
-            Console.WriteLine($"💻 Thread Pool: {System.Threading.ThreadPool.ThreadCount} threads available");
-            Console.WriteLine($"🧠 Gradient accumulation enabled for thread-safe parallel training");
-            Console.WriteLine($"💪 Maximum performance mode: Workload distributed across all processing units");
-            Console.WriteLine($"🚀 Async batch processing with lock-free gradient computation");
-            Console.WriteLine();
-            Console.WriteLine($"📊 Training will process {inputs.Count / batchSize} batches per epoch");
-            Console.WriteLine($"⏱️  Starting training loop...");
-            Console.WriteLine();
+            // Only show detailed startup info in single-network mode (no NetworkName set)
+            if (string.IsNullOrEmpty(NetworkName))
+            {
+                Console.WriteLine($"Starting training with {inputs.Count} samples for {epochs} epochs ({totalIterations} total iterations)");
+                Console.WriteLine($"Using batch size: {batchSize}");
+                Console.WriteLine();
+            }
 
             // For early stopping
             double bestError = double.MaxValue;
@@ -231,6 +238,21 @@ namespace Aesclea_Back_End_.AIModel
             List<double> trainingErrors = new List<double>();
 
             Console.Out.Flush();
+
+            // Ensure ThreadPool has enough threads to ramp up quickly for Parallel.For
+            try
+            {
+                ThreadPool.GetMinThreads(out int currentWorker, out int currentIOC);
+                int desiredMin = Math.Max(1, TrainingParallelism > 0 ? TrainingParallelism : Environment.ProcessorCount);
+                if (currentWorker < desiredMin)
+                {
+                    ThreadPool.SetMinThreads(desiredMin, currentIOC);
+                }
+            }
+            catch
+            {
+                // Ignore ThreadPool tuning errors - continue with defaults
+            }
 
             for (int epoch = 0; epoch < epochs; epoch++)
             {
@@ -254,37 +276,51 @@ namespace Aesclea_Back_End_.AIModel
                     double batchError = 0;
                     int validSamples = 0;
 
-                    // Process batch samples sequentially (OPTIMIZED for speed)
-                    for (int i = 0; i < currentBatchSize; i++)
+                    // Process batch samples in parallel to utilize CPU cores
+                    var perSampleGradients = new List<List<List<double>>>[currentBatchSize];
+                    var perSampleErrors = new double[currentBatchSize];
+                    var exceptionMessages = new ConcurrentBag<string>();
+
+                    var po = new ParallelOptions { MaxDegreeOfParallelism = TrainingParallelism > 0 ? TrainingParallelism : Environment.ProcessorCount };
+
+                    Parallel.For(0, currentBatchSize, po, i =>
                     {
                         try
                         {
                             int idx = indices[batchStart + i];
-                            
+
                             // Direct access - no defensive copying (FAST)
                             var input = inputs[idx];
                             var expectedOutput = expectedOutputs[idx];
-                            
+
                             // Validate input size
                             if (input.Count != Layers[0].Neurons[0].Weights.Count)
                             {
-                                Console.WriteLine($"\n❌ ERROR processing sample: Number of inputs ({input.Count}) must match the number of weights ({Layers[0].Neurons[0].Weights.Count}).");
-                                currentIteration++;
-                                continue;
+                                exceptionMessages.Add($"Sample idx {idx}: Number of inputs ({input.Count}) must match the number of weights ({Layers[0].Neurons[0].Weights.Count}).");
+                                perSampleGradients[i] = null;
+                                perSampleErrors[i] = 0;
+                                return;
                             }
 
-                            // FAST forward pass - reuse activation lists
+                            // Thread-safe forward pass (non-mutating) using Neuron.Evaluate
                             var activations = new List<List<double>>(Layers.Count + 1);
                             activations.Add(input);
-                            var currentActivation = input;
+                            var currentActivationLocal = input;
 
                             for (int l = 0; l < Layers.Count; l++)
                             {
-                                currentActivation = Layers[l].FeedForward(currentActivation, true);
-                                activations.Add(currentActivation);
+                                var layer = Layers[l];
+                                var nextActivation = new List<double>(layer.Neurons.Count);
+                                for (int ni = 0; ni < layer.Neurons.Count; ni++)
+                                {
+                                    var neuron = layer.Neurons[ni];
+                                    nextActivation.Add(neuron.Evaluate(currentActivationLocal, true));
+                                }
+                                currentActivationLocal = nextActivation;
+                                activations.Add(currentActivationLocal);
                             }
 
-                            // Calculate error (FAST - direct calculation)
+                            // Calculate error (thread-local)
                             double sampleError = 0;
                             var output = activations[activations.Count - 1];
                             for (int j = 0; j < expectedOutput.Count && j < output.Count; j++)
@@ -292,20 +328,38 @@ namespace Aesclea_Back_End_.AIModel
                                 double diff = expectedOutput[j] - output[j];
                                 sampleError += diff * diff;
                             }
-                            batchError += sampleError;
 
-                            // FAST gradient computation (in-place where possible)
+                            // Compute gradients for this sample
                             var gradients = ComputeGradientsOptimized(input, expectedOutput, activations, currentLearningRate);
-                            batchGradients.Add(gradients);
-                            
-                            validSamples++;
-                            currentIteration++;
+                            perSampleGradients[i] = gradients;
+                            perSampleErrors[i] = sampleError;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"\n❌ ERROR processing sample: {ex.Message}");
-                            currentIteration++;
+                            exceptionMessages.Add($"Sample exception: {ex.Message}");
+                            perSampleGradients[i] = null;
+                            perSampleErrors[i] = 0;
                         }
+                    });
+
+                    // Aggregate results from parallel processing
+                    for (int i = 0; i < currentBatchSize; i++)
+                    {
+                        if (perSampleGradients[i] != null)
+                        {
+                            batchGradients.Add(perSampleGradients[i]);
+                            batchError += perSampleErrors[i];
+                            validSamples++;
+                        }
+                    }
+
+                    // Advance iteration counter by attempted samples
+                    currentIteration += currentBatchSize;
+
+                    // Print any collected exception messages (minimal overhead)
+                    while (exceptionMessages.TryTake(out var msg))
+                    {
+                        Console.WriteLine($"\n❌ ERROR processing sample: {msg}");
                     }
 
                     // FAST GRADIENT APPLICATION - Apply averaged batch gradients
@@ -332,7 +386,7 @@ namespace Aesclea_Back_End_.AIModel
                         TimeSpan elapsed = DateTime.Now - startTime;
                         TimeSpan remaining = TimeSpan.Zero;
                         string timeRemainingStr = "Calculating...";
-                        
+
                         if (currentIteration > 10 && elapsed.TotalSeconds > 1)
                         {
                             try
@@ -340,7 +394,7 @@ namespace Aesclea_Back_End_.AIModel
                                 double progress = currentIteration / (double)totalIterations;
                                 double estimatedTotalSeconds = elapsed.TotalSeconds / progress;
                                 double remainingSeconds = estimatedTotalSeconds - elapsed.TotalSeconds;
-                                
+
                                 if (remainingSeconds > 0 && remainingSeconds < TimeSpan.MaxValue.TotalSeconds)
                                 {
                                     remaining = TimeSpan.FromSeconds(remainingSeconds);
@@ -357,9 +411,23 @@ namespace Aesclea_Back_End_.AIModel
                             }
                         }
 
-                        // Enhanced progress display with sample tracking
-                        string skipWarning = skippedSamplesInBatch > 0 ? $" | ⚠️ Skipped: {skippedSamplesInBatch}/{currentBatchSize}" : "";
-                        Console.Write($"\rTraining progress: {currentPercentage.ToString("N2")}% | Error: {batchError:F6} | Valid: {validSamplesInBatch}/{currentBatchSize}{skipWarning} | Time: {timeRemainingStr} | Epoch: {epoch + 1}/{epochs}        ");
+                        // Enhanced progress display with sample tracking and explicit iteration counter
+                        string skipWarning = skippedSamplesInBatch > 0 ? $" | ⚠️  Skipped: {skippedSamplesInBatch}/{currentBatchSize}" : "";
+                        string processingRate = TrainingSymbolsPerSecond > 0 ? $" | Read: {TrainingSymbolsPerSecond:N0} chars/s" : "";
+                        
+                        // Support multi-network parallel training with separate progress lines
+                        if (!string.IsNullOrEmpty(NetworkName) && ConsoleLineOffset >= 0)
+                        {
+                            // Multi-line concurrent display - move to assigned line, print, restore position
+                            Console.SetCursorPosition(0, Console.CursorTop - ConsoleLineOffset);
+                            Console.Write($"[{NetworkName}] Iter: {currentIteration}/{totalIterations} | {currentPercentage:N1}% | Error: {batchError:F6} | ETA: {timeRemainingStr} | Epoch: {epoch + 1}/{epochs}{processingRate}".PadRight(120));
+                            Console.SetCursorPosition(0, Console.CursorTop + ConsoleLineOffset);
+                        }
+                        else if (string.IsNullOrEmpty(NetworkName))
+                        {
+                            // Single network mode - original display
+                            Console.Write($"\rIteration: {currentIteration}/{totalIterations} | {currentPercentage:N2}% | Error: {batchError:F6} | Valid: {validSamplesInBatch}/{currentBatchSize}{skipWarning} | Time: {timeRemainingStr} | Epoch: {epoch + 1}/{epochs}{processingRate}        ");
+                        }
                         Console.Out.Flush();
                         lastPercentageReported = currentPercentage;
                     }
@@ -368,8 +436,11 @@ namespace Aesclea_Back_End_.AIModel
                 totalError /= inputs.Count;
                 trainingErrors.Add(totalError);
 
-                // Print detailed progress after each epoch
-                Console.WriteLine($"\nEpoch {epoch + 1}/{epochs}: Error = {totalError:F6}, Learning Rate = {currentLearningRate:F6}");
+                // Print detailed progress after each epoch (only in single-network mode)
+                if (string.IsNullOrEmpty(NetworkName))
+                {
+                    Console.WriteLine($"\nEpoch {epoch + 1}/{epochs}: Error = {totalError:F6}, Learning Rate = {currentLearningRate:F6}");
+                }
 
                 // Early stopping check
                 if (totalError < bestError)
@@ -382,7 +453,10 @@ namespace Aesclea_Back_End_.AIModel
                     patienceCounter++;
                     if (patienceCounter >= patienceLimit)
                     {
-                        Console.WriteLine($"\nEarly stopping triggered after {epoch + 1} epochs with no improvement for {patienceLimit} epochs");
+                        if (string.IsNullOrEmpty(NetworkName))
+                        {
+                            Console.WriteLine($"\nEarly stopping triggered after {epoch + 1} epochs with no improvement for {patienceLimit} epochs");
+                        }
                         break;
                     }
                 }
@@ -390,21 +464,30 @@ namespace Aesclea_Back_End_.AIModel
                 // Very low error check
                 if (totalError < 0.001)
                 {
-                    Console.WriteLine($"\nTraining converged at epoch {epoch + 1} with error {totalError:F6}");
+                    if (string.IsNullOrEmpty(NetworkName))
+                    {
+                        Console.WriteLine($"\nTraining converged at epoch {epoch + 1} with error {totalError:F6}");
+                    }
                     break;
                 }
             }
 
-            Console.WriteLine("\nTraining complete!");
-
-            // Show error evolution if requested
-            Console.WriteLine("Would you like to see the error evolution? (Y/N)");
-            if (Console.ReadLine().Trim().ToUpper() == "Y")
+            if (string.IsNullOrEmpty(NetworkName))
             {
-                Console.WriteLine("Error evolution across epochs:");
-                for (int i = 0; i < trainingErrors.Count; i++)
+                Console.WriteLine("\nTraining complete!");
+            }
+
+            // Show error evolution if requested (only in single-network mode)
+            if (string.IsNullOrEmpty(NetworkName))
+            {
+                Console.WriteLine("Would you like to see the error evolution? (Y/N)");
+                if (Console.ReadLine().Trim().ToUpper() == "Y")
                 {
-                    Console.WriteLine($"Epoch {i + 1}: {trainingErrors[i]:F6}");
+                    Console.WriteLine("Error evolution across epochs:");
+                    for (int i = 0; i < trainingErrors.Count; i++)
+                    {
+                        Console.WriteLine($"Epoch {i + 1}: {trainingErrors[i]:F6}");
+                    }
                 }
             }
         }
@@ -592,14 +675,43 @@ namespace Aesclea_Back_End_.AIModel
                     if (n < errors.Length)
                     {
                         double error = errors[n];
+                        
+                        // NaN/Inf protection
+                        if (double.IsNaN(error) || double.IsInfinity(error))
+                        {
+                            error = 0.0;
+                        }
+                        
                         double output = activations[l + 1][n];
                         double derivative = output * (1 - output); // Sigmoid derivative
+                        
+                        // Gradient clipping to prevent explosion
+                        if (double.IsNaN(derivative) || double.IsInfinity(derivative))
+                        {
+                            derivative = 0.0;
+                        }
 
                         // Weight gradients
                         int maxWeights = Math.Min(neuron.Weights.Count, layerInputs.Count);
                         for (int w = 0; w < maxWeights; w++)
                         {
-                            neuronGradients.Add(error * derivative * layerInputs[w]);
+                            double gradient = error * derivative * layerInputs[w];
+                            
+                            // Gradient clipping (value-based)
+                            if (double.IsNaN(gradient) || double.IsInfinity(gradient))
+                            {
+                                gradient = 0.0;
+                            }
+                            else if (gradient > 10.0)
+                            {
+                                gradient = 10.0;
+                            }
+                            else if (gradient < -10.0)
+                            {
+                                gradient = -10.0;
+                            }
+                            
+                            neuronGradients.Add(gradient);
                         }
                         for (int w = maxWeights; w < neuron.Weights.Count; w++)
                         {
@@ -607,7 +719,20 @@ namespace Aesclea_Back_End_.AIModel
                         }
                         
                         // Bias gradient
-                        neuronGradients.Add(error * derivative);
+                        double biasGradient = error * derivative;
+                        if (double.IsNaN(biasGradient) || double.IsInfinity(biasGradient))
+                        {
+                            biasGradient = 0.0;
+                        }
+                        else if (biasGradient > 10.0)
+                        {
+                            biasGradient = 10.0;
+                        }
+                        else if (biasGradient < -10.0)
+                        {
+                            biasGradient = -10.0;
+                        }
+                        neuronGradients.Add(biasGradient);
                     }
                     else
                     {
@@ -635,44 +760,90 @@ namespace Aesclea_Back_End_.AIModel
 
             double scale = learningRate / validSamples;
 
-            // Average and apply gradients in one pass
+            // Average and apply gradients in parallel across layers and neurons to utilize CPU during aggregation
+            var layerOptions = new ParallelOptions { MaxDegreeOfParallelism = TrainingParallelism > 0 ? TrainingParallelism : Environment.ProcessorCount };
+
             for (int l = 0; l < Layers.Count; l++)
             {
                 var layer = Layers[l];
-                
-                for (int n = 0; n < layer.Neurons.Count; n++)
+
+                // Parallelize across neurons in this layer
+                Parallel.For(0, layer.Neurons.Count, layerOptions, n =>
                 {
                     var neuron = layer.Neurons[n];
 
-                    // Average weight gradients
+                    // Average weight gradients for this neuron
                     for (int w = 0; w < neuron.Weights.Count; w++)
                     {
                         double avgGradient = 0;
                         for (int s = 0; s < validSamples; s++)
                         {
-                            if (l < batchGradients[s].Count && 
-                                n < batchGradients[s][l].Count && 
+                            if (l < batchGradients[s].Count &&
+                                n < batchGradients[s][l].Count &&
                                 w < batchGradients[s][l][n].Count)
                             {
                                 avgGradient += batchGradients[s][l][n][w];
                             }
                         }
-                        neuron.Weights[w] += avgGradient * scale;
+                        
+                        // NaN/Inf protection for averaged gradient
+                        if (double.IsNaN(avgGradient) || double.IsInfinity(avgGradient))
+                        {
+                            avgGradient = 0.0;
+                        }
+                        
+                        // Update weight (per-neuron updates are independent)
+                        double weightUpdate = avgGradient * scale;
+                        
+                        // NaN/Inf protection for weight update
+                        if (double.IsNaN(weightUpdate) || double.IsInfinity(weightUpdate))
+                        {
+                            weightUpdate = 0.0;
+                        }
+                        
+                        neuron.Weights[w] += weightUpdate;
+                        
+                        // Validate weight after update
+                        if (double.IsNaN(neuron.Weights[w]) || double.IsInfinity(neuron.Weights[w]))
+                        {
+                            neuron.Weights[w] = (new Random().NextDouble() - 0.5) * 0.01;
+                        }
                     }
 
                     // Average bias gradient
                     double avgBiasGradient = 0;
                     for (int s = 0; s < validSamples; s++)
                     {
-                        if (l < batchGradients[s].Count && 
-                            n < batchGradients[s][l].Count && 
+                        if (l < batchGradients[s].Count &&
+                            n < batchGradients[s][l].Count &&
                             neuron.Weights.Count < batchGradients[s][l][n].Count)
                         {
                             avgBiasGradient += batchGradients[s][l][n][neuron.Weights.Count];
                         }
                     }
-                    neuron.Bias += avgBiasGradient * scale;
-                }
+                    
+                    // NaN/Inf protection for bias gradient
+                    if (double.IsNaN(avgBiasGradient) || double.IsInfinity(avgBiasGradient))
+                    {
+                        avgBiasGradient = 0.0;
+                    }
+                    
+                    double biasUpdate = avgBiasGradient * scale;
+                    
+                    // NaN/Inf protection for bias update
+                    if (double.IsNaN(biasUpdate) || double.IsInfinity(biasUpdate))
+                    {
+                        biasUpdate = 0.0;
+                    }
+                    
+                    neuron.Bias += biasUpdate;
+                    
+                    // Validate bias after update
+                    if (double.IsNaN(neuron.Bias) || double.IsInfinity(neuron.Bias))
+                    {
+                        neuron.Bias = (new Random().NextDouble() - 0.5) * 0.01;
+                    }
+                });
             }
         }
 

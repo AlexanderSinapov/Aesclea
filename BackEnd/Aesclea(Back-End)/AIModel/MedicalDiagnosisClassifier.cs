@@ -5,18 +5,21 @@
 // Unauthorized copying, modification, distribution, or use is strictly prohibited.
 
 using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Aesclea_Back_End_.AIModel.Helpers;
 
 namespace Aesclea_Back_End_.AIModel
 {
     public class MedicalDiagnosisClassifier
     {
-        private NeuronNetwork diagnosticNetwork; // Main diagnostic network
-        private NeuronNetwork severityNetwork; // Severity assessment network
-        private NeuronNetwork urgencyNetwork; // Urgency classification network
+        public NeuronNetwork diagnosticNetwork; // Main diagnostic network - made public for console control
+        public NeuronNetwork severityNetwork; // Severity assessment network - made public for console control
+        public NeuronNetwork urgencyNetwork; // Urgency classification network - made public for console control
         private MedicalDiagnosisHelper diagnosisHelper; // Helper with medical knowledge
 
         public MedicalDiagnosisClassifier()
@@ -26,15 +29,27 @@ namespace Aesclea_Back_End_.AIModel
             // Initialize networks with INCREASED DIMENSIONS for maximum accuracy
             // Diagnostic network - classifies into major diagnostic categories
             // Architecture: 2048 → 1024 → 512 → 256 → 128 → 64 → categories
-            this.diagnosticNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 128, 64, diagnosisHelper.DiagnosticCategories.Length });
+            this.diagnosticNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 128, 64, diagnosisHelper.DiagnosticCategories.Length })
+            {
+                NetworkName = "DIAGNOSTIC",
+                ConsoleLineOffset = 0
+            };
 
             // Severity network - assesses severity level (1-5 scale)
             // Architecture: 2048 → 1024 → 512 → 256 → 64 → 5
-            this.severityNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 64, 5 });
+            this.severityNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 64, 5 })
+            {
+                NetworkName = "SEVERITY  ",
+                ConsoleLineOffset = 0
+            };
 
             // Urgency network - determines urgency level (immediate, urgent, routine)
             // Architecture: 2048 → 1024 → 512 → 256 → 64 → 3
-            this.urgencyNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 64, 3 });
+            this.urgencyNetwork = new NeuronNetwork(new int[] { 2048, 1024, 512, 256, 64, 3 })
+            {
+                NetworkName = "URGENCY   ",
+                ConsoleLineOffset = 0
+            };
         }        /// <summary>
         /// Analyzes medical text and provides enhanced diagnostic insights
         /// </summary>
@@ -50,40 +65,105 @@ namespace Aesclea_Back_End_.AIModel
             var severityOutput = severityNetwork.FeedForward(textFeatures);
             var urgencyOutput = urgencyNetwork.FeedForward(textFeatures);
 
-            // Create enhanced result object
+            // Create result object with ONLY neural network predictions
             var result = new MedicalDiagnosisResult
             {
                 InputText = medicalText,
                 ProcessedOn = DateTime.Now
             };
 
-            // Enhanced diagnostic analysis
+            // Diagnostic classification (learned by neural network)
             result.PrimaryDiagnosticCategory = GetTopDiagnosticCategory(diagnosticOutput);
             result.DiagnosticConfidences = GetDiagnosticConfidences(diagnosticOutput);
 
-            // Enhanced severity analysis with context
+            // Severity assessment (learned by neural network)
             result.SeverityLevel = GetSeverityLevel(severityOutput);
             result.SeverityDescription = diagnosisHelper.GetSeverityDescription(result.SeverityLevel);
             result.SeverityConfidence = severityOutput[result.SeverityLevel - 1];
 
-            // Enhanced urgency analysis with red flag detection
+            // Urgency classification (learned by neural network)
             result.UrgencyLevel = GetUrgencyLevel(urgencyOutput);
             result.UrgencyDescription = diagnosisHelper.GetUrgencyDescription(result.UrgencyLevel);
             result.UrgencyConfidence = urgencyOutput[result.UrgencyLevel];
 
-            // Enhanced medical information extraction
-            result.ExtractedInfo = ExtractEnhancedMedicalInfo(medicalText);
+            // Basic extracted information (simple text processing, not hardcoded medical rules)
+            result.ExtractedInfo = TextHelper.ExtractMedicalInfo(medicalText);
 
-            // Generate enhanced recommendations with clinical context
-            result.Recommendations = GenerateEnhancedRecommendations(result);
-
-            // Add clinical decision support features
-            result.ExtractedInfo["clinical_alerts"] = GenerateClinicalAlerts(result, medicalText);
-            result.ExtractedInfo["differential_diagnosis"] = GenerateDifferentialDiagnosis(result);
-            result.ExtractedInfo["suggested_tests"] = GenerateSuggestedTests(result);
-            result.ExtractedInfo["risk_factors"] = ExtractRiskFactors(medicalText);
+            // Generate recommendations based on learned severity/urgency
+            result.Recommendations = GenerateRecommendationsFromNeuralPredictions(result);
 
             return result;
+        }
+
+        /// <summary>
+        /// Generate recommendations based purely on what the neural networks learned
+        /// </summary>
+        private List<string> GenerateRecommendationsFromNeuralPredictions(MedicalDiagnosisResult result)
+        {
+            var recommendations = new List<string>();
+            
+            // Recommendations based on learned severity level
+            switch (result.SeverityLevel)
+            {
+                case 1:
+                    recommendations.Add("Consider outpatient management with scheduled follow-up");
+                    recommendations.Add("Monitor symptoms and seek care if condition worsens");
+                    break;
+                case 2:
+                    recommendations.Add("Consider same-day evaluation or urgent care visit");
+                    recommendations.Add("Provide clear instructions for symptom monitoring");
+                    break;
+                case 3:
+                    recommendations.Add("Recommend prompt medical evaluation within 24 hours");
+                    recommendations.Add("Consider emergency department if symptoms worsen");
+                    break;
+                case 4:
+                case 5:
+                    recommendations.Add("Immediate medical evaluation required");
+                    recommendations.Add("Consider emergency department presentation");
+                    recommendations.Add("Monitor vital signs closely");
+                    break;
+            }
+            
+            // Recommendations based on learned urgency level
+            if (result.UrgencyLevel >= 1)
+            {
+                recommendations.Add("Ensure patient has emergency contact information");
+                if (result.UrgencyLevel == 2)
+                {
+                    recommendations.Add("URGENT: Immediate evaluation required");
+                }
+            }
+            
+            // Category-specific recommendations from helper
+            var categoryRecommendations = diagnosisHelper.GetCategoryRecommendations(result.PrimaryDiagnosticCategory);
+            recommendations.AddRange(categoryRecommendations);
+            
+            return recommendations.Distinct().ToList();
+        }
+        /// <summary>
+        /// Set training parallelism for internal networks
+        /// </summary>
+        public void SetTrainingParallelism(int parallelism)
+        {
+            if (parallelism <= 0) parallelism = Environment.ProcessorCount;
+            diagnosticNetwork.TrainingParallelism = parallelism;
+            severityNetwork.TrainingParallelism = parallelism;
+            urgencyNetwork.TrainingParallelism = parallelism;
+        }
+
+        /// <summary>
+        /// Set per-network parallelism control so each network can be allocated a fixed number of threads.
+        /// </summary>
+        public void SetPerNetworkParallelism(int diagnosticParallelism, int severityParallelism, int urgencyParallelism)
+        {
+            if (diagnosticParallelism <= 0) diagnosticParallelism = 1;
+            if (severityParallelism <= 0) severityParallelism = 1;
+            if (urgencyParallelism <= 0) urgencyParallelism = 1;
+
+            diagnosticNetwork.TrainingParallelism = diagnosticParallelism;
+            severityNetwork.TrainingParallelism = severityParallelism;
+            urgencyNetwork.TrainingParallelism = urgencyParallelism;
         }
 
         /// <summary>
@@ -449,62 +529,67 @@ namespace Aesclea_Back_End_.AIModel
             double learningRate)
         {
             Console.WriteLine("Processing medical texts for training...");
-            Console.WriteLine($"⚡ Using optimized sequential training - maximum speed!");
+            Console.WriteLine($"⚡ Using optimized parallel training for feature extraction (if available)!");
             Console.WriteLine($"🧠 Network architecture: 2048 → 1024 → 512 → 256 → 128 → 64 → outputs");
             Console.WriteLine($"💪 Maximum accuracy configuration enabled!");
             Console.WriteLine($"� Optimized for fast processing - minimal memory overhead");
             
             Console.WriteLine($"Converting {medicalTexts.Count} texts to 2048-dimensional feature vectors...");
             
-            // Build ALL lists in a single pass to ensure perfect alignment
+            // Build ALL lists in parallel to utilize CPU for feature extraction
+            int total = medicalTexts.Count;
+            var featuresArray = new List<double>[total];
+            var skipFlags = new bool[total];
+            var exceptions = new System.Collections.Concurrent.ConcurrentBag<string>();
+
+            var po = new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+            System.Threading.Tasks.Parallel.For(0, total, po, i =>
+            {
+                try
+                {
+                    var features = TextHelper.ProcessMedicalText(medicalTexts[i], 2048);
+
+                    if (features == null || features.Count != 2048)
+                    {
+                        skipFlags[i] = true;
+                        return;
+                    }
+
+                    featuresArray[i] = features;
+                }
+                catch (Exception ex)
+                {
+                    skipFlags[i] = true;
+                    exceptions.Add($"Sample {i}: {ex.Message}");
+                }
+            });
+
+            // Collect valid entries in original order to preserve alignment
             var inputs = new List<List<double>>();
             var validCategories = new List<string>();
             var validSeverityLevels = new List<int>();
             var validUrgencyLevels = new List<int>();
-            
             int skippedSamples = 0;
-            for (int i = 0; i < medicalTexts.Count; i++)
+
+            for (int i = 0; i < total; i++)
             {
-                try
+                if (skipFlags[i] || featuresArray[i] == null)
                 {
-                    // Process the text into features
-                    var features = TextHelper.ProcessMedicalText(medicalTexts[i], 2048);
-                    
-                    // CRITICAL VALIDATION: Ensure EXACT size
-                    if (features == null || features.Count != 2048)
-                    {
-                        Console.WriteLine($"\n⚠️  WARNING: Sample {i} has incorrect size ({features?.Count ?? 0}), expected 2048. Skipping...");
-                        skippedSamples++;
-                        continue;
-                    }
-                    
-                    // PARANOID CHECK: Verify size one more time before adding
-                    if (features.Count != 2048)
-                    {
-                        Console.WriteLine($"\n❌ CRITICAL: Feature size changed between check and add! Size: {features.Count}");
-                        skippedSamples++;
-                        continue;
-                    }
-                    
-                    // ONLY if validation passes, add to ALL lists simultaneously
-                    // This guarantees perfect alignment
-                    inputs.Add(features.ToList()); // Make a defensive copy when adding
-                    validCategories.Add(diagnosticCategories[i]);
-                    validSeverityLevels.Add(severityLevels[i]);
-                    validUrgencyLevels.Add(urgencyLevels[i]);
-                    
-                    // Progress indicator
-                    if (i % 100 == 0 || i == medicalTexts.Count - 1)
-                    {
-                        double progress = (i + 1) * 100.0 / medicalTexts.Count;
-                        Console.Write($"\rProcessed: {i + 1}/{medicalTexts.Count} samples ({progress:F1}%) | Valid: {inputs.Count} | Skipped: {skippedSamples}   ");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"\n❌ ERROR processing sample {i}: {ex.Message}");
                     skippedSamples++;
+                    continue;
                 }
+
+                inputs.Add(featuresArray[i]);
+                validCategories.Add(diagnosticCategories[i]);
+                validSeverityLevels.Add(severityLevels[i]);
+                validUrgencyLevels.Add(urgencyLevels[i]);
+            }
+
+            // Print exceptions (if any)
+            while (exceptions.TryTake(out var em))
+            {
+                Console.WriteLine($"\n❌ ERROR processing sample: {em}");
             }
             
             Console.WriteLine($"\n✓ Processed {inputs.Count} valid medical texts into 2048-dimensional feature vectors.");
@@ -512,35 +597,12 @@ namespace Aesclea_Back_End_.AIModel
             {
                 Console.WriteLine($"⚠️  Skipped {skippedSamples} samples due to validation errors");
             }
-            Console.WriteLine($"💾 Total features: {inputs.Count * 2048:N0} ({inputs.Count * 2048 * 8.0 / 1024.0 / 1024.0:F2} MB)");
             
             if (inputs.Count == 0)
             {
                 Console.WriteLine("❌ ERROR: No valid training samples! Cannot proceed with training.");
                 return;
             }
-            
-            // Final sanity check - lists should be perfectly aligned now
-            if (validCategories.Count != inputs.Count || 
-                validSeverityLevels.Count != inputs.Count || 
-                validUrgencyLevels.Count != inputs.Count)
-            {
-                Console.WriteLine($"❌ CRITICAL ERROR: Data alignment mismatch despite single-pass processing!");
-                Console.WriteLine($"   Inputs: {inputs.Count}, Categories: {validCategories.Count}, Severity: {validSeverityLevels.Count}, Urgency: {validUrgencyLevels.Count}");
-                Console.WriteLine($"   This should never happen! Aborting training.");
-                return;
-            }
-            
-            Console.WriteLine($"✓ All data lists perfectly aligned with {inputs.Count} samples each");
-            Console.WriteLine();
-
-            // PARANOID DEBUG: Check actual sizes of first few inputs
-            Console.WriteLine("🔍 DEBUGGING: Checking actual input sizes before training...");
-            for (int i = 0; i < Math.Min(10, inputs.Count); i++)
-            {
-                Console.WriteLine($"   Input[{i}] size: {inputs[i].Count}");
-            }
-            Console.WriteLine();
 
             // Train diagnostic network
             Console.WriteLine("Training diagnostic classification network...");
@@ -555,6 +617,194 @@ namespace Aesclea_Back_End_.AIModel
             TrainUrgencyNetwork(inputs, validUrgencyLevels, epochs, learningRate);
 
             Console.WriteLine("Medical diagnosis network training complete!");
+        }
+
+        /// <summary>
+        /// Helper: convert raw medical texts into 2048-dimensional feature inputs in parallel
+        /// Returns the list of features and the kept input indices so callers can align labels.
+        /// </summary>
+        private (List<List<double>> inputs, List<int> keptIndices) BuildInputsFromTexts(List<string> medicalTexts, bool suppressOutput = false)
+        {
+            int total = medicalTexts.Count;
+            var featuresArray = new List<double>[total];
+            var skipFlags = new bool[total];
+            var exceptions = new ConcurrentBag<string>();
+
+            var po = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+            // Measure throughput (symbols / second)
+            var sw = Stopwatch.StartNew();
+
+            long totalAttemptedChars = 0;
+            long totalProcessedChars = 0;
+            long totalSampleTicks = 0; // sum of per-sample processing ticks (aggregated across threads)
+            long rawReadTicks = 0; // time spent just reading/accessing the raw text
+
+            Parallel.For(0, total, po, i =>
+            {
+                // Measure raw read speed (actually iterating through characters)
+                long rawReadStart = Stopwatch.GetTimestamp();
+                string rawText = medicalTexts[i];
+                int sampleLen = 0;
+                if (rawText != null)
+                {
+                    // Actually iterate through the string to measure real read speed
+                    int charCount = 0;
+                    foreach (char c in rawText)
+                    {
+                        charCount++; // Force the CPU to actually read each character
+                    }
+                    sampleLen = charCount;
+                }
+                long rawReadEnd = Stopwatch.GetTimestamp();
+                System.Threading.Interlocked.Add(ref rawReadTicks, rawReadEnd - rawReadStart);
+                
+                long sampleStart = Stopwatch.GetTimestamp();
+                try
+                {
+                    System.Threading.Interlocked.Add(ref totalAttemptedChars, sampleLen);
+
+                    var features = TextHelper.ProcessMedicalText(rawText, 2048);
+
+                    if (features == null || features.Count != 2048)
+                    {
+                        skipFlags[i] = true;
+                        return;
+                    }
+
+                    featuresArray[i] = features;
+                    System.Threading.Interlocked.Add(ref totalProcessedChars, sampleLen);
+                }
+                catch (Exception ex)
+                {
+                    skipFlags[i] = true;
+                    exceptions.Add($"Sample {i}: {ex.Message}");
+                }
+                finally
+                {
+                    long sampleEnd = Stopwatch.GetTimestamp();
+                    System.Threading.Interlocked.Add(ref totalSampleTicks, sampleEnd - sampleStart);
+                }
+            });
+
+            sw.Stop();
+
+            var inputs = new List<List<double>>();
+            var kept = new List<int>();
+
+            for (int i = 0; i < total; i++)
+            {
+                if (skipFlags[i] || featuresArray[i] == null)
+                    continue;
+
+                inputs.Add(featuresArray[i]);
+                kept.Add(i);
+            }
+
+            while (exceptions.TryTake(out var em))
+            {
+                if (!suppressOutput)
+                    Console.WriteLine($"\n❌ ERROR processing sample: {em}");
+            }
+
+            // Compute symbol (character) throughput
+            try
+            {
+                // Use the atomically-collected totals for more accurate stats
+                long attemptedChars = totalAttemptedChars;
+                long processedChars = totalProcessedChars;
+                double wallClockSeconds = Math.Max(0.0001, sw.Elapsed.TotalSeconds);
+                
+                // Compute raw reading speed (just memory access to strings)
+                double rawReadSeconds = Math.Max(0.000001, (double)rawReadTicks / Stopwatch.Frequency);
+                double rawReadRate = attemptedChars / rawReadSeconds;
+                
+                // Compute single-thread-equivalent rate using aggregated per-sample time
+                // (this represents actual CPU work time, not parallelized wall-clock time)
+                double summedSampleSeconds = Math.Max(0.000001, (double)totalSampleTicks / Stopwatch.Frequency);
+                double singleThreadEquivalentRate = processedChars / summedSampleSeconds;
+                
+                // Also compute wall-clock throughput (parallel processing rate)
+                double parallelThroughputRate = processedChars / wallClockSeconds;
+
+                if (!suppressOutput)
+                {
+                    Console.WriteLine($"✓ Feature extraction: processed {inputs.Count}/{total} samples in {wallClockSeconds:F2}s wall-clock");
+                    Console.WriteLine($"   - Input text size: {processedChars:N0} characters total");
+                    Console.WriteLine($"   - Raw read speed: {rawReadRate:N0} chars/sec (just accessing text in memory)");
+                    Console.WriteLine($"   - Processing rate: {singleThreadEquivalentRate:N0} chars/sec (includes tokenization, feature extraction, normalization)");
+                    Console.WriteLine($"   - Parallel speedup: {parallelThroughputRate:N0} chars/sec effective ({Environment.ProcessorCount} cores)");
+                }
+
+                // Surface raw read rate to networks for display during training
+                try
+                {
+                    this.diagnosticNetwork.TrainingSymbolsPerSecond = rawReadRate;
+                    this.severityNetwork.TrainingSymbolsPerSecond = rawReadRate;
+                    this.urgencyNetwork.TrainingSymbolsPerSecond = rawReadRate;
+                }
+                catch
+                {
+                    // Non-fatal - networks may be null in some unit test scenarios
+                }
+            }
+            catch
+            {
+                // Non-fatal - don't block training if stats fail
+            }
+
+            return (inputs, kept);
+        }
+
+        /// <summary>
+        /// Public wrapper to train only the diagnostic network using raw medical texts (concurrent entrypoint)
+        /// </summary>
+        public void TrainDiagnosticNetworkConcurrent(List<string> medicalTexts, List<string> diagnosticCategories, int epochs, double learningRate)
+        {
+            var (inputs, kept) = BuildInputsFromTexts(medicalTexts, suppressOutput: true);
+            var validCategories = kept.Select(i => diagnosticCategories[i]).ToList();
+
+            if (inputs.Count == 0)
+            {
+                Console.WriteLine("❌ ERROR: No valid training samples for diagnostic network.");
+                return;
+            }
+
+            TrainDiagnosticNetwork(inputs, validCategories, epochs, learningRate);
+        }
+
+        /// <summary>
+        /// Public wrapper to train only the severity network using raw medical texts (concurrent entrypoint)
+        /// </summary>
+        public void TrainSeverityNetworkConcurrent(List<string> medicalTexts, List<int> severityLevels, int epochs, double learningRate)
+        {
+            var (inputs, kept) = BuildInputsFromTexts(medicalTexts, suppressOutput: true);
+            var validSeverity = kept.Select(i => severityLevels[i]).ToList();
+
+            if (inputs.Count == 0)
+            {
+                Console.WriteLine("❌ ERROR: No valid training samples for severity network.");
+                return;
+            }
+
+            TrainSeverityNetwork(inputs, validSeverity, epochs, learningRate);
+        }
+
+        /// <summary>
+        /// Public wrapper to train only the urgency network using raw medical texts (concurrent entrypoint)
+        /// </summary>
+        public void TrainUrgencyNetworkConcurrent(List<string> medicalTexts, List<int> urgencyLevels, int epochs, double learningRate)
+        {
+            var (inputs, kept) = BuildInputsFromTexts(medicalTexts, suppressOutput: true);
+            var validUrgency = kept.Select(i => urgencyLevels[i]).ToList();
+
+            if (inputs.Count == 0)
+            {
+                Console.WriteLine("❌ ERROR: No valid training samples for urgency network.");
+                return;
+            }
+
+            TrainUrgencyNetwork(inputs, validUrgency, epochs, learningRate);
         }
 
         private void TrainDiagnosticNetwork(List<List<double>> inputs, List<string> categories, int epochs, double learningRate)

@@ -94,7 +94,8 @@ namespace Aesclea_Back_End_.Commands
                     UsePubMedQA = true,
                     MaxSamplesPerSource = maxSamples,
                     EnableParallelProcessing = true, // NEW: Enable multi-core processing
-                    MaxDegreeOfParallelism = Environment.ProcessorCount // Use all CPU cores
+                    MaxDegreeOfParallelism = Environment.ProcessorCount, // Use all CPU cores
+                    EnableConcurrentNetworkTraining = true // Run diagnostic/severity/urgency training concurrently with controlled allocation
                 };
 
                 System.Console.WriteLine("╔══════════════════════════════════════════════════════════╗");

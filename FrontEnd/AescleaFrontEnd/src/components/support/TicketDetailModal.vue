@@ -1,8 +1,8 @@
 <template>
-  <div v-if="show" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4 z-50">
+  <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-30">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center space-x-4">
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ ticket?.subject }}</h2>
           <span
@@ -20,7 +20,7 @@
         </div>
         <button
           @click="$emit('close')"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          class="text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -31,70 +31,70 @@
       <!-- Content -->
       <div class="flex flex-1 overflow-hidden">
         <!-- Ticket Details -->
-        <div class="w-1/3 border-r border-gray-200 dark:border-gray-700 p-6 overflow-y-auto">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Ticket Details</h3>
+        <div class="w-1/3 p-6 overflow-y-auto border-r border-gray-200 dark:border-gray-700">
+          <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Ticket Details</h3>
           
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ticket ID</label>
-              <p class="text-sm text-gray-900 dark:text-white font-mono">{{ ticket?.id }}</p>
+              <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Ticket ID</label>
+              <p class="font-mono text-sm text-gray-900 dark:text-white">{{ ticket?.id }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+              <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
               <p class="text-sm text-gray-900 dark:text-white">{{ ticket?.category }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Created</label>
+              <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Created</label>
               <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(ticket?.createdAt) }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Updated</label>
+              <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Last Updated</label>
               <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(ticket?.updatedAt) }}</p>
             </div>
 
             <div v-if="ticket?.assignedAgent">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned Agent</label>
+              <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Assigned Agent</label>
               <p class="text-sm text-gray-900 dark:text-white">
                 {{ ticket.assignedAgent.firstName }} {{ ticket.assignedAgent.lastName }}
               </p>
             </div>
 
             <div v-if="ticket?.resolvedAt">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Resolved</label>
+              <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Resolved</label>
               <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(ticket.resolvedAt) }}</p>
             </div>
 
             <div v-if="ticket?.resolutionNote">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Resolution Note</label>
+              <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Resolution Note</label>
               <p class="text-sm text-gray-900 dark:text-white">{{ ticket.resolutionNote }}</p>
             </div>
           </div>
         </div>
 
         <!-- Messages -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex flex-col flex-1">
           <!-- Messages Header -->
-          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">Conversation</h3>
           </div>
 
           <!-- Messages List -->
-          <div class="flex-1 overflow-y-auto p-6 space-y-4">
+          <div class="flex-1 p-6 space-y-4 overflow-y-auto">
             <!-- Initial Description -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div class="p-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
               <div class="flex items-start space-x-3">
                 <div class="flex-shrink-0">
-                  <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span class="text-white text-sm font-medium">
+                  <div class="flex items-center justify-center w-8 h-8 bg-blue-600 rounded-full">
+                    <span class="text-sm font-medium text-white">
                       {{ ticket?.user?.firstName?.charAt(0) }}{{ ticket?.user?.lastName?.charAt(0) }}
                     </span>
                   </div>
                 </div>
                 <div class="flex-1">
-                  <div class="flex items-center space-x-2 mb-2">
+                  <div class="flex items-center mb-2 space-x-2">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">
                       {{ ticket?.user?.firstName }} {{ ticket?.user?.lastName }}
                     </p>
@@ -102,7 +102,7 @@
                       {{ formatDate(ticket?.createdAt) }}
                     </span>
                   </div>
-                  <div class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ ticket?.description }}</div>
+                  <div class="text-sm text-gray-800 whitespace-pre-wrap dark:text-gray-200">{{ ticket?.description }}</div>
                 </div>
               </div>
             </div>
@@ -132,7 +132,7 @@
                   </div>
                 </div>
                 <div class="flex-1">
-                  <div class="flex items-center space-x-2 mb-2">
+                  <div class="flex items-center mb-2 space-x-2">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">
                       {{ message.sender?.firstName }} {{ message.sender?.lastName }}
                       <span v-if="message.isFromAgent" class="text-green-600 dark:text-green-400">(Support Agent)</span>
@@ -141,36 +141,36 @@
                       {{ formatDate(message.createdAt) }}
                     </span>
                   </div>
-                  <div class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ message.content }}</div>
+                  <div class="text-sm text-gray-800 whitespace-pre-wrap dark:text-gray-200">{{ message.content }}</div>
                 </div>
               </div>
             </div>
 
             <!-- Loading Messages -->
-            <div v-if="loadingMessages" class="text-center py-4">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+            <div v-if="loadingMessages" class="py-4 text-center">
+              <div class="w-6 h-6 mx-auto border-b-2 border-blue-600 rounded-full animate-spin"></div>
               <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading messages...</p>
             </div>
           </div>
 
           <!-- Message Input -->
-          <div class="border-t border-gray-200 dark:border-gray-700 p-6 flex-shrink-0">
+          <div class="flex-shrink-0 p-6 border-t border-gray-200 dark:border-gray-700">
             <form @submit.prevent="sendMessage" class="flex space-x-4">
               <div class="flex-1">
                 <textarea
                   v-model="newMessage"
                   rows="3"
                   placeholder="Type your message..."
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md resize-none dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   :disabled="sendingMessage || ticket?.status === 'Closed'"
                 ></textarea>
               </div>
               <button
                 type="submit"
                 :disabled="!newMessage.trim() || sendingMessage || ticket?.status === 'Closed'"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                class="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div v-if="sendingMessage" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div v-if="sendingMessage" class="w-4 h-4 border-b-2 border-white rounded-full animate-spin"></div>
                 <span>{{ sendingMessage ? 'Sending...' : 'Send' }}</span>
               </button>
             </form>
@@ -266,7 +266,8 @@ const getPriorityBadgeClass = (priority?: string) => {
 }
 
 const formatStatus = (status?: string) => {
-  return status?.replace(/([A-Z])/g, ' $1').trim()
+  const statusStr = typeof status === 'string' ? status : String(status)
+  return statusStr?.replace(/([A-Z])/g, ' $1').trim()
 }
 
 const formatDate = (dateString?: string) => {

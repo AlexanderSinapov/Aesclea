@@ -47,7 +47,7 @@
         <!-- Department -->
         <div>
           <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Department <span class="text-red-500">*</span>
+            Department / Specialization <span class="text-red-500">*</span>
           </label>
           <select
             id="department"
@@ -56,13 +56,30 @@
             @change="updateAppointmentTypes"
             class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
           >
-            <option value="">Select department</option>
-            <option value="cardiology">Cardiology</option>
-            <option value="neurology">Neurology</option>
-            <option value="oncology">Oncology</option>
-            <option value="radiology">Radiology</option>
-            <option value="emergency">Emergency</option>
-            <option value="pediatrics">Pediatrics</option>
+            <option value="">Select department or specialization</option>
+            <option value="cardiology">Кардиология (Cardiology)</option>
+            <option value="neurology">Неврология (Neurology)</option>
+            <option value="oncology">Онкология (Oncology)</option>
+            <option value="pediatrics">Педиатрия (Pediatrics)</option>
+            <option value="psychiatry">Психиатрия (Psychiatry)</option>
+            <option value="radiology">Радиология (Radiology)</option>
+            <option value="surgery">Хирургия (Surgery)</option>
+            <option value="orthopedics">Ортопедия (Orthopedics)</option>
+            <option value="dermatology">Дерматология (Dermatology)</option>
+            <option value="obstetrics-gynecology">Акушерство и гинекология (Obstetrics & Gynecology)</option>
+            <option value="anesthesiology">Анестезиология (Anesthesiology)</option>
+            <option value="ophthalmology">Офталмология (Ophthalmology)</option>
+            <option value="otolaryngology">Оториноларингология (Otolaryngology)</option>
+            <option value="urology">Урология (Urology)</option>
+            <option value="endocrinology">Ендокринология (Endocrinology)</option>
+            <option value="gastroenterology">Гастроентерология (Gastroenterology)</option>
+            <option value="nephrology">Нефрология (Nephrology)</option>
+            <option value="pulmonology">Пулмология (Pulmonology)</option>
+            <option value="rheumatology">Ревматология (Rheumatology)</option>
+            <option value="infectious-diseases">Инфекциозни болести (Infectious Diseases)</option>
+            <option value="emergency">Спешна медицина (Emergency Medicine)</option>
+            <option value="general-practice">Обща медицина (General Practice)</option>
+            <option value="administration">Administration</option>
           </select>
         </div>
 
@@ -131,13 +148,17 @@
             id="doctor"
             v-model="form.doctor"
             required
-            class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+            :disabled="loadingDoctors || availableDoctors.length === 0"
+            class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 disabled:opacity-50"
           >
-            <option value="">Select doctor</option>
-            <option v-for="doctor in availableDoctors" :key="doctor" :value="doctor">
-              {{ doctor }}
+            <option value="">{{ loadingDoctors ? 'Loading doctors...' : availableDoctors.length === 0 ? 'No doctors available for this department' : 'Select doctor' }}</option>
+            <option v-for="doctor in availableDoctors" :key="doctor.id" :value="doctor.value">
+              {{ doctor.name }}
             </option>
           </select>
+          <p v-if="!loadingDoctors && form.department && availableDoctors.length === 0" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            No doctors found for {{ form.department }}. Please contact admin to assign doctors to this department.
+          </p>
         </div>
 
         <!-- Duration -->
@@ -231,6 +252,8 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { usePatientsStore } from '../../stores/patients'
 import { useAppointmentsStore, type Appointment } from '../../stores/appointments'
+import { useAdminStore } from '../../stores/admin'
+import { useAuthStore } from '../../stores/auth'
 
 interface Props {
   appointment?: Appointment | null
@@ -259,9 +282,13 @@ const emit = defineEmits<{
 // Stores
 const patientsStore = usePatientsStore()
 const appointmentsStore = useAppointmentsStore()
+const adminStore = useAdminStore()
+const authStore = useAuthStore()
 
 // Local state
 const isSubmitting = ref(false)
+const doctors = ref<any[]>([])
+const loadingDoctors = ref(false)
 
 // Form data
 const form = ref<AppointmentForm>({
@@ -288,53 +315,31 @@ const availablePatients = computed(() => {
 
 const availableAppointmentTypes = computed(() => {
   const typesByDepartment: Record<string, string[]> = {
-    cardiology: [
-      'Consultation',
-      'ECG Test',
-      'Echocardiogram',
-      'Stress Test',
-      'Follow-up',
-      'Cardiac Catheterization'
-    ],
-    neurology: [
-      'Consultation',
-      'EEG Test',
-      'MRI Review',
-      'Neurological Assessment',
-      'Follow-up',
-      'EMG Test'
-    ],
-    oncology: [
-      'Consultation',
-      'Chemotherapy',
-      'Radiation Planning',
-      'Follow-up',
-      'Biopsy Review',
-      'Treatment Planning'
-    ],
-    radiology: [
-      'X-Ray',
-      'CT Scan',
-      'MRI',
-      'Ultrasound',
-      'Mammography',
-      'Nuclear Medicine'
-    ],
-    emergency: [
-      'Urgent Care',
-      'Emergency Consultation',
-      'Trauma Assessment',
-      'Critical Care'
-    ],
-    pediatrics: [
-      'Well-child Visit',
-      'Vaccination',
-      'Sick Visit',
-      'Development Assessment',
-      'Follow-up'
-    ]
+    cardiology: ['Consultation', 'ECG Test', 'Echocardiogram', 'Stress Test', 'Follow-up', 'Cardiac Catheterization'],
+    neurology: ['Consultation', 'EEG Test', 'MRI Review', 'Neurological Assessment', 'Follow-up', 'EMG Test'],
+    oncology: ['Consultation', 'Chemotherapy', 'Radiation Planning', 'Follow-up', 'Biopsy Review', 'Treatment Planning'],
+    pediatrics: ['Well-child Visit', 'Vaccination', 'Sick Visit', 'Development Assessment', 'Follow-up'],
+    psychiatry: ['Consultation', 'Therapy Session', 'Medication Review', 'Crisis Intervention', 'Follow-up'],
+    radiology: ['X-Ray', 'CT Scan', 'MRI', 'Ultrasound', 'Mammography', 'Nuclear Medicine'],
+    surgery: ['Pre-operative Consultation', 'Post-operative Follow-up', 'Surgical Procedure', 'Consultation'],
+    orthopedics: ['Consultation', 'Joint Injection', 'Post-operative Follow-up', 'Physical Therapy Review'],
+    dermatology: ['Consultation', 'Skin Biopsy', 'Mole Check', 'Treatment Review', 'Follow-up'],
+    'obstetrics-gynecology': ['Prenatal Visit', 'Gynecological Exam', 'Ultrasound', 'Consultation', 'Follow-up'],
+    anesthesiology: ['Pre-operative Assessment', 'Post-operative Follow-up', 'Pain Management', 'Consultation'],
+    ophthalmology: ['Eye Exam', 'Vision Test', 'Consultation', 'Follow-up', 'Surgery Consultation'],
+    otolaryngology: ['Consultation', 'Hearing Test', 'Throat Examination', 'Follow-up', 'Procedure'],
+    urology: ['Consultation', 'Examination', 'Follow-up', 'Procedure Planning', 'Post-operative Care'],
+    endocrinology: ['Consultation', 'Diabetes Management', 'Hormone Assessment', 'Follow-up', 'Treatment Review'],
+    gastroenterology: ['Consultation', 'Endoscopy', 'Colonoscopy', 'Follow-up', 'Treatment Planning'],
+    nephrology: ['Consultation', 'Dialysis Planning', 'Kidney Function Assessment', 'Follow-up'],
+    pulmonology: ['Consultation', 'Pulmonary Function Test', 'Sleep Study Review', 'Follow-up'],
+    rheumatology: ['Consultation', 'Joint Assessment', 'Treatment Review', 'Follow-up', 'Injection'],
+    'infectious-diseases': ['Consultation', 'Treatment Review', 'Follow-up', 'Laboratory Review'],
+    emergency: ['Urgent Care', 'Emergency Consultation', 'Trauma Assessment', 'Critical Care'],
+    'general-practice': ['General Consultation', 'Health Check-up', 'Vaccination', 'Follow-up', 'Referral'],
+    administration: ['Administrative Meeting', 'Consultation', 'Review']
   }
-  return typesByDepartment[form.value.department] || []
+  return typesByDepartment[form.value.department] || ['Consultation', 'Follow-up']
 })
 
 const availableTimeSlots = computed(() => {
@@ -352,39 +357,80 @@ const availableTimeSlots = computed(() => {
 })
 
 const availableDoctors = computed(() => {
-  const doctorsByDepartment: Record<string, string[]> = {
-    cardiology: [
-      'Dr. Smith (Cardiologist)',
-      'Dr. Johnson (Interventional Cardiologist)',
-      'Dr. Williams (Electrophysiologist)'
-    ],
-    neurology: [
-      'Dr. Brown (Neurologist)',
-      'Dr. Davis (Neurosurgeon)',
-      'Dr. Miller (Movement Disorders Specialist)'
-    ],
-    oncology: [
-      'Dr. Wilson (Medical Oncologist)',
-      'Dr. Moore (Radiation Oncologist)',
-      'Dr. Taylor (Surgical Oncologist)'
-    ],
-    radiology: [
-      'Dr. Anderson (Radiologist)',
-      'Dr. Thomas (Interventional Radiologist)',
-      'Dr. Jackson (Nuclear Medicine)'
-    ],
-    emergency: [
-      'Dr. White (Emergency Medicine)',
-      'Dr. Harris (Trauma Specialist)',
-      'Dr. Martin (Critical Care)'
-    ],
-    pediatrics: [
-      'Dr. Thompson (Pediatrician)',
-      'Dr. Garcia (Pediatric Specialist)',
-      'Dr. Martinez (Adolescent Medicine)'
-    ]
-  }
-  return doctorsByDepartment[form.value.department] || []
+  console.log('Computing available doctors for department:', form.value.department)
+  console.log('All doctors:', doctors.value)
+  
+  if (!form.value.department) return []
+  
+  // Show all doctors that match the selected department/specialization
+  const matchedDoctors = doctors.value.filter(doctor => {
+    // Always include if department matches exactly
+    if (doctor.department?.toLowerCase() === form.value.department.toLowerCase()) {
+      console.log('Doctor matched by department:', doctor)
+      return true
+    }
+    
+    // Include doctors whose specialization matches the department
+    if (doctor.specialization) {
+      const specialization = doctor.specialization.toLowerCase()
+      const department = form.value.department.toLowerCase()
+      
+      // Comprehensive mapping of specializations to departments
+      const specialtyMatches: Record<string, string[]> = {
+        'cardiology': ['кардиология'],
+        'neurology': ['неврология'],
+        'oncology': ['онкология'],
+        'pediatrics': ['педиатрия'],
+        'psychiatry': ['психиатрия'],
+        'radiology': ['радиология'],
+        'surgery': ['хирургия'],
+        'orthopedics': ['ортопедия'],
+        'dermatology': ['дерматология'],
+        'obstetrics-gynecology': ['акушерство и гинекология'],
+        'anesthesiology': ['анестезиология'],
+        'ophthalmology': ['офталмология'],
+        'otolaryngology': ['оториноларингология'],
+        'urology': ['урология'],
+        'endocrinology': ['ендокринология'],
+        'gastroenterology': ['гастроентерология'],
+        'nephrology': ['нефрология'],
+        'pulmonology': ['пулмология'],
+        'rheumatology': ['ревматология'],
+        'infectious-diseases': ['инфекциозни болести'],
+        'emergency': ['спешна медицина'],
+        'general-practice': ['обща медицина'],
+        'administration': ['administration']
+      }
+      
+      const matchingTerms = specialtyMatches[department] || [department]
+      const isMatch = matchingTerms.some(term => specialization.includes(term.toLowerCase()))
+      if (isMatch) {
+        console.log('Doctor matched by specialization:', doctor)
+      }
+      return isMatch
+    }
+    
+    // For general practice, show all doctors
+    if (form.value.department === 'general-practice') {
+      console.log('General practice - including all doctors:', doctor)
+      return true
+    }
+    
+    // For administration, show admin users
+    if (form.value.department === 'administration' && doctor.role === 'admin') {
+      console.log('Admin department - including admin:', doctor)
+      return true
+    }
+    
+    return false
+  }).map(doctor => ({
+    id: doctor.id,
+    name: `${doctor.firstName} ${doctor.lastName}${doctor.specialization ? ` (${doctor.specialization})` : ''}`,
+    value: doctor.id
+  }))
+  
+  console.log('Matched doctors:', matchedDoctors)
+  return matchedDoctors
 })
 
 const isFormValid = computed(() => {
@@ -403,9 +449,70 @@ const XMarkIcon = {
 }
 
 // Methods
+const loadDoctors = async () => {
+  try {
+    loadingDoctors.value = true
+    console.log('Loading doctors from API...')
+    
+    try {
+      const response = await adminStore.fetchDoctors()
+      console.log('Doctors loaded from API:', response)
+      doctors.value = response || []
+    } catch (apiError) {
+      console.warn('API failed, using fallback:', apiError)
+      doctors.value = []
+    }
+    
+    // Always add current user as a doctor option if they have doctor role
+    const currentUser = authStore.user
+    if (currentUser && (currentUser.role === 'doctor' || currentUser.role === 'admin')) {
+      const currentUserDoctor = {
+        id: currentUser.id,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        role: currentUser.role,
+        department: (currentUser as any).department || 'general-practice',
+        specialization: (currentUser as any).specialization || 'Обща медицина'
+      }
+      
+      // Check if current user is already in the list
+      const existingDoctor = doctors.value.find(d => d.id === currentUser.id)
+      if (!existingDoctor) {
+        console.log('Adding current user as doctor option:', currentUserDoctor)
+        doctors.value.push(currentUserDoctor)
+      }
+    }
+    
+    // If still no doctors, add some fallback options
+    if (doctors.value.length === 0) {
+      console.log('No doctors available, creating fallback options')
+      if (currentUser) {
+        doctors.value = [{
+          id: currentUser.id,
+          firstName: currentUser.firstName,
+          lastName: currentUser.lastName,
+          email: currentUser.email,
+          role: 'doctor',
+          department: 'general-practice',
+          specialization: 'Обща медицина'
+        }]
+      }
+    }
+    
+    console.log('Final doctors list:', doctors.value)
+  } catch (error) {
+    console.error('Error loading doctors:', error)
+    doctors.value = []
+  } finally {
+    loadingDoctors.value = false
+  }
+}
+
 const updateAppointmentTypes = () => {
-  form.value.appointmentType = ''
+  // Clear doctor selection when department changes
   form.value.doctor = ''
+  form.value.appointmentType = ''
 }
 
 const handleSubmit = async () => {
@@ -475,6 +582,9 @@ watch(() => props.appointment, initializeForm, { immediate: true })
 
 // Lifecycle
 onMounted(async () => {
+  // Load doctors first
+  await loadDoctors()
+  
   // Load patients if not already loaded
   if (patientsStore.patients.length === 0) {
     await patientsStore.fetchPatients()

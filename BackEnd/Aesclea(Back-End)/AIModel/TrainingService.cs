@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Aesclea_Back_End_.AIModel.Helpers;
 
 namespace Aesclea_Back_End_.AIModel
@@ -35,6 +37,7 @@ namespace Aesclea_Back_End_.AIModel
             public int MaxSamplesPerSource { get; set; } = 10000; // Limit for performance
             public bool EnableParallelProcessing { get; set; } = true; // Use all CPU cores
             public int MaxDegreeOfParallelism { get; set; } = Environment.ProcessorCount; // CPU cores to use
+            public bool EnableConcurrentNetworkTraining { get; set; } = false; // Run diagnostic/severity/urgency training concurrently with controlled allocation
         }
 
         /// <summary>
@@ -62,6 +65,9 @@ namespace Aesclea_Back_End_.AIModel
                 Console.WriteLine("=== Starting Medical AI Model Training ===");
                 Console.WriteLine($"Dataset Base Path: {_datasetBasePath}");
                 Console.WriteLine($"Epochs: {config.Epochs}, Learning Rate: {config.LearningRate}");
+                Console.WriteLine();
+
+                ReportDiskReadThroughput();
                 Console.WriteLine();
 
                 // Step 1: Load all datasets
@@ -106,6 +112,97 @@ namespace Aesclea_Back_End_.AIModel
             {
                 Console.WriteLine($"ERROR during training: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+        }
+
+        private void ReportDiskReadThroughput(int maxCharactersToRead = 5_000_000)
+        {
+            try
+            {
+                if (!Directory.Exists(_datasetBasePath))
+                {
+                    Console.WriteLine("⚠️  Disk benchmark skipped: dataset directory not found.");
+                    return;
+                }
+
+                var eligibleExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ".txt", ".csv", ".json", ".jsonl", ".md"
+                };
+
+                var filesToSample = Directory.EnumerateFiles(_datasetBasePath, "*.*", SearchOption.AllDirectories)
+                    .Where(path => eligibleExtensions.Contains(Path.GetExtension(path)))
+                    .Take(10)
+                    .ToList();
+
+                if (filesToSample.Count == 0)
+                {
+                    Console.WriteLine("⚠️  Disk benchmark skipped: no text-based dataset files found.");
+                    return;
+                }
+
+                long totalBytes = 0;
+                long totalChars = 0;
+                int filesRead = 0;
+
+                var encoding = Encoding.UTF8;
+                var stopwatch = Stopwatch.StartNew();
+
+                var byteBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(1 << 15);
+                var charBuffer = System.Buffers.ArrayPool<char>.Shared.Rent(1 << 15);
+
+                try
+                {
+                    foreach (var file in filesToSample)
+                    {
+                        using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, byteBuffer.Length, FileOptions.SequentialScan);
+                        var decoder = encoding.GetDecoder();
+
+                        int bytesRead;
+                        while ((bytesRead = stream.Read(byteBuffer, 0, byteBuffer.Length)) > 0)
+                        {
+                            totalBytes += bytesRead;
+                            totalChars += decoder.GetChars(byteBuffer, 0, bytesRead, charBuffer, 0, flush: false);
+
+                            if (maxCharactersToRead > 0 && totalChars >= maxCharactersToRead)
+                            {
+                                break;
+                            }
+                        }
+
+                        filesRead++;
+
+                        if (maxCharactersToRead > 0 && totalChars >= maxCharactersToRead)
+                        {
+                            break;
+                        }
+                    }
+                }
+                finally
+                {
+                    stopwatch.Stop();
+                    System.Buffers.ArrayPool<byte>.Shared.Return(byteBuffer);
+                    System.Buffers.ArrayPool<char>.Shared.Return(charBuffer);
+                }
+
+                if (totalChars == 0 || stopwatch.Elapsed.TotalSeconds <= 0)
+                {
+                    Console.WriteLine("⚠️  Disk benchmark inconclusive (no data read).");
+                    return;
+                }
+
+                double seconds = stopwatch.Elapsed.TotalSeconds;
+                double charsPerSecond = totalChars / seconds;
+                double mbPerSecond = (totalBytes / (1024.0 * 1024.0)) / seconds;
+
+                Console.WriteLine("📀 Disk throughput benchmark (approximate)");
+                Console.WriteLine($"   Files sampled: {filesRead}, Characters read: {totalChars:N0}");
+                Console.WriteLine($"   Sustained read speed: {charsPerSecond:N0} chars/s (~{mbPerSecond:F2} MB/s)");
+                Console.WriteLine("   Note: Measurement limited to first few files and approximates characters via UTF-8 decoding.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️  Disk benchmark failed: {ex.Message}");
             }
         }
 
@@ -232,14 +329,85 @@ namespace Aesclea_Back_End_.AIModel
             var urgencyLevels = trainingSet.Select(s => Math.Min(Math.Max(s.UrgencyLevel, 0), 2)).ToList();
 
             // Train the classifier using its batch training method
-            _classifier.TrainDiagnosticNetworks(
-                medicalTexts,
-                diagnosticCategories,
-                severityLevels,
-                urgencyLevels,
-                config.Epochs,
-                config.LearningRate
-            );
+            if (config.EnableConcurrentNetworkTraining && config.MaxDegreeOfParallelism > 1)
+            {
+                Console.WriteLine("🔥 CONCURRENT NETWORK TRAINING MODE 🔥");
+                Console.WriteLine("Training 3 networks simultaneously with separate progress lines:");
+                Console.WriteLine();
+                
+                // Controlled concurrent training: divide cores across networks to avoid oversubscription
+                int total = Math.Max(1, config.MaxDegreeOfParallelism);
+
+                int baseAlloc = total / 3;
+                int remainder = total % 3;
+
+                // Assign remainder to diagnostic (largest) then severity then urgency
+                int diagAlloc = Math.Max(1, baseAlloc + (remainder > 0 ? 1 : 0));
+                int sevAlloc = Math.Max(1, baseAlloc + (remainder > 1 ? 1 : 0));
+                int urgAlloc = Math.Max(1, baseAlloc);
+
+                // If allocations somehow sum to more than total due to Max(1,..), normalize
+                int sum = diagAlloc + sevAlloc + urgAlloc;
+                if (sum > total)
+                {
+                    // reduce urgency first
+                    int over = sum - total;
+                    urgAlloc = Math.Max(1, urgAlloc - over);
+                }
+
+                _classifier.SetPerNetworkParallelism(diagAlloc, sevAlloc, urgAlloc);
+                
+                // Enable multi-line progress display - reserve 3 lines for 3 networks
+                // Print placeholder lines first
+                Console.WriteLine("[DIAGNOSTIC] Initializing...".PadRight(120));
+                Console.WriteLine("[SEVERITY  ] Initializing...".PadRight(120));
+                Console.WriteLine("[URGENCY   ] Initializing...".PadRight(120));
+                
+                // Configure networks to use separate console lines
+                _classifier.diagnosticNetwork.ConsoleLineOffset = 2; // 2 lines up from current
+                _classifier.severityNetwork.ConsoleLineOffset = 1;   // 1 line up
+                _classifier.urgencyNetwork.ConsoleLineOffset = 0;    // Current line
+
+                // Run three training tasks concurrently. Each internal Train* will use its assigned threads.
+                var tasks = new List<System.Threading.Tasks.Task>();
+
+                tasks.Add(System.Threading.Tasks.Task.Run(() =>
+                {
+                    _classifier.TrainDiagnosticNetworkConcurrent(medicalTexts, diagnosticCategories, config.Epochs, config.LearningRate);
+                }));
+
+                tasks.Add(System.Threading.Tasks.Task.Run(() =>
+                {
+                    _classifier.TrainSeverityNetworkConcurrent(medicalTexts, severityLevels, config.Epochs, config.LearningRate);
+                }));
+
+                tasks.Add(System.Threading.Tasks.Task.Run(() =>
+                {
+                    _classifier.TrainUrgencyNetworkConcurrent(medicalTexts, urgencyLevels, config.Epochs, config.LearningRate);
+                }));
+
+                System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
+                
+                // Reset to normal console mode
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("✓ All networks trained concurrently");
+            }
+            else
+            {
+                // Configure classifier parallelism so internal training uses reasonable per-network threads (sequential mode)
+                int perNetworkParallelism = Math.Max(1, config.MaxDegreeOfParallelism / 3);
+                _classifier.SetTrainingParallelism(perNetworkParallelism);
+
+                _classifier.TrainDiagnosticNetworks(
+                    medicalTexts,
+                    diagnosticCategories,
+                    severityLevels,
+                    urgencyLevels,
+                    config.Epochs,
+                    config.LearningRate
+                );
+            }
 
             // Validate final model
             var accuracy = ValidateModel(validationSet);

@@ -3,6 +3,7 @@ using System;
 using Aesclea_Back_End_.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Aesclea_Back_End_.Migrations
 {
     [DbContext(typeof(AescleaDbContext))]
-    partial class AescleaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251113163446_AddMedicalRecords")]
+    partial class AddMedicalRecords
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -993,11 +996,6 @@ namespace Aesclea_Back_End_.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("Role");
-
-                    b.Property<string>("Specialization")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("Specialization");
 
                     b.Property<string>("Theme")
                         .IsRequired()

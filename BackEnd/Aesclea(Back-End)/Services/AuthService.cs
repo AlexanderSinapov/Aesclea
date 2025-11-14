@@ -411,6 +411,9 @@ namespace Aesclea_Back_End_.Services
                 if (!string.IsNullOrEmpty(request.Department))
                     user.Department = request.Department;
                 
+                if (!string.IsNullOrEmpty(request.Specialization))
+                    user.Specialization = request.Specialization;
+                
                 if (!string.IsNullOrEmpty(request.Role))
                     user.Role = request.Role;
 
@@ -670,6 +673,98 @@ namespace Aesclea_Back_End_.Services
                     Success = false,
                     Message = "Failed to toggle two-factor authentication."
                 };
+            }
+        }
+    
+        // Admin methods
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            try
+            {
+                return await _context.Users.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching all users");
+                throw;
+            }
+        }
+
+        public async Task<User?> GetUserByIdAsync(string userId)
+        {
+            try
+            {
+                return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching user by ID: {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<User> UpdateUserProfileAsync(string userId, UpdateProfileRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    throw new InvalidOperationException("User not found");
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.FirstName))
+                    user.FirstName = request.FirstName;
+                
+                if (!string.IsNullOrWhiteSpace(request.LastName))
+                    user.LastName = request.LastName;
+                
+                if (!string.IsNullOrWhiteSpace(request.Phone))
+                    user.Phone = request.Phone;
+                
+                if (!string.IsNullOrWhiteSpace(request.Department))
+                    user.Department = request.Department;
+                
+                if (!string.IsNullOrWhiteSpace(request.Specialization))
+                    user.Specialization = request.Specialization;
+                
+                if (!string.IsNullOrWhiteSpace(request.Role))
+                    user.Role = request.Role;
+
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user profile for user: {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteUserAsync(string userId)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                
+                if (user == null)
+                {
+                    return false;
+                }
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("User deleted successfully: {UserId}", userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user: {UserId}", userId);
+                throw;
             }
         }
     }

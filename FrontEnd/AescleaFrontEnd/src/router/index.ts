@@ -24,6 +24,7 @@ import Privacy from '../views/Privacy.vue'
 import Terms from '../views/Terms.vue'
 import Support from '../views/Support.vue'
 import SupportAgent from '../views/dashboard/SupportAgent.vue'
+import MedicalAppointment from '../views/dashboard/MedicalAppointment.vue'
 import Products from '../views/Products.vue'
 import PublicChat from '../views/PublicChat.vue'
 
@@ -80,6 +81,12 @@ const routes = [
     name: 'SupportAgent',
     component: SupportAgent,
     meta: { requiresAuth: true, requiresEmailVerified: true, requiresSupportRole: true }
+  },
+  {
+    path: '/dashboard/appointment/:id',
+    name: 'MedicalAppointment',
+    component: MedicalAppointment,
+    meta: { requiresAuth: true, requiresEmailVerified: true }
   },
   {
     path: '/home',

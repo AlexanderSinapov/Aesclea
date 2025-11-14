@@ -146,6 +146,51 @@
             </div>
           </div>
 
+          <!-- Doctor Specialization (Only shown if role is doctor) -->
+          <div v-if="profileForm.role === 'doctor'" class="border-t pt-6 border-gray-200 dark:border-gray-700">
+            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Специализация (Doctor Specialization)
+            </h4>
+            <div>
+              <label for="specialization" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Медицинска специализация</label>
+              <select
+                id="specialization"
+                v-model="profileForm.specialization"
+                class="block w-full px-3 py-2 mt-1 text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="">Select Specialization / Изберете специализация</option>
+                <option value="Кардиология">Кардиология (Cardiology)</option>
+                <option value="Неврология">Неврология (Neurology)</option>
+                <option value="Онкология">Онкология (Oncology)</option>
+                <option value="Педиатрия">Педиатрия (Pediatrics)</option>
+                <option value="Психиатрия">Психиатрия (Psychiatry)</option>
+                <option value="Радиология">Радиология (Radiology)</option>
+                <option value="Хирургия">Хирургия (Surgery)</option>
+                <option value="Ортопедия">Ортопедия (Orthopedics)</option>
+                <option value="Дерматология">Дерматология (Dermatology)</option>
+                <option value="Акушерство и гинекология">Акушерство и гинекология (Obstetrics & Gynecology)</option>
+                <option value="Анестезиология">Анестезиология (Anesthesiology)</option>
+                <option value="Офталмология">Офталмология (Ophthalmology)</option>
+                <option value="Оториноларингология">Оториноларингология (Otolaryngology)</option>
+                <option value="Урология">Урология (Urology)</option>
+                <option value="Ендокринология">Ендокринология (Endocrinology)</option>
+                <option value="Гастроентерология">Гастроентерология (Gastroenterology)</option>
+                <option value="Нефрология">Нефрология (Nephrology)</option>
+                <option value="Пулмология">Пулмология (Pulmonology)</option>
+                <option value="Ревматология">Ревматология (Rheumatology)</option>
+                <option value="Инфекциозни болести">Инфекциозни болести (Infectious Diseases)</option>
+                <option value="Спешна медицина">Спешна медицина (Emergency Medicine)</option>
+                <option value="Обща медицина">Обща медицина (General Practice)</option>
+              </select>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Изберете вашата медицинска специализация. Това помага на пациентите да намерят правилния специалист.
+              </p>
+            </div>
+          </div>
+
           <div class="flex justify-end">
             <button
               type="submit"
@@ -418,6 +463,7 @@ const profileForm = ref({
   phone: authStore.user?.phone || '',
   department: (authStore.user as any)?.department || '',
   role: authStore.user?.role || 'doctor',
+  specialization: (authStore.user as any)?.specialization || '',
   avatar: (authStore.user as any)?.avatar || ''
 })
 
@@ -523,7 +569,8 @@ const saveProfile = async () => {
       lastName: profileForm.value.lastName,
       phone: profileForm.value.phone,
       department: profileForm.value.department,
-      role: profileForm.value.role
+      role: profileForm.value.role,
+      specialization: profileForm.value.specialization || null
     })
     
     alert('Profile updated successfully!')
@@ -624,6 +671,7 @@ const loadUserData = () => {
       phone: user.phone || '',
       department: user.department || '',
       role: user.role || 'doctor',
+      specialization: user.specialization || '',
       avatar: user.avatar || ''
     }
     

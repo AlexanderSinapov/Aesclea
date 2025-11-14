@@ -49,7 +49,7 @@
                   <svg class="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
-                  <span class="text-gray-600 dark:text-gray-300">Up to 50 patients</span>
+                  <span class="text-gray-600 dark:text-gray-300">Unlimited patients</span>
                 </li>
                 <li class="flex items-center">
                   <svg class="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -113,7 +113,7 @@
                   <svg class="w-5 h-5 mr-3 text-green-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
-                  <span class="text-purple-100">Up to 500 patients</span>
+                  <span class="text-purple-100">Unlimited patients</span>
                 </li>
                 <li class="flex items-center">
                   <svg class="w-5 h-5 mr-3 text-green-300" fill="currentColor" viewBox="0 0 20 20">
@@ -169,7 +169,7 @@
                 <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Enterprise</h3>
                 <div class="mb-6">
                   <span class="text-4xl font-extrabold text-gray-900 dark:text-white">$399</span>
-                  <span class="text-gray-600 dark:text-gray-300">/month</span>
+                  <span class="text-gray-600 dark:text-gray-300">/month/user</span>
                 </div>
                 <p class="mb-8 text-gray-600 dark:text-gray-300">For large hospitals and healthcare networks requiring maximum scalability.</p>
               </div>

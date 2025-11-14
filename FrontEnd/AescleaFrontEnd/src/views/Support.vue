@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Support Center</h1>
@@ -8,43 +8,43 @@
       </div>
 
       <!-- Quick Actions -->
-      <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-3">
         <button
           @click="showCreateTicketModal = true"
-          class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+          class="p-6 transition-colors bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400"
         >
-          <div class="text-blue-600 dark:text-blue-400 mb-3">
+          <div class="mb-3 text-blue-600 dark:text-blue-400">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create New Ticket</h3>
+          <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Create New Ticket</h3>
           <p class="text-gray-600 dark:text-gray-400">Report an issue or ask for help</p>
         </button>
 
-        <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div class="text-green-600 dark:text-green-400 mb-3">
+        <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <div class="mb-3 text-green-600 dark:text-green-400">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Knowledge Base</h3>
+          <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Knowledge Base</h3>
           <p class="text-gray-600 dark:text-gray-400">Find answers to common questions</p>
         </div>
 
-        <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div class="text-purple-600 dark:text-purple-400 mb-3">
+        <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <div class="mb-3 text-purple-600 dark:text-purple-400">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Live Chat</h3>
+          <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Live Chat</h3>
           <p class="text-gray-600 dark:text-gray-400">Chat with our support team</p>
         </div>
       </div>
 
       <!-- My Tickets -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">My Support Tickets</h2>
@@ -52,7 +52,7 @@
               <select
                 v-model="statusFilter"
                 @change="loadTickets"
-                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                class="px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="">All Status</option>
                 <option value="Open">Open</option>
@@ -63,7 +63,7 @@
               </select>
               <button
                 @click="loadTickets"
-                class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                class="px-4 py-2 text-blue-600 transition-colors rounded-md dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
               >
                 Refresh
               </button>
@@ -73,21 +73,21 @@
 
         <!-- Tickets List -->
         <div v-if="loading" class="p-8 text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div class="w-8 h-8 mx-auto border-b-2 border-blue-600 rounded-full animate-spin"></div>
           <p class="mt-2 text-gray-600 dark:text-gray-400">Loading tickets...</p>
         </div>
 
         <div v-else-if="tickets.length === 0" class="p-8 text-center">
-          <div class="text-gray-400 mb-4">
+          <div class="mb-4 text-gray-400">
             <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1M7 8h10"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No support tickets</h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-4">You haven't created any support tickets yet.</p>
+          <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No support tickets</h3>
+          <p class="mb-4 text-gray-600 dark:text-gray-400">You haven't created any support tickets yet.</p>
           <button
             @click="showCreateTicketModal = true"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            class="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
           >
             Create Your First Ticket
           </button>
@@ -98,11 +98,11 @@
             v-for="ticket in tickets"
             :key="ticket.id"
             @click="openTicket(ticket)"
-            class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+            class="p-6 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"
           >
             <div class="flex items-start justify-between">
               <div class="flex-1">
-                <div class="flex items-center space-x-3 mb-2">
+                <div class="flex items-center mb-2 space-x-3">
                   <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ ticket.subject }}</h3>
                   <span
                     :class="getStatusBadgeClass(ticket.status)"
@@ -117,7 +117,7 @@
                     {{ ticket.priority }}
                   </span>
                 </div>
-                <p class="text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{{ ticket.description }}</p>
+                <p class="mb-3 text-gray-600 dark:text-gray-400 line-clamp-2">{{ ticket.description }}</p>
                 <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                   <span>Created {{ formatDate(ticket.createdAt) }}</span>
                   <span>•</span>
@@ -230,7 +230,8 @@ const getPriorityBadgeClass = (priority: string) => {
 }
 
 const formatStatus = (status: string) => {
-  return status.replace(/([A-Z])/g, ' $1').trim()
+  const statusStr = typeof status === 'string' ? status : String(status)
+  return statusStr.replace(/([A-Z])/g, ' $1').trim()
 }
 
 const formatDate = (dateString: string) => {

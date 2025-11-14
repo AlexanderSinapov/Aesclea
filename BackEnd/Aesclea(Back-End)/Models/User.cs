@@ -71,6 +71,7 @@ namespace Aesclea_Back_End_.Models
         
         // Settings-related fields
         public string? Department { get; set; }
+        public string? Specialization { get; set; } // Medical specialization for doctors
         public string? Avatar { get; set; } // URL or base64 string for profile photo
         public string Theme { get; set; } = "system"; // light, dark, system
         public string Language { get; set; } = "en"; // ISO language code
@@ -106,6 +107,7 @@ namespace Aesclea_Back_End_.Models
         public string? LastName { get; set; }
         public string? Phone { get; set; }
         public string? Department { get; set; }
+        public string? Specialization { get; set; }
         public string? Role { get; set; }
     }
 

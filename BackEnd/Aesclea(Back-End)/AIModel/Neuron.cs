@@ -16,7 +16,7 @@ namespace Aesclea_Back_End_.AIModel
         public double Output { get; set; }
         public double Input { get; set; }
         public double Error { get; set; }
-        private static Random random = new Random();
+    private static System.Threading.ThreadLocal<Random> threadRandom = new System.Threading.ThreadLocal<Random>(() => new Random());
         private readonly ActivationType _activationType;
         private double _dropoutRate = 0.0; // Dropout probability
 
@@ -50,9 +50,9 @@ namespace Aesclea_Back_End_.AIModel
 
             for (int i = 0; i < numberOfInputs; i++)
             {
-                Weights.Add((random.NextDouble() * 2 - 1) * weightScale);
+                Weights.Add((threadRandom.Value.NextDouble() * 2 - 1) * weightScale);
             }
-            Bias = (random.NextDouble() * 2 - 1) * 0.1;
+            Bias = (threadRandom.Value.NextDouble() * 2 - 1) * 0.1;
         }
 
         public double FeedForward(List<double> inputs, bool isTraining = true)
@@ -84,10 +84,10 @@ namespace Aesclea_Back_End_.AIModel
                 Output = ReLU(Input);
             }
 
-            // Apply dropout during training
+            // Apply dropout during training (uses thread-local RNG)
             if (isTraining && _dropoutRate > 0)
             {
-                if (random.NextDouble() < _dropoutRate)
+                if (threadRandom.Value.NextDouble() < _dropoutRate)
                 {
                     Output = 0;
                 }
@@ -99,6 +99,53 @@ namespace Aesclea_Back_End_.AIModel
             }
 
             return Output;
+        }
+
+        /// <summary>
+        /// Evaluate neuron output without mutating instance state (thread-safe for parallel forward passes).
+        /// </summary>
+        public double Evaluate(List<double> inputs, bool isTraining = true)
+        {
+            if (inputs.Count != Weights.Count)
+            {
+                throw new ArgumentException($"Number of inputs ({inputs.Count}) must match the number of weights ({Weights.Count}).");
+            }
+
+            double localInput = 0;
+            for (int i = 0; i < inputs.Count; i++)
+            {
+                localInput += inputs[i] * Weights[i];
+            }
+
+            localInput += Bias;
+
+            double localOutput;
+            if (_activationType == ActivationType.Sigmoid)
+            {
+                localOutput = Sigmoid(localInput);
+            }
+            else if (_activationType == ActivationType.LeakyReLU)
+            {
+                localOutput = LeakyReLU(localInput);
+            }
+            else // ReLU
+            {
+                localOutput = ReLU(localInput);
+            }
+
+            if (isTraining && _dropoutRate > 0)
+            {
+                if (threadRandom.Value.NextDouble() < _dropoutRate)
+                {
+                    localOutput = 0;
+                }
+                else
+                {
+                    localOutput /= (1 - _dropoutRate);
+                }
+            }
+
+            return localOutput;
         }
 
         public void UpdateWeights(List<double> inputs, double learningRate, double l2Lambda = 0.0001)

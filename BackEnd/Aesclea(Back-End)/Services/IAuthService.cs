@@ -24,5 +24,11 @@ namespace Aesclea_Back_End_.Services
         Task<SettingsResponse> UpdateNotificationSettingsAsync(string userId, UpdateNotificationSettingsRequest request);
         Task<SettingsResponse> UpdateAvatarAsync(string userId, UpdateAvatarRequest request);
         Task<SettingsResponse> ToggleTwoFactorAsync(string userId);
+        
+        // Admin methods
+        Task<List<User>> GetAllUsersAsync();
+        Task<User?> GetUserByIdAsync(string userId);
+        Task<User> UpdateUserProfileAsync(string userId, UpdateProfileRequest request);
+        Task<bool> DeleteUserAsync(string userId);
     }
 }

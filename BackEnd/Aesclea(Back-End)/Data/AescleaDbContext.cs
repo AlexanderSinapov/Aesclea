@@ -25,6 +25,10 @@ namespace Aesclea_Back_End_.Data
         public DbSet<SupportTicket> SupportTickets { get; set; }
         public DbSet<TicketMessage> TicketMessages { get; set; }
         public DbSet<TicketAttachment> TicketAttachments { get; set; }
+        public DbSet<Referral> Referrals { get; set; }
+        public DbSet<Diagnosis> Diagnoses { get; set; }
+        public DbSet<Prescription> Prescriptions { get; set; }
+        public DbSet<OutpatientRecord> OutpatientRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +46,7 @@ namespace Aesclea_Back_End_.Data
                 entity.Property(e => e.Role).HasColumnName("Role").IsRequired();
                 entity.Property(e => e.MedicalNumber).HasColumnName("MedicalNumber").IsRequired();
                 entity.Property(e => e.Hospital).HasColumnName("Hospital").IsRequired();
+                entity.Property(e => e.Specialization).HasColumnName("Specialization").HasMaxLength(200);
                 entity.Property(e => e.IsEmailVerified).HasColumnName("IsEmailVerified").HasDefaultValue(false);
                 entity.Property(e => e.EmailVerificationToken).HasColumnName("EmailVerificationToken");
                 entity.Property(e => e.EmailVerificationTokenExpires).HasColumnName("EmailVerificationTokenExpires");
@@ -321,6 +326,134 @@ namespace Aesclea_Back_End_.Data
                 // Create indexes
                 entity.HasIndex(e => e.TicketId);
                 entity.HasIndex(e => e.MessageId);
+            });
+
+            // Configure Referral entity
+            modelBuilder.Entity<Referral>(entity =>
+            {
+                entity.ToTable("Referrals");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.AppointmentId).HasColumnName("AppointmentId").IsRequired();
+                entity.Property(e => e.PatientId).HasColumnName("PatientId").IsRequired();
+                entity.Property(e => e.PatientName).HasColumnName("PatientName").IsRequired();
+                entity.Property(e => e.DoctorId).HasColumnName("DoctorId").IsRequired();
+                entity.Property(e => e.DoctorName).HasColumnName("DoctorName").IsRequired();
+                entity.Property(e => e.Specialty).HasColumnName("Specialty").IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Reason).HasColumnName("Reason").IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.Notes).HasColumnName("Notes").HasMaxLength(2000);
+                entity.Property(e => e.IssuedDate).HasColumnName("IssuedDate");
+                entity.Property(e => e.ExpiryDate).HasColumnName("ExpiryDate");
+                entity.Property(e => e.Status).HasColumnName("Status").HasMaxLength(50).HasDefaultValue("active");
+
+                entity.HasOne(e => e.Appointment)
+                    .WithMany()
+                    .HasForeignKey(e => e.AppointmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.AppointmentId);
+                entity.HasIndex(e => e.PatientId);
+            });
+
+            // Configure Diagnosis entity
+            modelBuilder.Entity<Diagnosis>(entity =>
+            {
+                entity.ToTable("Diagnoses");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.AppointmentId).HasColumnName("AppointmentId").IsRequired();
+                entity.Property(e => e.PatientId).HasColumnName("PatientId").IsRequired();
+                entity.Property(e => e.DoctorId).HasColumnName("DoctorId").IsRequired();
+                entity.Property(e => e.ICD10Code).HasColumnName("ICD10Code").HasMaxLength(20);
+                entity.Property(e => e.DiagnosisName).HasColumnName("DiagnosisName").IsRequired().HasMaxLength(500);
+                entity.Property(e => e.DiagnosisType).HasColumnName("DiagnosisType").HasMaxLength(50).HasDefaultValue("primary");
+                entity.Property(e => e.ClinicalFindings).HasColumnName("ClinicalFindings").HasMaxLength(2000);
+                entity.Property(e => e.Notes).HasColumnName("Notes").HasMaxLength(2000);
+                entity.Property(e => e.DiagnosedDate).HasColumnName("DiagnosedDate");
+
+                entity.HasOne(e => e.Appointment)
+                    .WithMany()
+                    .HasForeignKey(e => e.AppointmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.AppointmentId);
+                entity.HasIndex(e => e.PatientId);
+                entity.HasIndex(e => e.ICD10Code);
+            });
+
+            // Configure Prescription entity
+            modelBuilder.Entity<Prescription>(entity =>
+            {
+                entity.ToTable("Prescriptions");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.AppointmentId).HasColumnName("AppointmentId").IsRequired();
+                entity.Property(e => e.PatientId).HasColumnName("PatientId").IsRequired();
+                entity.Property(e => e.DoctorId).HasColumnName("DoctorId").IsRequired();
+                entity.Property(e => e.MedicationName).HasColumnName("MedicationName").IsRequired().HasMaxLength(300);
+                entity.Property(e => e.Dosage).HasColumnName("Dosage").IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Frequency).HasColumnName("Frequency").IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Route).HasColumnName("Route").IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Duration).HasColumnName("Duration").IsRequired();
+                entity.Property(e => e.Instructions).HasColumnName("Instructions").HasMaxLength(1000);
+                entity.Property(e => e.Quantity).HasColumnName("Quantity");
+                entity.Property(e => e.Notes).HasColumnName("Notes").HasMaxLength(2000);
+                entity.Property(e => e.PrescribedDate).HasColumnName("PrescribedDate");
+                entity.Property(e => e.StartDate).HasColumnName("StartDate");
+                entity.Property(e => e.EndDate).HasColumnName("EndDate");
+                entity.Property(e => e.Status).HasColumnName("Status").HasMaxLength(50).HasDefaultValue("active");
+
+                entity.HasOne(e => e.Appointment)
+                    .WithMany()
+                    .HasForeignKey(e => e.AppointmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.AppointmentId);
+                entity.HasIndex(e => e.PatientId);
+            });
+
+            // Configure OutpatientRecord entity
+            modelBuilder.Entity<OutpatientRecord>(entity =>
+            {
+                entity.ToTable("OutpatientRecords");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.AppointmentId).HasColumnName("AppointmentId").IsRequired();
+                entity.Property(e => e.PatientId).HasColumnName("PatientId").IsRequired();
+                entity.Property(e => e.PatientName).HasColumnName("PatientName").IsRequired();
+                entity.Property(e => e.PatientEGN).HasColumnName("PatientEGN");
+                entity.Property(e => e.DoctorId).HasColumnName("DoctorId").IsRequired();
+                entity.Property(e => e.DoctorName).HasColumnName("DoctorName").IsRequired();
+                entity.Property(e => e.DoctorSpecialty).HasColumnName("DoctorSpecialty");
+                entity.Property(e => e.VisitDate).HasColumnName("VisitDate").IsRequired();
+                entity.Property(e => e.ChiefComplaint).HasColumnName("ChiefComplaint").HasMaxLength(2000);
+                entity.Property(e => e.MedicalHistory).HasColumnName("MedicalHistory").HasMaxLength(3000);
+                entity.Property(e => e.PhysicalExamination).HasColumnName("PhysicalExamination").HasMaxLength(3000);
+                entity.Property(e => e.VitalSigns).HasColumnName("VitalSigns").HasMaxLength(2000);
+                entity.Property(e => e.DiagnosisIds).HasColumnName("DiagnosisIds")
+                    .HasConversion(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+                entity.Property(e => e.PrescriptionIds).HasColumnName("PrescriptionIds")
+                    .HasConversion(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+                entity.Property(e => e.ReferralIds).HasColumnName("ReferralIds")
+                    .HasConversion(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+                entity.Property(e => e.TreatmentPlan).HasColumnName("TreatmentPlan").HasMaxLength(3000);
+                entity.Property(e => e.Notes).HasColumnName("Notes").HasMaxLength(2000);
+                entity.Property(e => e.CreatedAt).HasColumnName("CreatedAt");
+                entity.Property(e => e.UpdatedAt).HasColumnName("UpdatedAt");
+
+                entity.HasOne(e => e.Appointment)
+                    .WithMany()
+                    .HasForeignKey(e => e.AppointmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.AppointmentId);
+                entity.HasIndex(e => e.PatientId);
             });
         }
     }

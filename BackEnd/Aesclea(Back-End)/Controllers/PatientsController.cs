@@ -43,8 +43,16 @@ namespace Aesclea_Back_End_.Controllers
                     return Unauthorized("User not authenticated");
                 }
 
-                // Filter patients by current user
-                var query = _context.Patients.Where(p => p.UserId == userId);
+                // Get patient IDs from appointments where this doctor is assigned
+                var appointmentPatientIds = await _context.Appointments
+                    .Where(a => a.Doctor == userId || a.PatientId != null)
+                    .Select(a => a.PatientId)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Filter patients: owned by current user OR have appointments with current user
+                var query = _context.Patients.Where(p => 
+                    p.UserId == userId || appointmentPatientIds.Contains(p.Id));
 
                 // Apply additional filters
                 if (!string.IsNullOrEmpty(department))
@@ -89,8 +97,12 @@ namespace Aesclea_Back_End_.Controllers
                     return Unauthorized("User not authenticated");
                 }
 
+                // Check if patient is owned by user or has appointments with user
+                var hasAppointment = await _context.Appointments
+                    .AnyAsync(a => a.PatientId == id && a.Doctor == userId);
+
                 var patient = await _context.Patients
-                    .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+                    .FirstOrDefaultAsync(p => p.Id == id && (p.UserId == userId || hasAppointment));
 
                 if (patient == null)
                 {

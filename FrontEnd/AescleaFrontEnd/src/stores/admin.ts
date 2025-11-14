@@ -188,6 +188,16 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  const fetchDoctors = async () => {
+    try {
+      const response = await api.get('/admin/doctors')
+      return response.data
+    } catch (err: any) {
+      console.error('Error fetching doctors:', err)
+      throw err
+    }
+  }
+
   const updateSystemSettings = async (settings: any) => {
     try {
       const response = await api.put('/admin/settings', settings)
@@ -214,6 +224,7 @@ export const useAdminStore = defineStore('admin', () => {
     deleteAdminUser,
     getAllUsers,
     getAllSubscriptions,
+    fetchDoctors,
     updateSystemSettings
   }
 })

@@ -238,9 +238,12 @@
                 <div class="flex items-center space-x-2">
                   <button
                     @click="viewAppointment(appointment)"
-                    class="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300"
+                    class="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
                   >
-                    View
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Medical Records
                   </button>
                   <button
                     v-if="appointment.status === 'scheduled'"
@@ -575,6 +578,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAppointmentsStore, type Appointment } from '../../stores/appointments'
 import AppointmentModal from './AppointmentModal.vue'
 import AppointmentDetailsModal from './AppointmentDetailsModal.vue'
@@ -585,6 +589,9 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+// Router
+const router = useRouter()
 
 // Store
 const appointmentsStore = useAppointmentsStore()
@@ -894,8 +901,8 @@ const getStatusBadgeClass = (status: string) => {
 }
 
 const viewAppointment = (appointment: Appointment) => {
-  selectedAppointment.value = appointment
-  showDetailsModal.value = true
+  // Navigate to the medical appointment detail page
+  router.push(`/dashboard/appointment/${appointment.id}`)
 }
 
 const editAppointment = (appointment: Appointment) => {

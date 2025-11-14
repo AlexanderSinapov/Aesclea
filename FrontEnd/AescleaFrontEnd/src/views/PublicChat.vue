@@ -124,13 +124,142 @@
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' 
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'"
                   >
-                    <div v-html="formatMessage(message.content)"></div>
+                    <!-- User messages: simple text -->
+                    <div v-if="message.role === 'user'" v-html="formatMessage(message.content)"></div>
+                    
+                    <!-- Assistant messages: structured analysis ONLY (no duplicate old text) -->
+                    <div v-else class="space-y-4">
+                      <!-- Only show content if there's no analysis (fallback/error messages) -->
+                      <div v-if="!message.analysis && message.content" v-html="formatMessage(message.content)"></div>
+
+                      <!-- Structured medical analysis from trained model -->
+                      <div v-if="message.analysis" class="space-y-4 text-sm leading-relaxed">
+                        <div class="p-4 border-l-4 border-purple-500 rounded-lg bg-purple-50 dark:bg-purple-900/40 dark:border-purple-400">
+                          <p class="font-semibold text-purple-900 dark:text-purple-100">Primary Category: {{ message.analysis.primaryCategory }}</p>
+                          <p class="mt-1 text-gray-700 dark:text-gray-200">
+                            Severity Level {{ message.analysis.severityLevel }} · {{ message.analysis.severityDescription }}
+                            <span v-if="message.analysis.severityConfidence !== undefined" class="text-xs text-gray-500">({{ formatPercentage(message.analysis.severityConfidence) }} confidence)</span>
+                          </p>
+                          <p class="mt-1 text-gray-700 dark:text-gray-200">
+                            Urgency: {{ message.analysis.urgencyDescription }}
+                            <span v-if="message.analysis.urgencyConfidence !== undefined" class="text-xs text-gray-500">({{ formatPercentage(message.analysis.urgencyConfidence) }})</span>
+                          </p>
+                        </div>
+
+                        <div v-if="message.analysis.diagnosticConfidences && getTopConfidences(message.analysis.diagnosticConfidences).length" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Top Diagnostic Probabilities</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="([label, score], idx) in getTopConfidences(message.analysis.diagnosticConfidences)" :key="label" class="flex items-center justify-between">
+                              <span>{{ idx + 1 }}. {{ label }}</span>
+                              <span class="font-medium">{{ formatPercentage(score) }}</span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasItems(message.analysis.clinicalAlerts)" class="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/30 dark:border-red-700">
+                          <h4 class="font-semibold text-red-700 dark:text-red-200">Clinical Alerts</h4>
+                          <ul class="mt-2 space-y-1 text-red-700 dark:text-red-100">
+                            <li v-for="alert in message.analysis.clinicalAlerts" :key="alert">⚠️ {{ alert }}</li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasItems(message.analysis.symptoms)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Identified Symptoms</h4>
+                          <div class="mt-2 flex flex-wrap gap-2">
+                            <span v-for="symptom in message.analysis.symptoms" :key="symptom" class="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full dark:bg-purple-900/40 dark:text-purple-200">{{ symptom }}</span>
+                          </div>
+                        </div>
+
+                        <div v-if="hasObjectEntries(message.analysis.symptomClusters)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Symptom Clusters</h4>
+                          <div class="grid gap-3 mt-2 md:grid-cols-2">
+                            <div v-for="(symptoms, cluster) in message.analysis.symptomClusters" :key="cluster" class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/60">
+                              <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">{{ cluster }}</p>
+                              <ul class="mt-1 space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                                <li v-for="symptom in symptoms" :key="symptom">• {{ symptom }}</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div v-if="hasObjectEntries(message.analysis.vitalSignsAnalysis)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Vital Signs</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="(value, key) in message.analysis.vitalSignsAnalysis" :key="key">
+                              <strong>{{ key.replace('_', ' ') }}:</strong> {{ value }}
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasObjectEntries(message.analysis.temporalPatterns)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Temporal Patterns</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="(value, key) in message.analysis.temporalPatterns" :key="key">
+                              <strong>{{ key }}:</strong> {{ value }}
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasObjectEntries(message.analysis.functionalImpact)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Functional Impact</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="(value, key) in message.analysis.functionalImpact" :key="key">
+                              <strong>{{ key }}:</strong> {{ value }}
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasItems(message.analysis.riskFactors)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Risk Factors</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="factor in message.analysis.riskFactors" :key="factor">• {{ factor }}</li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasItems(message.analysis.medications)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Medication Mentions</h4>
+                          <div class="mt-2 flex flex-wrap gap-2">
+                            <span v-for="med in message.analysis.medications" :key="med" class="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-100 rounded-full dark:bg-indigo-900/40 dark:text-indigo-200">{{ med }}</span>
+                          </div>
+                        </div>
+
+                        <div v-if="hasItems(message.analysis.differentialDiagnosis)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Differential Diagnosis Considerations</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="item in message.analysis.differentialDiagnosis" :key="item">• {{ item }}</li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasItems(message.analysis.suggestedTests)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Recommended Diagnostic Tests</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="test in message.analysis.suggestedTests" :key="test">• {{ test }}</li>
+                          </ul>
+                        </div>
+
+                        <div v-if="hasItems(message.analysis.recommendations)" class="p-4 border border-gray-200 rounded-lg dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Clinical Recommendations</h4>
+                          <ul class="mt-2 space-y-1 text-gray-700 dark:text-gray-200">
+                            <li v-for="rec in message.analysis.recommendations" :key="rec">• {{ rec }}</li>
+                          </ul>
+                        </div>
+
+                        <div v-if="message.analysis.summary" class="p-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800/60 dark:border-gray-600">
+                          <h4 class="font-semibold text-gray-800 dark:text-gray-100">Summary</h4>
+                          <p class="mt-2 text-gray-700 dark:text-gray-200">{{ message.analysis.summary }}</p>
+                        </div>
+
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                          This analysis is for informational purposes only. Always consult a licensed medical professional.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   
                   <!-- Message Actions for AI responses -->
                   <div v-if="message.role === 'assistant'" class="flex items-center mt-2 space-x-2">
                     <button
-                      @click="copyMessage(message.content)"
+                      @click="copyMessage(message)"
                       class="p-1 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
                       title="Copy"
                     >
@@ -139,7 +268,7 @@
                       </svg>
                     </button>
                     <button
-                      @click="shareMessage(message.content)"
+                      @click="shareMessage(message)"
                       class="p-1 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
                       title="Share"
                     >
@@ -160,15 +289,27 @@
             <div v-if="isTyping" class="flex justify-start">
               <div class="flex max-w-[85%] space-x-3">
                 <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-6 h-6 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <div class="px-4 py-3 bg-gray-100 dark:bg-gray-700 rounded-2xl">
-                  <div class="flex space-x-2">
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                <div class="flex-1 space-y-3">
+                  <div class="px-4 py-3 bg-gray-100 dark:bg-gray-700 rounded-2xl">
+                    <div class="flex items-center space-x-2">
+                      <div class="flex space-x-1.5">
+                        <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0s; animation-duration: 1.4s;"></div>
+                        <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0.2s; animation-duration: 1.4s;"></div>
+                        <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0.4s; animation-duration: 1.4s;"></div>
+                      </div>
+                      <span class="text-sm text-gray-600 dark:text-gray-300 animate-pulse">Analyzing medical information...</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Skeleton loading for analysis sections -->
+                  <div class="space-y-2 animate-pulse">
+                    <div class="h-20 bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
+                    <div class="h-16 bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
+                    <div class="h-12 bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
                   </div>
                 </div>
               </div>
@@ -235,10 +376,35 @@ import SiteNavbar from '../components/SiteNavbar.vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import { getEndpointUrl } from '../config/api'
 
+interface MedicalAnalysisResponse {
+  primaryCategory: string
+  severityLevel: number
+  severityDescription: string
+  severityConfidence?: number
+  urgencyLevel: number
+  urgencyDescription: string
+  urgencyConfidence?: number
+  diagnosticConfidences?: Record<string, number>
+  clinicalAlerts?: string[]
+  symptoms?: string[]
+  symptomClusters?: Record<string, string[]>
+  vitalSignsAnalysis?: Record<string, string>
+  temporalPatterns?: Record<string, string>
+  functionalImpact?: Record<string, string>
+  riskFactors?: string[]
+  medications?: string[]
+  differentialDiagnosis?: string[]
+  suggestedTests?: string[]
+  recommendations?: string[]
+  summary?: string
+  processedOn?: string
+}
+
 interface Message {
   role: 'user' | 'assistant'
-  content: string
+  content?: string
   timestamp: Date
+  analysis?: MedicalAnalysisResponse
 }
 
 // State
@@ -316,11 +482,12 @@ const sendMessage = async () => {
       throw new Error('Failed to get AI response')
     }
 
-    const data = await response.json()
-    
+    const data: { message?: string; analysis?: MedicalAnalysisResponse } = await response.json()
+
     const aiMessage: Message = {
       role: 'assistant',
-      content: data.message || 'I apologize, but I encountered an issue processing your request.',
+      content: data.message?.trim(),
+      analysis: data.analysis,
       timestamp: new Date()
     }
     
@@ -334,12 +501,12 @@ const sendMessage = async () => {
     console.error('Error calling AI API:', error)
     
     // Fallback response
-    const aiMessage: Message = {
+    const fallbackMessage: Message = {
       role: 'assistant',
       content: 'I apologize, but I\'m having trouble connecting right now. Please try again in a moment, or consider creating an account for a better experience with our full AI health assistant.',
       timestamp: new Date()
     }
-    messages.value.push(aiMessage)
+    messages.value.push(fallbackMessage)
     isTyping.value = false
     
     nextTick(() => {
@@ -353,12 +520,102 @@ const useSuggestedPrompt = (text: string) => {
   sendMessage()
 }
 
-const formatMessage = (content: string): string => {
+const getTopConfidences = (confidences?: Record<string, number>, limit = 5) => {
+  if (!confidences) return []
+  return Object.entries(confidences)
+    .sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))
+    .slice(0, limit)
+}
+
+const hasItems = (value?: unknown[] | null): value is unknown[] => Array.isArray(value) && value.length > 0
+
+const hasObjectEntries = (value?: Record<string, unknown> | null): value is Record<string, unknown> => !!value && Object.keys(value).length > 0
+
+const formatPercentage = (value?: number): string => {
+  if (value === undefined || value === null || Number.isNaN(value)) return 'N/A'
+  return `${(value * 100).toFixed(1)}%`
+}
+
+const buildAnalysisText = (analysis?: MedicalAnalysisResponse): string => {
+  if (!analysis) return ''
+  const lines: string[] = []
+
+  lines.push(`Primary Category: ${analysis.primaryCategory}`)
+  lines.push(`Severity: Level ${analysis.severityLevel} - ${analysis.severityDescription} (${formatPercentage(analysis.severityConfidence)})`)
+  lines.push(`Urgency: ${analysis.urgencyDescription} (${formatPercentage(analysis.urgencyConfidence)})`)
+
+  if (hasItems(analysis.clinicalAlerts)) {
+    lines.push('Clinical Alerts:')
+    analysis.clinicalAlerts!.forEach(alert => lines.push(` - ${alert}`))
+  }
+
+  if (hasItems(analysis.symptoms)) {
+    lines.push('Symptoms:')
+    analysis.symptoms!.forEach(symptom => lines.push(` - ${symptom}`))
+  }
+
+  if (analysis.diagnosticConfidences) {
+    lines.push('Top Diagnostic Probabilities:')
+    getTopConfidences(analysis.diagnosticConfidences).forEach(([label, score]) => {
+      lines.push(` - ${label}: ${formatPercentage(score)}`)
+    })
+  }
+
+  if (hasItems(analysis.differentialDiagnosis)) {
+    lines.push('Differential Diagnosis:')
+    analysis.differentialDiagnosis!.forEach(item => lines.push(` - ${item}`))
+  }
+
+  if (hasItems(analysis.suggestedTests)) {
+    lines.push('Suggested Tests:')
+    analysis.suggestedTests!.forEach(test => lines.push(` - ${test}`))
+  }
+
+  if (hasItems(analysis.recommendations)) {
+    lines.push('Recommendations:')
+    analysis.recommendations!.forEach(rec => lines.push(` - ${rec}`))
+  }
+
+  if (hasItems(analysis.riskFactors)) {
+    lines.push('Risk Factors:')
+    analysis.riskFactors!.forEach(factor => lines.push(` - ${factor}`))
+  }
+
+  if (hasItems(analysis.medications)) {
+    lines.push('Medication Mentions:')
+    analysis.medications!.forEach(med => lines.push(` - ${med}`))
+  }
+
+  if (hasObjectEntries(analysis.vitalSignsAnalysis)) {
+    lines.push('Vital Signs:')
+    Object.entries(analysis.vitalSignsAnalysis!).forEach(([key, value]) => {
+      lines.push(` - ${key}: ${value}`)
+    })
+  }
+
+  if (analysis.summary) {
+    lines.push('Summary:')
+    lines.push(analysis.summary)
+  }
+
+  return lines.join('\n')
+}
+
+const buildPlainText = (message: Message): string => {
+  const parts: string[] = []
+  if (message.content) parts.push(message.content)
+  const analysisText = buildAnalysisText(message.analysis)
+  if (analysisText) parts.push(analysisText)
+  return parts.join('\n\n')
+}
+
+const formatMessage = (content?: string): string => {
+  if (!content) return ''
   let formatted = content
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/\n/g, '<br>')
-  
+
   return formatted
 }
 
@@ -380,19 +637,21 @@ const scrollToBottom = () => {
   }
 }
 
-const copyMessage = (content: string) => {
-  navigator.clipboard.writeText(content.replace(/<[^>]*>/g, ''))
+const copyMessage = (message: Message) => {
+  const plain = buildPlainText(message)
+  navigator.clipboard.writeText(plain)
   // Could add a toast notification here
 }
 
-const shareMessage = (content: string) => {
+const shareMessage = (message: Message) => {
+  const plain = buildPlainText(message)
   if (navigator.share) {
     navigator.share({
       title: 'Aesclea Health Assistant',
-      text: content.replace(/<[^>]*>/g, '')
+      text: plain
     })
   } else {
-    copyMessage(content)
+    copyMessage(message)
   }
 }
 </script>
