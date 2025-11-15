@@ -507,8 +507,8 @@
     <!-- Enhanced Diagnosis Modal -->
     <div v-if="showDiagnosisModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="showDiagnosisModal = false">
       <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 z-40" @click="showDiagnosisModal = false"></div>
-        <div class="relative inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-50">
+        <div class="fixed inset-0 z-40 transition-opacity bg-gray-500 bg-opacity-75" @click="showDiagnosisModal = false"></div>
+        <div class="relative z-50 inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">Добави Диагноза (МКБ-10)</h3>
@@ -587,8 +587,8 @@
     <!-- Enhanced Prescription Modal -->
     <div v-if="showPrescriptionModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="showPrescriptionModal = false">
       <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 z-40" @click="showPrescriptionModal = false"></div>
-        <div class="relative inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-50">
+        <div class="fixed inset-0 z-40 transition-opacity bg-gray-500 bg-opacity-75" @click="showPrescriptionModal = false"></div>
+        <div class="relative z-50 inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">Добави Лекарство</h3>
@@ -682,8 +682,8 @@
     <!-- Enhanced Referral Modal -->
     <div v-if="showReferralModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="showReferralModal = false">
       <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 z-40" @click="showReferralModal = false"></div>
-        <div class="relative inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-50">
+        <div class="fixed inset-0 z-40 transition-opacity bg-gray-500 bg-opacity-75" @click="showReferralModal = false"></div>
+        <div class="relative z-50 inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           <div class="px-4 pt-5 pb-4 bg-white dark:bg-gray-800 sm:p-6 sm:pb-4">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">Добави Направление</h3>
