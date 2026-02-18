@@ -92,6 +92,7 @@ namespace Aesclea_Back_End_.Commands
                     UseMedicalSamples = true,
                     UseTextbooks = true,
                     UsePubMedQA = true,
+                    UsePlainTextFiles = true, // ENABLED: Train from plain text files (ICD-11, medical texts, etc.)
                     MaxSamplesPerSource = maxSamples,
                     EnableParallelProcessing = true, // NEW: Enable multi-core processing
                     MaxDegreeOfParallelism = Environment.ProcessorCount, // Use all CPU cores
@@ -108,6 +109,12 @@ namespace Aesclea_Back_End_.Commands
                 System.Console.WriteLine($"  📚 Max Samples Per Source: {config.MaxSamplesPerSource}");
                 System.Console.WriteLine($"  ⚡ Parallel Processing: ENABLED");
                 System.Console.WriteLine($"  🖥️  CPU Cores: {config.MaxDegreeOfParallelism}");
+                System.Console.WriteLine();
+                System.Console.WriteLine("  DATA SOURCES:");
+                System.Console.WriteLine($"  📄 Plain Text Files (TXT): {(config.UsePlainTextFiles ? "✓ ENABLED" : "✗ DISABLED")}");
+                System.Console.WriteLine($"  📊 Medical Samples (CSV): {(config.UseMedicalSamples ? "✓ ENABLED" : "✗ DISABLED")}");
+                System.Console.WriteLine($"  📖 Textbooks (JSON): {(config.UseTextbooks ? "✓ ENABLED" : "✗ DISABLED")}");
+                System.Console.WriteLine($"  🔬 PubMed Q&A: {(config.UsePubMedQA ? "✓ ENABLED" : "✗ DISABLED")}");
                 System.Console.WriteLine();
 
                 System.Console.Write("Start training? (y/n): ");

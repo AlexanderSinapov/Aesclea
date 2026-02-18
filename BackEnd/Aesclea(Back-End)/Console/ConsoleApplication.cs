@@ -84,7 +84,7 @@ namespace Aesclea_Back_End_
                 Console.WriteLine("13. Train Medical Text Classifier (Legacy)");
                 Console.WriteLine("14. Test Medical Text Classifier");
                 Console.WriteLine("15. Batch Analyze Medical Records");
-                Console.WriteLine("16. Train with LLM Datasets (NEW!)");
+                Console.WriteLine("16. Train with All Datasets (CSV/JSON/TXT)");
                 Console.WriteLine("");
                 Console.WriteLine("SYSTEM MANAGEMENT:");
                 Console.WriteLine("17. Load Weights");

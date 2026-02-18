@@ -14,7 +14,7 @@ namespace Aesclea_Back_End_.Examples
     /// </summary>
     public class NeuralODEQuickStart
     {
-        public static void Main()
+        public static void RunExamples()
         {
             Console.WriteLine("╔════════════════════════════════════════════════════════════╗");
             Console.WriteLine("║   Neural ODE Medical LLM - Quick Start Examples          ║");

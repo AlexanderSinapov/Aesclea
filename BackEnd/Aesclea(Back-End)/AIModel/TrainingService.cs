@@ -34,6 +34,7 @@ namespace Aesclea_Back_End_.AIModel
             public bool UseMedicalSamples { get; set; } = true;
             public bool UseTextbooks { get; set; } = true;
             public bool UsePubMedQA { get; set; } = true;
+            public bool UsePlainTextFiles { get; set; } = true; // NEW: Enable plain text file training
             public int MaxSamplesPerSource { get; set; } = 10000; // Limit for performance
             public bool EnableParallelProcessing { get; set; } = true; // Use all CPU cores
             public int MaxDegreeOfParallelism { get; set; } = Environment.ProcessorCount; // CPU cores to use
@@ -288,6 +289,68 @@ namespace Aesclea_Back_End_.AIModel
 
                 allData.AddRange(pubmedTrainingData);
                 Console.WriteLine($"✓ Loaded {pubmedTrainingData.Count} PubMed Q&A samples");
+            }
+
+            // Load Plain Text Files (TXT) - NEW!
+            if (config.UsePlainTextFiles)
+            {
+                progressCallback?.Invoke(new TrainingProgress
+                {
+                    Phase = "Loading Data",
+                    Message = "Loading plain text files (ICD-11, medical texts, etc.)..."
+                });
+
+                // Scan multiple subdirectories for TXT files
+                var textDirectories = new[]
+                {
+                    Path.Combine(_datasetBasePath, "textbooks"),
+                    Path.Combine(_datasetBasePath, "clinical_cases"),
+                    Path.Combine(_datasetBasePath, "medical_qa"),
+                    Path.Combine(_datasetBasePath, "safety_examples"),
+                    Path.Combine(_datasetBasePath, "uncertainty_calibration"),
+                    _datasetBasePath // Also check root directory
+                };
+
+                var parsingConfig = new DataLoaders.PlainTextLoader.ParsingConfig
+                {
+                    MinSectionLength = 50,
+                    MaxSectionLength = 2000,
+                    DetectMedicalCodes = true,
+                    ExtractHeaders = true,
+                    CleanText = true,
+                    ChunkOverlap = 100
+                };
+
+                var allTextDocuments = new List<DataLoaders.PlainTextLoader.TextDocument>();
+
+                foreach (var dir in textDirectories)
+                {
+                    if (Directory.Exists(dir))
+                    {
+                        var documents = DataLoaders.PlainTextLoader.LoadFromDirectory(dir, parsingConfig);
+                        allTextDocuments.AddRange(documents);
+                    }
+                }
+
+                if (allTextDocuments.Count > 0)
+                {
+                    var plainTextTrainingData = DataLoaders.PlainTextLoader.ConvertToTrainingData(allTextDocuments);
+
+                    if (plainTextTrainingData.Count > config.MaxSamplesPerSource)
+                    {
+                        plainTextTrainingData = plainTextTrainingData
+                            .OrderBy(x => Guid.NewGuid())
+                            .Take(config.MaxSamplesPerSource)
+                            .ToList();
+                    }
+
+                    allData.AddRange(plainTextTrainingData);
+                    Console.WriteLine($"✓ Loaded {plainTextTrainingData.Count} training samples from {allTextDocuments.Count} plain text files");
+                }
+                else
+                {
+                    Console.WriteLine("ℹ No plain text (.txt) files found in dataset directories");
+                }
             }
 
             return allData;
